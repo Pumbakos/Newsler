@@ -1,0 +1,1 @@
+# Application to send mails using EmialLabs API

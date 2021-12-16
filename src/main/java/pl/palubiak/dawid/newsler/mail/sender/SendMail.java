@@ -32,7 +32,7 @@ public class SendMail {
             params.put(HTML, "<p>Newsletter message example</p>");
             params.put(TEXT, "Newsletter message example");
             params.put(FROM, "sklep@e-srodkiczystosci.pl".strip());
-            params.put(FROM_NAME, "Sklep e-środkiczystości.pl".strip());
+            params.put(FROM_NAME, "Sklep e-srodkiczystosci.pl".strip());
             params.put(TO_ADDRESS, "dawid.palubiak@gmail.com".strip());
 
             // build query

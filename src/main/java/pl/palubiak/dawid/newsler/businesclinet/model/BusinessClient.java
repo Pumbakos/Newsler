@@ -2,15 +2,19 @@ package pl.palubiak.dawid.newsler.businesclinet.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import pl.palubiak.dawid.newsler.user.model.User;
 import pl.palubiak.dawid.newsler.utils.DBModel;
 
 import javax.persistence.*;
+import javax.validation.Constraint;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.executable.ValidateOnExecution;
 
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -18,9 +22,9 @@ import javax.validation.constraints.NotBlank;
 public class BusinessClient extends DBModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID", nullable = false, unique = true, updatable = false, columnDefinition = "NUMBER(10)")
+    @Column(name = "ID", columnDefinition = "NUMBER(10)")
     @ToString.Exclude
-    private Long id;
+    private long id;
 
     @NotBlank
     @Column(name = "NAME", nullable = false, columnDefinition = "VARCHAR(255)")
@@ -35,13 +39,13 @@ public class BusinessClient extends DBModel {
     @Column(nullable = false, name = "EMAIL", unique = true, columnDefinition = "VARCHAR(255)")
     private String email;
 
-    @Column(name = "IS_ACTIVE", columnDefinition = "NUMBER(1)")
+    @Column(name = "IS_ACTIVE", columnDefinition = "BIT")
     private boolean isActive;
 
-    @Column(name = "ACTIVE_NEWSLETTERS", columnDefinition = "NUMBER(1)")
+    @Column(name = "ACTIVE_NEWSLETTERS", columnDefinition = "BIT")
     private boolean activeNewsLetters;
 
-    @Column(name = "ACTIVE_PARTNERSHIP_OFFERS", columnDefinition = "NUMBER(1)")
+    @Column(name = "ACTIVE_PARTNERSHIP_OFFERS", columnDefinition = "BIT")
     private boolean activePartnershipOffers;
 
     @ManyToOne

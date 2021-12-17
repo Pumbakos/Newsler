@@ -21,12 +21,13 @@ public class PresenceChecker<S extends DBModel> {
         if (object == null)
             throw new NullPointerException("Object is null");
 
+        if (object.getId() == 0)
+            return Optional.of(repository.save(object));
+
         Optional<S> optionalObject = repository.findById(object.getId());
         if (optionalObject.isEmpty())
             throw new IllegalArgumentException("Object " + object + "has wrong ID\nIt cannot be identified");
 
-        if (object.getId() == null)
-            return Optional.of(repository.save(object));
 
         return Optional.empty();
     }
@@ -48,7 +49,7 @@ public class PresenceChecker<S extends DBModel> {
             if (object == null)
                 throw new NullPointerException("Object is null");
 
-            if (object.getId() == null)
+            if (object.getId() == 0)
                 repository.save(object);
 
             Optional<S> optionalObject = repository.findById(object.getId());

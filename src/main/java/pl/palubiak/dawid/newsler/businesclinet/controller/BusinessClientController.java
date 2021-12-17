@@ -3,7 +3,6 @@ package pl.palubiak.dawid.newsler.businesclinet.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import pl.palubiak.dawid.newsler.businesclinet.model.BusinessClient;
 import pl.palubiak.dawid.newsler.businesclinet.service.BusinessClientService;
@@ -11,8 +10,10 @@ import pl.palubiak.dawid.newsler.businesclinet.service.BusinessClientService;
 import javax.validation.Valid;
 import java.util.List;
 
-@Controller("/clients")
-class BusinessClientController {
+@CrossOrigin(origins = "http://localhost:4200")
+@RestController
+@RequestMapping("/api/clients")
+public class BusinessClientController {
     private final BusinessClientService businessClientService;
 
     @Autowired
@@ -33,7 +34,7 @@ class BusinessClientController {
                 new ResponseEntity<>(businessClient, HttpStatus.OK);
     }
 
-    @GetMapping("{email}")
+    @GetMapping("/{email}")
     public ResponseEntity<BusinessClient> getClientByEmail(@PathVariable("email") String email) {
         BusinessClient businessClient = businessClientService.findByEmail(email);
         return businessClient == null ?
@@ -57,7 +58,7 @@ class BusinessClientController {
     }
 
     @PostMapping
-    public ResponseEntity<String> save(@Valid @RequestBody BusinessClient businessClient) {
+    public ResponseEntity<String> save(@RequestBody BusinessClient businessClient) {
         return businessClientService.save(businessClient) == null ?
                 new ResponseEntity<>("Client could not be saved, check data", HttpStatus.BAD_REQUEST) :
                 new ResponseEntity<>("Client saved successfully", HttpStatus.CREATED);

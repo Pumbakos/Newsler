@@ -30,13 +30,12 @@ public class BusinessClient extends DBModel {
     @Column(name = "NAME", nullable = false, columnDefinition = "VARCHAR(255)")
     private String name;
 
-    @NotBlank
-    @Column(name = "LAST_NAME", nullable = false, columnDefinition = "VARCHAR(255)")
+    @Column(name = "LAST_NAME", columnDefinition = "VARCHAR(255)")
     private String lastName;
 
     @NotBlank
     @Email(regexp = "[\\w!#$%&’*+/=?`{|}~^-]+(?:\\.[\\w!#$%&’*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}")
-    @Column(nullable = false, name = "EMAIL", unique = true, columnDefinition = "VARCHAR(255)")
+    @Column(name = "EMAIL", nullable = false, unique = true, columnDefinition = "VARCHAR(255)")
     private String email;
 
     @Column(name = "IS_ACTIVE", columnDefinition = "BIT")

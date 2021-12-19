@@ -2,50 +2,30 @@ package pl.palubiak.dawid.newsler.user.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import pl.palubiak.dawid.newsler.businesclinet.model.BusinessClient;
+import pl.palubiak.dawid.newsler.utils.DBModel;
 
-import javax.persistence.Id;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "USERS")
-public class User {
+public class User extends DBModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID", nullable = false, updatable = false, unique = true, columnDefinition = "VARCHAR(36)")
-    private String id;
+    @Column(name = "ID", nullable = false, updatable = false, unique = true, columnDefinition = "NUMBER(10)")
+    @ToString.Exclude
+    private long id;
 
     @NotBlank
     @Email(regexp = "[\\w!#$%&’*+/=?`{|}~^-]+(?:\\.[\\w!#$%&’*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}")
-    @Column(nullable = false, name = "EMAIL", columnDefinition = "VARCHAR(255)")
+    @Column(name = "EMAIL", nullable = false, unique = true, columnDefinition = "VARCHAR(255)")
     private String email;
-
-    @NotBlank
-    @Column(name = "PASSWORD", nullable = false, columnDefinition = "VARCHAR(255)")
-    private String password;
-
-    /**
-     * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find APP KEY here</a><br/>
-     * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
-     */
-    @NotBlank
-    @Column(nullable = false, name = "APP_KEY", columnDefinition = "VARCHAR(255)")
-    private String APP_KEY;
-
-    /**
-     * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find SECRET KEY here</a><br/>
-     * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
-     */
-    @NotBlank
-    @Column(nullable = false, name = "SECRET_KEY", columnDefinition = "VARCHAR(255)")
-    private String SECRET_KEY;
 
     /**
      * If user is an organization it is preferred to use name as one String omitting lastName <br/>
@@ -53,17 +33,41 @@ public class User {
      * <strong>not</strong> "name = Microsoft", lastName = "Corporation"
      */
     @NotBlank
-    @Column(nullable = false, name = "FIRST_NAME", columnDefinition = "VARCHAR(50)")
+    @Column(name = "NAME", nullable = false, unique = true, columnDefinition = "VARCHAR(50)")
     private String name;
+
+//    @ValidPassword passay?
+    @NotBlank
+    @Column(name = "PASSWORD", nullable = false, columnDefinition = "VARCHAR(255)")
+    private String password;
 
     @Column(name = "LAST_NAME", columnDefinition = "VARCHAR(50)")
     private String lastName;
+
+    /**
+     * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find APP KEY here</a><br/>
+     * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
+     */
+    @NotBlank
+    @Column(name = "APP_KEY", unique = true, columnDefinition = "VARCHAR(255)")
+    private String appKey;
+
+    /**
+     * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find SECRET KEY here</a><br/>
+     * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
+     */
+    @NotBlank
+    @Column(name = "SECRET_KEY", unique = true, columnDefinition = "VARCHAR(255)")
+    private String secretKey;
 
     /**
      * <a href="https://panel.emaillabs.net.pl/pl/smtp">You can find SMTP ACCOUNT here</a><br/>
      * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
      */
     @NotBlank
-    @Column(nullable = false, name = "SMTP_ACCOUNT", columnDefinition = "VARCHAR(255)")
+    @Column(name = "SMTP_ACCOUNT", unique = true, columnDefinition = "VARCHAR(255)")
     private String smtpAccount;
+
+    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL)
+    List<BusinessClient> businessClients;
 }

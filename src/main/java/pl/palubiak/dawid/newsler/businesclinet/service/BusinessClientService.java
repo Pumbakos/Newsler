@@ -7,6 +7,7 @@ import pl.palubiak.dawid.newsler.businesclinet.repository.BusinessClientReposito
 import pl.palubiak.dawid.newsler.utils.PresenceChecker;
 import pl.palubiak.dawid.newsler.utils.UpdateUtils;
 
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Optional;
 

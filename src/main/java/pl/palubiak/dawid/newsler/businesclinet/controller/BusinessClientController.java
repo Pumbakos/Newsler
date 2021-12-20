@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import pl.palubiak.dawid.newsler.businesclinet.model.BusinessClient;
 import pl.palubiak.dawid.newsler.businesclinet.service.BusinessClientService;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:4200")

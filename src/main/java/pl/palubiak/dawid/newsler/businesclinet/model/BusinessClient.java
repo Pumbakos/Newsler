@@ -9,10 +9,8 @@ import pl.palubiak.dawid.newsler.user.model.User;
 import pl.palubiak.dawid.newsler.utils.DBModel;
 
 import javax.persistence.*;
-import javax.validation.Constraint;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.executable.ValidateOnExecution;
 
 @NoArgsConstructor
 @Getter
@@ -38,14 +36,9 @@ public class BusinessClient extends DBModel {
     @Column(name = "EMAIL", nullable = false, unique = true, columnDefinition = "VARCHAR(255)")
     private String email;
 
-    @Column(name = "IS_ACTIVE", columnDefinition = "BIT")
-    private boolean isActive;
-
-    @Column(name = "ACTIVE_NEWSLETTERS", columnDefinition = "BIT")
-    private boolean activeNewsLetters;
-
-    @Column(name = "ACTIVE_PARTNERSHIP_OFFERS", columnDefinition = "BIT")
-    private boolean activePartnershipOffers;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "EMAIL_TYPE", columnDefinition = "VARCHAR(20)")
+    private EmailType emailType;
 
     @ManyToOne
     @JsonIgnore

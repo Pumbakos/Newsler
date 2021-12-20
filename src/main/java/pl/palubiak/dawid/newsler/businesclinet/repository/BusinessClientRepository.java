@@ -17,12 +17,12 @@ public interface BusinessClientRepository extends JpaRepository<BusinessClient, 
     @Query(value = "SELECT c FROM BusinessClient c WHERE c.name = :name")
     Optional<BusinessClient> findByName(@Param("name") String name);
 
-    @Query(value = "SELECT c FROM BusinessClient c WHERE c.activeNewsLetters = true")
+    @Query(value = "SELECT c FROM BusinessClient c WHERE c.emailType = 'NEWSLETTER'")
     List<BusinessClient> findAllByActiveNewsletter();
 
-    @Query(value = "SELECT c FROM BusinessClient c WHERE c.activePartnershipOffers = true")
+    @Query(value = "SELECT c FROM BusinessClient c WHERE c.emailType = 'PARTNERSHIP_OFFER'")
     List<BusinessClient> findAllByActivePartnershipOffers();
 
-    @Query(value = "SELECT c FROM BusinessClient c WHERE c.activeNewsLetters = true AND c.activePartnershipOffers = true")
+    @Query(value = "SELECT c FROM BusinessClient c WHERE c.emailType = 'ALL'")
     List<BusinessClient> findAllByActiveNewsletterAndActivePartnershipOffers();
 }

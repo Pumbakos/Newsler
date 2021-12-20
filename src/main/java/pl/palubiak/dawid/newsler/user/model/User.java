@@ -48,7 +48,6 @@ public class User extends DBModel {
      * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find APP KEY here</a><br/>
      * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
      */
-    @NotBlank
     @Column(name = "APP_KEY", unique = true, columnDefinition = "VARCHAR(255)")
     private String appKey;
 
@@ -56,7 +55,6 @@ public class User extends DBModel {
      * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find SECRET KEY here</a><br/>
      * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
      */
-    @NotBlank
     @Column(name = "SECRET_KEY", unique = true, columnDefinition = "VARCHAR(255)")
     private String secretKey;
 
@@ -64,7 +62,6 @@ public class User extends DBModel {
      * <a href="https://panel.emaillabs.net.pl/pl/smtp">You can find SMTP ACCOUNT here</a><br/>
      * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
      */
-    @NotBlank
     @Column(name = "SMTP_ACCOUNT", unique = true, columnDefinition = "VARCHAR(255)")
     private String smtpAccount;
 

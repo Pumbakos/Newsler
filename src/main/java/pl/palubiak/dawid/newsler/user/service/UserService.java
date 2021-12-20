@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import pl.palubiak.dawid.newsler.businesclinet.model.BusinessClient;
 import pl.palubiak.dawid.newsler.businesclinet.repository.BusinessClientRepository;
 import pl.palubiak.dawid.newsler.user.model.User;
+import pl.palubiak.dawid.newsler.user.model.UserSimpleModel;
 import pl.palubiak.dawid.newsler.user.repository.UserRepository;
 import pl.palubiak.dawid.newsler.utils.UpdateUtils;
 
@@ -25,17 +26,22 @@ public class UserService {
         this.businessClientRepository = businessClientRepository;
     }
 
-    public User save(@NotBlank String email, @NotBlank String name, @NotBlank String password) {
-        if (email.isBlank() || name.isBlank() || password.isBlank()) {
-            throw new IllegalArgumentException("Email, name and password must not be blank");
+    public User findById(@NotNull Long id) {
+        Optional<User> user = userRepository.findById(id);
+        return user.orElse(null);
+    }
+
+    public Optional<User> save(UserSimpleModel userSimpleModel) {
+        if (!userSimpleModel.isValid()) {
+            return Optional.empty();
         }
 
         User user = new User();
-        user.setEmail(email);
-        user.setName(name);
-        user.setPassword(password);
+        user.setEmail(userSimpleModel.getEmail());
+        user.setName(userSimpleModel.getName());
+        user.setPassword(userSimpleModel.getPassword());
 
-        return userRepository.save(user);
+        return Optional.of(userRepository.save(user));
     }
 
     public boolean update(@NotNull long id, User user) {
@@ -48,8 +54,8 @@ public class UserService {
         return byId.isPresent();
     }
 
-    public boolean addBusinessClient(@NotNull long userId, @NotBlank String email, @NotBlank String name) {
-        if (email.isBlank() || name.isBlank()) {
+    public boolean addBusinessClient(@NotNull long userId, BusinessClient client) {
+        if (!isBusinessClientValid(client)) {
             throw new IllegalArgumentException("Email and name must not be blank");
         }
 
@@ -59,12 +65,23 @@ public class UserService {
         }
 
         BusinessClient businessClient = new BusinessClient();
-        businessClient.setEmail(email);
-        businessClient.setName(name);
+        businessClient.setEmail(client.getEmail());
+        businessClient.setName(client.getName());
+        businessClient.setEmailType(client.getEmailType());
         businessClient.setUser(byId.get());
+
+        if (!client.getLastName().isBlank()) {
+            businessClient.setLastName(client.getLastName());
+        }
+
+
 
         businessClientRepository.save(businessClient);
 
         return true;
+    }
+
+    public boolean isBusinessClientValid(BusinessClient client){
+        return !client.getEmail().isBlank() && !client.getName().isBlank();
     }
 }

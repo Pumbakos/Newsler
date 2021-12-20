@@ -7,9 +7,14 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import pl.palubiak.dawid.newsler.businesclinet.model.BusinessClient;
+import pl.palubiak.dawid.newsler.generators.BusinessClientGenerator;
 import pl.palubiak.dawid.newsler.generators.UserGenerator;
 import pl.palubiak.dawid.newsler.user.model.User;
+import pl.palubiak.dawid.newsler.user.model.UserSimpleModel;
 import pl.palubiak.dawid.newsler.user.service.UserService;
+
+import java.util.Optional;
 
 @ContextConfiguration(classes = UserServiceTest.class)
 @SpringBootTest
@@ -20,58 +25,27 @@ public class UserServiceTest {
     @Test
     @DisplayName("Should return user's instance if user was created")
     public void saveValidUserData(){
-        User user = UserGenerator.createNewbieUser();
-        Mockito.when(userService.save(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(user);
-        User result = userService.save(user.getEmail(), user.getName(), user.getPassword());
+        UserSimpleModel simpleUserModel = UserGenerator.createSimpleUserModel();
+        User user = UserGenerator.createUser();
+        Mockito.when(userService.save(Mockito.any(UserSimpleModel.class))).thenReturn(Optional.of(user));
+        Optional<User> result = userService.save(simpleUserModel);
 
-        Mockito.verify(userService, Mockito.times(1)).save(user.getEmail(), user.getName(), user.getPassword());
-        Mockito.verifyNoMoreInteractions(userService);
+        assert result.isPresent();
 
-        Assertions.assertEquals(result, user);
+        Assertions.assertEquals(result.get().getEmail(), user.getEmail());
+        Assertions.assertEquals(result.get().getName(), user.getName());
+        Assertions.assertEquals(result.get().getPassword(), user.getPassword());
     }
 
     @Test
-    @DisplayName("Should throw IllegalArgumentException if user's email is blank")
-    public void saveInvalidUserDataEmail(){
+    @DisplayName("Should return Optional.empty() if user was not valid")
+    public void saveInvalidUserData(){
+        UserSimpleModel simpleUserModel = UserGenerator.createSimpleUserModel();
         User user = UserGenerator.createNewbieUser();
-        Mockito.when(userService.save(Mockito.nullable(String.class), Mockito.anyString(), Mockito.anyString()))
-                .thenThrow(IllegalArgumentException.class);
+        Mockito.when(userService.save(Mockito.any(UserSimpleModel.class))).thenReturn(Optional.empty());
+        Optional<User> result = userService.save(simpleUserModel);
 
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> userService.save(null, user.getName(), user.getPassword()));
-    }
-
-    @Test
-    @DisplayName("Should throw IllegalArgumentException if user's name is blank")
-    public void saveInvalidUserDataName(){
-        User user = UserGenerator.createNewbieUser();
-        Mockito.when(userService.save(Mockito.anyString(), Mockito.nullable(String.class), Mockito.anyString()))
-                .thenThrow(IllegalArgumentException.class);
-
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> userService.save(user.getName(), null, user.getPassword()));
-    }
-
-    @Test
-    @DisplayName("Should throw IllegalArgumentException if user's password is blank")
-    public void saveInvalidUserDataPassword(){
-        User user = UserGenerator.createNewbieUser();
-        Mockito.when(userService.save(Mockito.anyString(), Mockito.anyString(), Mockito.nullable(String.class)))
-                .thenThrow(IllegalArgumentException.class);
-
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> userService.save(user.getEmail(), user.getName(), null));
-    }
-
-    @Test
-    @DisplayName("Should throw IllegalArgumentException if all user's data is blank")
-    public void saveInvalidUserDataAll(){
-        User user = UserGenerator.createNewbieUser();
-        Mockito.when(userService.save(Mockito.nullable(String.class), Mockito.nullable(String.class), Mockito.nullable(String.class)))
-                .thenThrow(IllegalArgumentException.class);
-
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> userService.save(null, null,null));
+        Assertions.assertEquals(Optional.empty(), result);
     }
 
     @Test
@@ -138,40 +112,41 @@ public class UserServiceTest {
     @Test
     @DisplayName("Should return true if client was added")
     public void addBusinessClient(){
-        User user = UserGenerator.createUser();
-        Mockito.when(userService.addBusinessClient(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString()))
+        BusinessClient businessClientSimpleModel = BusinessClientGenerator.createBusinessClient();
+        Mockito.when(userService.addBusinessClient(Mockito.anyLong(), Mockito.any(BusinessClient.class)))
                 .thenReturn(true);
 
-        Assertions.assertTrue(userService.addBusinessClient(1, user.getEmail(), user.getName()));
+        Assertions.assertTrue(userService.addBusinessClient(1, businessClientSimpleModel));
+    }
+    @Test
+    @DisplayName("Should return false if client was not added")
+    public void doNotAddBusinessClient(){
+        BusinessClient businessClientSimpleModel = BusinessClientGenerator.createBusinessClient();
+        Mockito.when(userService.addBusinessClient(Mockito.anyLong(), Mockito.any(BusinessClient.class)))
+                .thenReturn(false);
+
+        Assertions.assertFalse(userService.addBusinessClient(1, businessClientSimpleModel));
     }
 
     @Test
-    @DisplayName("Should return true if client was added")
+    @DisplayName("Should throw IllegalArgumentException if client was not found added")
     public void addBusinessClientUserNotFound(){
-        Mockito.when(userService.addBusinessClient(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString()))
+        BusinessClient businessClientSimpleModel = BusinessClientGenerator.createBusinessClient();
+        Mockito.when(userService.addBusinessClient(Mockito.anyLong(), Mockito.any(BusinessClient.class)))
                 .thenThrow(IllegalArgumentException.class);
 
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> userService.addBusinessClient(1, "email", "name"));
+                () -> userService.addBusinessClient(1, businessClientSimpleModel));
     }
 
     @Test
     @DisplayName("Should throw IllegalArgumentException if client's email and name is blank")
     public void addBusinessClientWithBlankEmailAndName(){
-        Mockito.when(userService.addBusinessClient(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString()))
+        BusinessClient businessClientSimpleModel = BusinessClientGenerator.createBusinessClient();
+        Mockito.when(userService.addBusinessClient(Mockito.anyLong(), Mockito.any(BusinessClient.class)))
                 .thenThrow(IllegalArgumentException.class);
 
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> userService.addBusinessClient(1, "", ""));
-    }
-
-    @Test
-    @DisplayName("Should throw IllegalArgumentException if user was not found")
-    public void donNotAddBusinessClientCuzClientNotFound(){
-        Mockito.when(userService.addBusinessClient(Mockito.anyLong(), Mockito.nullable(String.class), Mockito.nullable(String.class)))
-                .thenThrow(IllegalArgumentException.class);
-
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> userService.addBusinessClient(1, "", ""));
+                () -> userService.addBusinessClient(1, businessClientSimpleModel));
     }
 }

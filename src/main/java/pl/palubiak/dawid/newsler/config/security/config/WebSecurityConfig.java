@@ -20,30 +20,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(daoAuthenticationProvider());
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors().and()
-                    .authorizeRequests()
-                        .antMatchers(HttpMethod.GET, "/users/*")
-                            .hasAuthority("SCOPE_read")
-                        .antMatchers(HttpMethod.POST, "/users/*")
-                            .hasAuthority("SCOPE_write")
-                            .anyRequest()
-                                .authenticated()
-                    .and()
-                        .oauth2ResourceServer()
-                            .jwt();
-//                .csrf().disable()
-//                .authorizeRequests()
-//                .antMatchers("/api/**")
-//                .permitAll()
-//                .anyRequest()
-//                .authenticated().and()
-//                .oauth2Login();
+        http.csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/**").permitAll()
+                .anyRequest().authenticated()
+                .and().formLogin();
     }
 
     @Bean

@@ -14,9 +14,9 @@ import javax.mail.internet.MimeMessage;
 @Service
 @AllArgsConstructor
 public class EmailConfirmationService implements EmailConfirmationSender {
-    private final static Logger LOGGER = LoggerFactory.getLogger(EmailConfirmationService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmailConfirmationService.class);
     private final JavaMailSender mailSender;
-    private final static String MSG = "Error while sending email";
+    private static final String MSG = "Error while sending email";
 
     @Override
     @Async

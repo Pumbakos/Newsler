@@ -52,19 +52,19 @@ public class UserRegistrationService {
     public ValueProvider resendConfirmationToken(ActivationRequest request) {
         AtomicReference<ValueProvider> valueProvider = new AtomicReference<>(ValueProvider.NOT_SENT);
 
-        boolean isEmailValid = emailValidator.test(request.getEmail());
+        boolean isEmailValid = emailValidator.test(request.email());
         if (!isEmailValid) {
             throw new IllegalArgumentException("Email is not valid");
         }
 
-        Optional<User> optionalUser = userService.getUserByEmailAndPassword(request.getEmail(), request.getPassword());
+        Optional<User> optionalUser = userService.getUserByEmailAndPassword(request.email(), request.password());
         optionalUser.ifPresent(user -> {
             if(confirmationTokenService.setTokenExpired(user)){
                 String token = UserService.generateToken();
                 userService.getConfirmationToken(user, token);
                 String link = ValueProvider.HOME_DOMAIN.getValue() + "/api/users/registration/confirm?token=" + token;
 
-                emailConfirmationSender.send(request.getEmail(),
+                emailConfirmationSender.send(request.email(),
                         emailConfirmationSender
                                 .confirmationEmailBuilder(user.getName(), link));
 

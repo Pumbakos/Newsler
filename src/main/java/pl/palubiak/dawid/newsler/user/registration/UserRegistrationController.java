@@ -43,6 +43,5 @@ public class UserRegistrationController {
         return valueProvider == ValueProvider.CONFIRMED ?
                 new ResponseEntity<>(ValueProvider.CONFIRMED, HttpStatus.OK) :
                 new ResponseEntity<>(ValueProvider.NOT_CONFIRMED, HttpStatus.BAD_REQUEST);
-
     }
 }

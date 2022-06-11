@@ -40,14 +40,6 @@ class UserController {
                 new ResponseEntity<>(user, HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<String> createUser(@Valid @RequestBody UserSimpleModel userSimpleModel) {
-        Optional<User> optionalUser = userService.save(userSimpleModel);
-        return optionalUser.isPresent() ?
-                new ResponseEntity<>("User created successfully", HttpStatus.CREATED) :
-                new ResponseEntity<>("User was not created", HttpStatus.BAD_REQUEST);
-    }
-
     @PostMapping("/{userId}/add/client")
     public ResponseEntity<String> addBusinessClient(@PathVariable("userId") Long userid, @Valid @RequestBody BusinessClient businessClient) {
         User byId = userService.findById(userid);

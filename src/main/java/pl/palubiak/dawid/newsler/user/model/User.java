@@ -1,29 +1,48 @@
 package pl.palubiak.dawid.newsler.user.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.Hibernate;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import pl.palubiak.dawid.newsler.businesclinet.model.BusinessClient;
+import pl.palubiak.dawid.newsler.user.registration.EmailValidator;
 import pl.palubiak.dawid.newsler.utils.DBModel;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "USERS")
-public class User extends DBModel {
+@Table(name = "USERS", catalog = "PUBLIC")
+public class User extends DBModel implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false, updatable = false, unique = true, columnDefinition = "NUMBER(10)")
     @ToString.Exclude
-    private long id;
+    private Long id;
 
     @NotBlank
-    @Email(regexp = "[\\w!#$%&’*+/=?`{|}~^-]+(?:\\.[\\w!#$%&’*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}")
+    @Email(regexp = EmailValidator.EMAIL_PATTERN)
     @Column(name = "EMAIL", nullable = false, unique = true, columnDefinition = "VARCHAR(255)")
     private String email;
 
@@ -33,10 +52,9 @@ public class User extends DBModel {
      * <strong>not</strong> "name = Microsoft", lastName = "Corporation"
      */
     @NotBlank
-    @Column(name = "NAME", nullable = false, unique = true, columnDefinition = "VARCHAR(50)")
+    @Column(name = "NAME", nullable = false, columnDefinition = "VARCHAR(50)")
     private String name;
 
-//    @ValidPassword passay?
     @NotBlank
     @Column(name = "PASSWORD", nullable = false, columnDefinition = "VARCHAR(255)")
     private String password;
@@ -65,6 +83,79 @@ public class User extends DBModel {
     @Column(name = "SMTP_ACCOUNT", unique = true, columnDefinition = "VARCHAR(255)")
     private String smtpAccount;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ROLE", nullable = false)
+    private UserRole role;
+
+    @Column(name = "ENABLED", nullable = false)
+    private Boolean enabled = false;
+
+    @Column(name = "LOCKED", nullable = false)
+    private Boolean locked = false;
+
     @OneToMany(mappedBy = "id", cascade = CascadeType.ALL)
-    List<BusinessClient> businessClients;
+    private transient List<BusinessClient> businessClients;
+
+    public User(String name, String lastName, String email, String password, UserRole role) {
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.lastName = lastName;
+        this.role = role;
+    }
+
+    public User(String name, String email, String password, UserRole role) {
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.role = role;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority(this.role.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        return this.name;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !locked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        User user = (User) o;
+        return id != null && Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

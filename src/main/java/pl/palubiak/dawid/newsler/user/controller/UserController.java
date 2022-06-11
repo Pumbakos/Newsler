@@ -10,6 +10,7 @@ import pl.palubiak.dawid.newsler.user.model.UserSimpleModel;
 import pl.palubiak.dawid.newsler.user.service.UserService;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:4200")
@@ -23,20 +24,28 @@ class UserController {
         this.userService = userService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<User>> getAll(){
+        final List<User> all = userService.findAll();
+        return all.isEmpty() ?
+                new ResponseEntity<>(HttpStatus.NO_CONTENT) :
+                new ResponseEntity<>(all, HttpStatus.OK);
+    }
+
+    @GetMapping("{userId}")
+    public ResponseEntity<User> getUser(@PathVariable("userId") Long id) {
+        User user = userService.findById(id);
+        return user == null ?
+                new ResponseEntity<>(HttpStatus.NOT_FOUND) :
+                new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<String> createUser(@Valid @RequestBody UserSimpleModel userSimpleModel) {
         Optional<User> optionalUser = userService.save(userSimpleModel);
         return optionalUser.isPresent() ?
                 new ResponseEntity<>("User created successfully", HttpStatus.CREATED) :
                 new ResponseEntity<>("User was not created", HttpStatus.BAD_REQUEST);
-    }
-
-    @GetMapping
-    public ResponseEntity<User> getUser(@RequestParam("id") Long id) {
-        User user = userService.findById(id);
-        return user == null ?
-                new ResponseEntity<>(HttpStatus.NOT_FOUND) :
-                new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @PostMapping("/{userId}/add/client")

@@ -22,7 +22,7 @@ public class BusinessClient extends DBModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", columnDefinition = "NUMBER(10)")
     @ToString.Exclude
-    private long id;
+    private Long id;
 
     @NotBlank
     @Column(name = "NAME", nullable = false, columnDefinition = "VARCHAR(255)")

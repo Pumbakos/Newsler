@@ -18,8 +18,8 @@ public class SendMail {
         try {
             // code from documentation
             // setup variables
-            String appKey = "5a176cc31073a4ed4082f3442cb2346c6da1b47f";
-            String secretKey = "fec5d1f36b756ae5d2afc20c019bdb2119352350";
+            String appKey = "";
+            String secretKey = "";
 
             String userPass = appKey + ":" + secretKey;
             String basicAuth = "Basic "
@@ -27,12 +27,12 @@ public class SendMail {
 
             // set params
             HashMap<String, String> params = new HashMap<>();
-            params.put(SMTP_ACCOUNT, "1.esrodkiczystosci.smtp");
+            params.put(SMTP_ACCOUNT, "1.pumbakos.smtp");
             params.put(SUBJECT, "Test message from java source code");
             params.put(HTML, "<p>Newsletter message example</p>");
             params.put(TEXT, "Newsletter message example");
-            params.put(FROM, "sklep@e-srodkiczystosci.pl".strip());
-            params.put(FROM_NAME, "Sklep e-srodkiczystosci.pl".strip());
+            params.put(FROM, "info@newsler.pl".strip());
+            params.put(FROM_NAME, "Info Newsler".strip());
             params.put(TO_ADDRESS, "dawid.palubiak@gmail.com".strip());
 
             // build query

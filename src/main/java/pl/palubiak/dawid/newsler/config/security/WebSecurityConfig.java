@@ -1,4 +1,4 @@
-package pl.palubiak.dawid.newsler.config.security.config;
+package pl.palubiak.dawid.newsler.config.security;
 
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +27,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
-                .authorizeRequests()
+                .authorizeRequests().antMatchers("/h2-console/**").permitAll()
+                .and().authorizeRequests()
                 .antMatchers("/**").permitAll()
                 .anyRequest().authenticated()
                 .and().formLogin();

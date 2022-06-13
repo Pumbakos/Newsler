@@ -5,10 +5,15 @@ server:
     include-binding-errors: always
 
 spring:
+  h2:
+    console:
+      path: /h2-console
+      enabled: true
   datasource:
     username: sa
     password: pass
     url: jdbc:h2:mem:newsler
+    driverClassName: org.h2.Driver
   jpa:
     hibernate:
       ddl-auto: create-drop

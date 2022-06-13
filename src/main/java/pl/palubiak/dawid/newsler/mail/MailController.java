@@ -3,7 +3,6 @@ package pl.palubiak.dawid.newsler.mail;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +20,7 @@ public class MailController {
 
     @PostMapping
 //    @GetMapping
-    public ResponseEntity<String> sendMail(@RequestBody MailRequest request){
+    public ResponseEntity<String> sendMail(@RequestBody MailRequest request) {
 //        MailRequest request = new MailRequest();
 //        request.setFrom("info@newsler.com");
 //        request.setFromName("Info Newsler");
@@ -37,8 +36,10 @@ public class MailController {
 //                "In this tutorial, I showed you how to implement your own login form in an Angular application using Material Design and the Angular Material library. Coding up your own form may be a viable option if you want to present a uniform user experience. Much of this tutorial can be used for other design libraries and is not limited to Material Design but Google’s Material Design standard is probably one of the most recognized user interface standards nowadays. Using it will improve the usability of your web application.\n" +
 //                "\n");
 
+        final boolean bcc = request.getBcc() != null || !request.getBcc().isBlank() || !request.getBcc().isEmpty();
+        final boolean cc = request.getCc() != null || !request.getCc().isBlank() || !request.getCc().isEmpty();
         try {
-            mailSenderService.send(request, request.getCc() != null, request.getBcc() != null);
+            mailSenderService.send(request, cc, bcc);
             return new ResponseEntity<>("Mail is being proceed", HttpStatus.ACCEPTED);
         } catch (MessagingException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

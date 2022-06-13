@@ -11,7 +11,7 @@ import pl.palubiak.dawid.newsler.businesclinet.model.BusinessClient;
 import pl.palubiak.dawid.newsler.generators.BusinessClientGenerator;
 import pl.palubiak.dawid.newsler.generators.UserGenerator;
 import pl.palubiak.dawid.newsler.user.model.User;
-import pl.palubiak.dawid.newsler.user.model.UserSimpleModel;
+import pl.palubiak.dawid.newsler.user.model.requestmodel.RequestUser;
 import pl.palubiak.dawid.newsler.user.service.UserService;
 
 import java.util.Optional;
@@ -25,9 +25,9 @@ public class UserServiceTest {
     @Test
     @DisplayName("Should return user's instance if user was created")
     public void saveValidUserData(){
-        UserSimpleModel simpleUserModel = UserGenerator.createSimpleUserModel();
+        RequestUser simpleUserModel = UserGenerator.createSimpleUserModel();
         User user = UserGenerator.createUser();
-        Mockito.when(userService.save(Mockito.any(UserSimpleModel.class))).thenReturn(Optional.of(user));
+        Mockito.when(userService.save(Mockito.any(RequestUser.class))).thenReturn(Optional.of(user));
         Optional<User> result = userService.save(simpleUserModel);
 
         assert result.isPresent();
@@ -40,9 +40,9 @@ public class UserServiceTest {
     @Test
     @DisplayName("Should return Optional.empty() if user was not valid")
     public void saveInvalidUserData(){
-        UserSimpleModel simpleUserModel = UserGenerator.createSimpleUserModel();
+        RequestUser simpleUserModel = UserGenerator.createSimpleUserModel();
         User user = UserGenerator.createNewbieUser();
-        Mockito.when(userService.save(Mockito.any(UserSimpleModel.class))).thenReturn(Optional.empty());
+        Mockito.when(userService.save(Mockito.any(RequestUser.class))).thenReturn(Optional.empty());
         Optional<User> result = userService.save(simpleUserModel);
 
         Assertions.assertEquals(Optional.empty(), result);

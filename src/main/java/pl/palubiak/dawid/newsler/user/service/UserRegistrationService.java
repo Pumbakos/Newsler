@@ -1,16 +1,16 @@
-package pl.palubiak.dawid.newsler.user.registration;
+package pl.palubiak.dawid.newsler.user.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.palubiak.dawid.newsler.user.model.User;
 import pl.palubiak.dawid.newsler.user.model.UserRole;
-import pl.palubiak.dawid.newsler.user.registration.emailconfirmation.EmailConfirmationSender;
-import pl.palubiak.dawid.newsler.user.registration.requestmodel.ActivationRequest;
-import pl.palubiak.dawid.newsler.user.registration.requestmodel.RegistrationRequest;
-import pl.palubiak.dawid.newsler.user.registration.token.ConfirmationToken;
-import pl.palubiak.dawid.newsler.user.registration.token.ConfirmationTokenService;
-import pl.palubiak.dawid.newsler.user.service.UserService;
+import pl.palubiak.dawid.newsler.user.registration.EmailValidator;
+import pl.palubiak.dawid.newsler.user.registration.ValueProvider;
+import pl.palubiak.dawid.newsler.user.registration.EmailConfirmationSender;
+import pl.palubiak.dawid.newsler.user.model.requestmodel.ActivationRequest;
+import pl.palubiak.dawid.newsler.user.model.requestmodel.RegistrationRequest;
+import pl.palubiak.dawid.newsler.user.registration.ConfirmationToken;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package pl.palubiak.dawid.newsler.user.registration.token;
+package pl.palubiak.dawid.newsler.user.registration;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

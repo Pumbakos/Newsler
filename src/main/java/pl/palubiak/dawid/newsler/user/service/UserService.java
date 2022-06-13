@@ -9,9 +9,8 @@ import org.springframework.stereotype.Service;
 import pl.palubiak.dawid.newsler.businesclinet.model.BusinessClient;
 import pl.palubiak.dawid.newsler.businesclinet.repository.BusinessClientRepository;
 import pl.palubiak.dawid.newsler.user.model.User;
-import pl.palubiak.dawid.newsler.user.model.UserSimpleModel;
-import pl.palubiak.dawid.newsler.user.registration.token.ConfirmationToken;
-import pl.palubiak.dawid.newsler.user.registration.token.ConfirmationTokenService;
+import pl.palubiak.dawid.newsler.user.model.requestmodel.RequestUser;
+import pl.palubiak.dawid.newsler.user.registration.ConfirmationToken;
 import pl.palubiak.dawid.newsler.user.repository.UserRepository;
 import pl.palubiak.dawid.newsler.utils.UpdateUtils;
 
@@ -48,15 +47,15 @@ public class UserService implements UserDetailsService {
         return user.orElse(null);
     }
 
-    public Optional<User> save(UserSimpleModel userSimpleModel) {
-        if (!userSimpleModel.isValid()) {
+    public Optional<User> save(RequestUser requestUser) {
+        if (!requestUser.isValid()) {
             return Optional.empty();
         }
 
         User user = new User();
-        user.setEmail(userSimpleModel.getEmail());
-        user.setName(userSimpleModel.getName());
-        user.setPassword(userSimpleModel.getPassword());
+        user.setEmail(requestUser.getEmail());
+        user.setName(requestUser.getName());
+        user.setPassword(requestUser.getPassword());
 
         return Optional.of(userRepository.save(user));
     }
@@ -144,7 +143,13 @@ public class UserService implements UserDetailsService {
     }
 
     public Optional<User> getUserByEmailAndPassword(String email, String password) {
-        return userRepository.findByEmailAndPassword(email, password);
+        final List<User> all = userRepository.findAll();
+        final Optional<User> optionalUser = all.stream().filter(user -> user.getEmail().equalsIgnoreCase(email)).findFirst();
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return bCryptPasswordEncoder.matches(password, user.getPassword()) ? Optional.of(user) : Optional.empty();
+        }
+        return Optional.empty();
     }
 
     public static String generateToken() {

@@ -5,21 +5,21 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import pl.palubiak.dawid.newsler.generators.UserGenerator;
-import pl.palubiak.dawid.newsler.user.model.UserSimpleModel;
+import pl.palubiak.dawid.newsler.user.model.requestmodel.RequestUser;
 
 @SpringBootTest
-public class UserSimpleModelTest {
+public class RequestUserTest {
     @Test
     @DisplayName("Should return false if user model is not valid")
     public void shouldNotCreateUserSimpleModel() {
-        UserSimpleModel userSimpleModel = UserGenerator.createInvalidSimpleUserModel();
-        Assertions.assertFalse(userSimpleModel.isValid());
+        RequestUser requestUser = UserGenerator.createInvalidSimpleUserModel();
+        Assertions.assertFalse(requestUser.isValid());
     }
 
     @Test
     @DisplayName("Should return true if user model is valid")
     public void shouldCreateUserSimpleModel() {
-        UserSimpleModel userSimpleModel = UserGenerator.createSimpleUserModel();
-        Assertions.assertTrue(userSimpleModel.isValid());
+        RequestUser requestUser = UserGenerator.createSimpleUserModel();
+        Assertions.assertTrue(requestUser.isValid());
     }
 }

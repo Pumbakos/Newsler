@@ -1,4 +1,4 @@
-package pl.palubiak.dawid.newsler.user.model;
+package pl.palubiak.dawid.newsler.user.model.requestmodel;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @Setter
 @AllArgsConstructor
-public class UserSimpleModel {
+public class RequestUser {
     @NotBlank
     private String email;
 

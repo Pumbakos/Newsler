@@ -1,21 +1,23 @@
 package pl.palubiak.dawid.newsler.user.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.palubiak.dawid.newsler.businesclinet.model.BusinessClient;
 import pl.palubiak.dawid.newsler.user.model.User;
-import pl.palubiak.dawid.newsler.user.model.UserSimpleModel;
 import pl.palubiak.dawid.newsler.user.service.UserService;
 
 import javax.validation.Valid;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("v1/api/users")
 class UserController {
     private final UserService userService;
 
@@ -36,8 +38,16 @@ class UserController {
     public ResponseEntity<User> getUser(@PathVariable("userId") Long id) {
         User user = userService.findById(id);
         return user == null ?
-                new ResponseEntity<>(HttpStatus.NOT_FOUND) :
+                new ResponseEntity<>(HttpStatus.BAD_REQUEST) :
                 new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+//    Basic bmV3YmllQG5ld3NsZXR0ZXIuaW86YXNrZjFtMDlmM200MQ==
+    @GetMapping("/credentials")
+    public User getUserByEmailAndPassword(@Param("token") String token){
+        final String[] split = new String(Base64.getDecoder().decode(token.replace("Basic ", "")), StandardCharsets.UTF_8).split(":");
+        final Optional<User> optionalUser = userService.getUserByEmailAndPassword(split[0].strip(), split[1].strip());
+        return optionalUser.orElseGet(User::new);
     }
 
     @PostMapping("/{userId}/add/client")

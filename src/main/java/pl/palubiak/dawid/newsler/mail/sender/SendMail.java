@@ -1,11 +1,14 @@
 package pl.palubiak.dawid.newsler.mail.sender;
 
+import io.swagger.models.HttpMethod;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
@@ -53,7 +56,7 @@ public class SendMail {
 
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            connection.setRequestMethod("POST");
+            connection.setRequestMethod(HttpMethod.POST.name());
             connection.setRequestProperty("Authorization", basicAuth);
             connection.setDoOutput(true);
 

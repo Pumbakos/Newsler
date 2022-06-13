@@ -1,4 +1,4 @@
-package pl.palubiak.dawid.newsler.user.registration.emailconfirmation;
+package pl.palubiak.dawid.newsler.user.registration;
 
 public interface EmailConfirmationSender {
     void send(String to, String email);

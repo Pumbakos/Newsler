@@ -2,7 +2,7 @@ package pl.palubiak.dawid.newsler.generators;
 
 import org.junit.jupiter.api.TestFactory;
 import pl.palubiak.dawid.newsler.user.model.User;
-import pl.palubiak.dawid.newsler.user.model.UserSimpleModel;
+import pl.palubiak.dawid.newsler.user.model.requestmodel.RequestUser;
 
 public class UserGenerator {
     @TestFactory
@@ -21,8 +21,8 @@ public class UserGenerator {
     }
 
     @TestFactory
-    public static UserSimpleModel createSimpleUserModel() {
-        return new UserSimpleModel("dave@aizholat.com", "Dave", "jsad192913as");
+    public static RequestUser createSimpleUserModel() {
+        return new RequestUser("dave@aizholat.com", "Dave", "jsad192913as");
     }
 
     @TestFactory
@@ -40,7 +40,7 @@ public class UserGenerator {
         return new User();
     }
 
-    public static UserSimpleModel createInvalidSimpleUserModel() {
-        return new UserSimpleModel("","", "");
+    public static RequestUser createInvalidSimpleUserModel() {
+        return new RequestUser("","", "");
     }
 }

@@ -1,11 +1,13 @@
-package pl.palubiak.dawid.newsler.user.registration;
+package pl.palubiak.dawid.newsler.user.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.palubiak.dawid.newsler.user.registration.requestmodel.ActivationRequest;
-import pl.palubiak.dawid.newsler.user.registration.requestmodel.RegistrationRequest;
+import pl.palubiak.dawid.newsler.user.service.UserRegistrationService;
+import pl.palubiak.dawid.newsler.user.registration.ValueProvider;
+import pl.palubiak.dawid.newsler.user.model.requestmodel.ActivationRequest;
+import pl.palubiak.dawid.newsler.user.model.requestmodel.RegistrationRequest;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController

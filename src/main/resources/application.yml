@@ -3,25 +3,12 @@ server:
   error:
     include-message: always
     include-binding-errors: always
-#keycloak:
-#  server:
-#    contextPath: /auth
-#    adminUser:
-#      username: bael-admin
-#      password: pass
-#    realmImportFile: baeldung-realm.json
 
 spring:
-  #  security:
-  #    oauth2:
-  #      resource-server:
-  #        jwt:
-  #          issuer-uri: http://localhost:8083/auth/realms/baeldung
-  #          jwk-set-uri: http://localhost:8083/auth/realms/baeldung/protocol/openid-connect/certs
   datasource:
-    password: pas
-    url: jdbc:h2:mem:newsler
     username: sa
+    password: pass
+    url: jdbc:h2:mem:newsler
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -48,3 +35,4 @@ spring:
           connectiontimeout: 5000
           timeout: 3000
           writetimeout: 5000
+debug: true

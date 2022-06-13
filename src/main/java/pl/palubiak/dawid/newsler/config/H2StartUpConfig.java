@@ -8,8 +8,8 @@ import pl.palubiak.dawid.newsler.businesclinet.model.EmailType;
 import pl.palubiak.dawid.newsler.businesclinet.repository.BusinessClientRepository;
 import pl.palubiak.dawid.newsler.user.model.User;
 import pl.palubiak.dawid.newsler.user.model.UserRole;
-import pl.palubiak.dawid.newsler.user.registration.UserRegistrationService;
-import pl.palubiak.dawid.newsler.user.registration.requestmodel.RegistrationRequest;
+import pl.palubiak.dawid.newsler.user.service.UserRegistrationService;
+import pl.palubiak.dawid.newsler.user.model.requestmodel.RegistrationRequest;
 import pl.palubiak.dawid.newsler.user.repository.UserRepository;
 
 import java.util.List;

@@ -33,7 +33,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
-@Table(name = "USERS", catalog = "PUBLIC")
+@Table(name = "USERS", schema = "PUBLIC")
 public class User extends DBModel implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

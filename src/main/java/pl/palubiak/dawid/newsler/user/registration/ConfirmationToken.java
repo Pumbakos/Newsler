@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @Entity
+@Table(name = "CONFIRMATION_TOEKN", schema = "PUBLIC")
 public class ConfirmationToken {@SequenceGenerator(
         name = "confirmation_token_seq",
         sequenceName = "confirmation_token_seq",

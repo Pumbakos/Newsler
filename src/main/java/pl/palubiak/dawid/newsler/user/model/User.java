@@ -96,6 +96,17 @@ public class User extends DBModel implements UserDetails {
     @OneToMany(mappedBy = "id", cascade = CascadeType.ALL)
     private transient List<BusinessClient> businessClients;
 
+    public User(String name, String lastName, String email, String password, UserRole role, String appKey, String secretKey, String smtpAccount) {
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.lastName = lastName;
+        this.appKey = appKey;
+        this.secretKey = secretKey;
+        this.smtpAccount = smtpAccount;
+        this.role = role;
+    }
+
     public User(String name, String lastName, String email, String password, UserRole role) {
         this.email = email;
         this.name = name;

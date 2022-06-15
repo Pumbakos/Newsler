@@ -14,16 +14,15 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @Entity
-public class ConfirmationToken {
-    @SequenceGenerator(
-            name = "confirmation_token_seq",
-            sequenceName = "confirmation_token_seq",
-            allocationSize = 1
-    )
-    @Id
-    @ToString.Exclude
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private long id;
+public class ConfirmationToken {@SequenceGenerator(
+        name = "confirmation_token_seq",
+        sequenceName = "confirmation_token_seq",
+        allocationSize = 1
+)
+@Id
+@ToString.Exclude
+@GeneratedValue(strategy = GenerationType.SEQUENCE)
+private long id;
 
     @NotNull
     @Column(name = "TOKEN", nullable = false,columnDefinition = "VARCHAR(255)")
@@ -43,6 +42,7 @@ public class ConfirmationToken {
     @ManyToOne
     @JoinColumn(nullable = false)
     private User user;
+
 
     public ConfirmationToken(String token, LocalDateTime creationDate, LocalDateTime expirationDate, User user) {
         this.token = token;

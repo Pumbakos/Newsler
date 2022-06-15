@@ -17,7 +17,6 @@
         <java.version>16</java.version>
         <maven.compiler.source>16</maven.compiler.source>
         <maven.compiler.target>16</maven.compiler.target>
-        <!--        <infinispan.version>13.0.8.Final</infinispan.version>-->
     </properties>
     <dependencies>
         <dependency>

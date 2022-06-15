@@ -9,7 +9,7 @@ import pl.palubiak.dawid.newsler.user.registration.EmailValidator;
 import pl.palubiak.dawid.newsler.user.registration.ValueProvider;
 import pl.palubiak.dawid.newsler.user.registration.EmailConfirmationSender;
 import pl.palubiak.dawid.newsler.user.model.requestmodel.ActivationRequest;
-import pl.palubiak.dawid.newsler.user.model.requestmodel.RegistrationRequest;
+import pl.palubiak.dawid.newsler.user.model.requestmodel.UserRequest;
 import pl.palubiak.dawid.newsler.user.registration.ConfirmationToken;
 
 import java.time.LocalDateTime;
@@ -24,7 +24,7 @@ public class UserRegistrationService {
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailConfirmationSender emailConfirmationSender;
 
-    public ValueProvider register(RegistrationRequest request) {
+    public ValueProvider register(UserRequest request) {
         boolean isEmailValid = emailValidator.test(request.email());
         if (!isEmailValid) {
             throw new IllegalArgumentException("Email is not valid");
@@ -36,7 +36,10 @@ public class UserRegistrationService {
                         request.lastName(),
                         request.email(),
                         request.password(),
-                        UserRole.USER
+                        UserRole.USER,
+                        request.appKey(),
+                        request.secretKey(),
+                        request.smtpAccount()
                 )
         );
 

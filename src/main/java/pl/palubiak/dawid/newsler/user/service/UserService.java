@@ -10,12 +10,15 @@ import pl.palubiak.dawid.newsler.businesclinet.model.BusinessClient;
 import pl.palubiak.dawid.newsler.businesclinet.repository.BusinessClientRepository;
 import pl.palubiak.dawid.newsler.user.model.User;
 import pl.palubiak.dawid.newsler.user.model.requestmodel.RequestUser;
+import pl.palubiak.dawid.newsler.user.model.requestmodel.UserRequest;
 import pl.palubiak.dawid.newsler.user.registration.ConfirmationToken;
 import pl.palubiak.dawid.newsler.user.repository.UserRepository;
 import pl.palubiak.dawid.newsler.utils.UpdateUtils;
 
 import javax.validation.constraints.NotNull;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,15 +27,13 @@ import java.util.UUID;
 public class UserService implements UserDetailsService {
     private static final String USER_NOT_FOUND_MSG = "User with email: %s not found";
     private final UserRepository userRepository;
-    private final UpdateUtils<User> updateUtils;
     private final BusinessClientRepository businessClientRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
 
     @Autowired
-    public UserService(UserRepository userRepository, UpdateUtils<User> updateUtils, BusinessClientRepository businessClientRepository, BCryptPasswordEncoder bCryptPasswordEncoder, ConfirmationTokenService confirmationTokenService) {
+    public UserService(UserRepository userRepository, BusinessClientRepository businessClientRepository, BCryptPasswordEncoder bCryptPasswordEncoder, ConfirmationTokenService confirmationTokenService) {
         this.userRepository = userRepository;
-        this.updateUtils = updateUtils;
         this.businessClientRepository = businessClientRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.confirmationTokenService = confirmationTokenService;
@@ -47,6 +48,11 @@ public class UserService implements UserDetailsService {
         return user.orElse(null);
     }
 
+    /**
+     * @deprecated
+     * @since 14-06-2022
+     */
+    @Deprecated(forRemoval = true, since = "14-06-2022")
     public Optional<User> save(RequestUser requestUser) {
         if (!requestUser.isValid()) {
             return Optional.empty();
@@ -60,8 +66,20 @@ public class UserService implements UserDetailsService {
         return Optional.of(userRepository.save(user));
     }
 
-    public boolean update(@NotNull long id, User user) {
-        return updateUtils.update(userRepository, user, id);
+    public boolean update(@NotNull long id, UserRequest user) {
+        final Optional<User> byId = userRepository.findById(id);
+        if (byId.isPresent() && user.password().contentEquals(user.password())) {
+            final User userOp = byId.get();
+            userOp.setName(user.name());
+            userOp.setLastName(user.lastName());
+            userOp.setEmail(user.email());
+            userOp.setAppKey(user.appKey());
+            userOp.setSecretKey(user.secretKey());
+            userOp.setSmtpAccount(user.smtpAccount());
+            userRepository.save(userOp);
+            return true;
+        }
+        return false;
     }
 
     public boolean delete(@NotNull long id) {
@@ -89,8 +107,6 @@ public class UserService implements UserDetailsService {
         if (!client.getLastName().isBlank()) {
             businessClient.setLastName(client.getLastName());
         }
-
-
         businessClientRepository.save(businessClient);
 
         return true;

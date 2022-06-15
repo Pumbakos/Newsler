@@ -4,9 +4,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import pl.palubiak.dawid.newsler.businesclinet.model.BusinessClient;
 import pl.palubiak.dawid.newsler.user.model.User;
+import pl.palubiak.dawid.newsler.user.model.requestmodel.UserRequest;
 import pl.palubiak.dawid.newsler.user.service.UserService;
 
 import javax.validation.Valid;
@@ -27,7 +35,7 @@ class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAll(){
+    public ResponseEntity<List<User>> getAll() {
         final List<User> all = userService.findAll();
         return all.isEmpty() ?
                 new ResponseEntity<>(HttpStatus.NO_CONTENT) :
@@ -42,9 +50,9 @@ class UserController {
                 new ResponseEntity<>(user, HttpStatus.OK);
     }
 
-//    Basic bmV3YmllQG5ld3NsZXR0ZXIuaW86YXNrZjFtMDlmM200MQ==
+    //    Basic bmV3YmllQG5ld3NsZXR0ZXIuaW86YXNrZjFtMDlmM200MQ==
     @GetMapping("/credentials")
-    public User getUserByEmailAndPassword(@Param("token") String token){
+    public User getUserByEmailAndPassword(@Param("token") String token) {
         final String[] split = new String(Base64.getDecoder().decode(token.replace("Basic ", "")), StandardCharsets.UTF_8).split(":");
         final Optional<User> optionalUser = userService.getUserByEmailAndPassword(split[0].strip(), split[1].strip());
         return optionalUser.orElseGet(User::new);
@@ -53,11 +61,18 @@ class UserController {
     @PostMapping("/{userId}/add/client")
     public ResponseEntity<String> addBusinessClient(@PathVariable("userId") Long userid, @Valid @RequestBody BusinessClient businessClient) {
         User byId = userService.findById(userid);
-        if(byId == null) {
+        if (byId == null) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
         }
         return userService.addBusinessClient(userid, businessClient) ?
                 new ResponseEntity<>("Business client added successfully", HttpStatus.CREATED) :
                 new ResponseEntity<>("Business client was not added", HttpStatus.BAD_REQUEST);
+    }
+
+    @PutMapping("/{userId}")
+    public ResponseEntity<String> update(@PathVariable("userId") Long userid, @Valid @RequestBody UserRequest user) {
+        return userService.update(userid, user) ?
+                new ResponseEntity<>("Updated successfully", HttpStatus.OK) :
+                new ResponseEntity<>("Updated failed", HttpStatus.BAD_REQUEST);
     }
 }

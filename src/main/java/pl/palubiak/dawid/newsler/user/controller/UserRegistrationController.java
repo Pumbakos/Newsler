@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.palubiak.dawid.newsler.user.service.UserRegistrationService;
 import pl.palubiak.dawid.newsler.user.registration.ValueProvider;
 import pl.palubiak.dawid.newsler.user.model.requestmodel.ActivationRequest;
-import pl.palubiak.dawid.newsler.user.model.requestmodel.RegistrationRequest;
+import pl.palubiak.dawid.newsler.user.model.requestmodel.UserRequest;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -21,7 +21,7 @@ public class UserRegistrationController {
     }
 
     @PostMapping
-    public ResponseEntity<ValueProvider> register(@RequestBody RegistrationRequest request) {
+    public ResponseEntity<ValueProvider> register(@RequestBody UserRequest request) {
         ValueProvider valueProvider = userRegistrationService.register(request);
 
         return valueProvider == ValueProvider.REGISTERED ?

@@ -9,20 +9,25 @@ import pl.palubiak.dawid.newsler.businesclinet.repository.BusinessClientReposito
 import pl.palubiak.dawid.newsler.user.model.User;
 import pl.palubiak.dawid.newsler.user.model.UserRole;
 import pl.palubiak.dawid.newsler.user.service.UserRegistrationService;
-import pl.palubiak.dawid.newsler.user.model.requestmodel.RegistrationRequest;
+import pl.palubiak.dawid.newsler.user.model.requestmodel.UserRequest;
 import pl.palubiak.dawid.newsler.user.repository.UserRepository;
+import pl.palubiak.dawid.newsler.user.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Configuration
 public class H2StartUpConfig {
     @Bean
-    CommandLineRunner saveUsers(UserRegistrationService service) {
+    CommandLineRunner saveUsers(UserRegistrationService service, UserService userService) {
         return args -> {
             User user1 = new User();
             user1.setName("Dave");
             user1.setLastName("Pumbakos");
+            user1.setAppKey(UUID.randomUUID().toString());
+            user1.setSecretKey(UUID.randomUUID().toString());
+            user1.setSmtpAccount("1.pumbakos.smtp");
             user1.setEmail("dave@newsletter.io");
             user1.setPassword("jnasfiuasb");
             user1.setRole(UserRole.USER);
@@ -30,6 +35,9 @@ public class H2StartUpConfig {
             User user2 = new User();
             user2.setName("Ejs");
             user2.setLastName("Aizholat");
+            user2.setAppKey(UUID.randomUUID().toString());
+            user2.setSecretKey(UUID.randomUUID().toString());
+            user2.setSmtpAccount("1.aizholat.smtp");
             user2.setEmail("ejs.aizholat@newsletter.io");
             user2.setPassword("kamsfoasf1");
             user2.setRole(UserRole.USER);
@@ -37,29 +45,41 @@ public class H2StartUpConfig {
             User user3 = new User();
             user3.setName("Anton");
             user3.setLastName("Newbie");
+            user3.setAppKey(UUID.randomUUID().toString());
+            user3.setSecretKey(UUID.randomUUID().toString());
+            user3.setSmtpAccount("1.newbie.smtp");
             user3.setEmail("newbie@newsletter.io");
             user3.setPassword("askf1m09f3m41");
             user3.setRole(UserRole.USER);
 
-            service.register(new RegistrationRequest(
+            service.register(new UserRequest(
                             user1.getName(),
                             user1.getLastName(),
                             user1.getPassword(),
-                            user1.getEmail()
+                            user1.getEmail(),
+                            user1.getAppKey(),
+                            user1.getSecretKey(),
+                            user1.getSmtpAccount()
                     )
             );
-            service.register(new RegistrationRequest(
+            service.register(new UserRequest(
                             user2.getName(),
                             user2.getLastName(),
                             user2.getPassword(),
-                            user2.getEmail()
+                            user2.getEmail(),
+                            user2.getAppKey(),
+                            user2.getSecretKey(),
+                            user2.getSmtpAccount()
                     )
             );
-            service.register(new RegistrationRequest(
+            service.register(new UserRequest(
                             user3.getName(),
                             user3.getLastName(),
                             user3.getPassword(),
-                            user3.getEmail()
+                            user3.getEmail(),
+                            user3.getAppKey(),
+                            user3.getSecretKey(),
+                            user3.getSmtpAccount()
                     )
             );
         };

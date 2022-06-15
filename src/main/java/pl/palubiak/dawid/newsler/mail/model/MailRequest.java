@@ -18,17 +18,15 @@ public class MailRequest {
     @Email(regexp = EmailValidator.EMAIL_PATTERN)
     private String from;
 
-    private String fromName;
-
     @NotBlank
     @Email(regexp = EmailValidator.EMAIL_PATTERN)
-    private String to;
+    private String[] to;
 
     @Email(regexp = EmailValidator.EMAIL_PATTERN)
-    private String bcc;
+    private String[] bcc;
 
     @Email(regexp = EmailValidator.EMAIL_PATTERN)
-    private String cc;
+    private String[] cc;
 
     @NotBlank
     private String subject;

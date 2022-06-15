@@ -3,6 +3,8 @@ package pl.palubiak.dawid.newsler.mail;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,7 +13,9 @@ import pl.palubiak.dawid.newsler.mail.model.MailRequest;
 import pl.palubiak.dawid.newsler.mail.pznu.MailSenderService;
 
 import javax.mail.MessagingException;
+import java.util.Arrays;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/v1/api/mails")
 @AllArgsConstructor
@@ -36,10 +40,12 @@ public class MailController {
 //                "In this tutorial, I showed you how to implement your own login form in an Angular application using Material Design and the Angular Material library. Coding up your own form may be a viable option if you want to present a uniform user experience. Much of this tutorial can be used for other design libraries and is not limited to Material Design but Google’s Material Design standard is probably one of the most recognized user interface standards nowadays. Using it will improve the usability of your web application.\n" +
 //                "\n");
 
-        final boolean bcc = request.getBcc() != null || !request.getBcc().isBlank() || !request.getBcc().isEmpty();
-        final boolean cc = request.getCc() != null || !request.getCc().isBlank() || !request.getCc().isEmpty();
         try {
-            mailSenderService.send(request, cc, bcc);
+            mailSenderService.send(
+                    request,
+                    !CollectionUtils.isEmpty(Arrays.asList(request.getCc())),
+                    !CollectionUtils.isEmpty(Arrays.asList(request.getBcc()))
+            );
             return new ResponseEntity<>("Mail is being proceed", HttpStatus.ACCEPTED);
         } catch (MessagingException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

@@ -8,16 +8,21 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import pl.newsler.api.UserRepository;
+import pl.newsler.api.UserService;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class SecurityConfig implements WebSecurityCustomizer {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final UserService userService;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -32,7 +37,7 @@ public class SecurityConfig {
                 .antMatchers("/test2").authenticated()
                 .antMatchers("/test3").hasRole("ADMIN")
                 .and()
-                .addFilter(new JWTFilter(authenticationManager()));
+                .addFilter(new JWTFilter(authenticationManager(), userRepository));
 
         return http.build();
     }
@@ -40,5 +45,10 @@ public class SecurityConfig {
     @Bean(name = "AuthenticationManager")
     public AuthenticationManager authenticationManager() throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Override
+    public void customize(WebSecurity web) {
+        web.ignoring().antMatchers("/api/jwt"); //FIXME: use .authorizeRequests().antMatchers().permitAll() properly
     }
 }

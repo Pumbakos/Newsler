@@ -1,4 +1,4 @@
-package pl.newsler.security;
+package pl.newsler.api;
 
 public enum UserRole {
     ADMIN, USER

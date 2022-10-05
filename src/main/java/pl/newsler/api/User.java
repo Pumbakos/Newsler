@@ -1,5 +1,6 @@
-package pl.newsler.security;
+package pl.newsler.api;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,7 +28,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "USERS", schema = "PUBLIC")
-@Builder
+@Builder(access = AccessLevel.PUBLIC)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -137,6 +138,10 @@ public class User implements UserDetails {
         this.name = name;
         this.password = password;
         this.role = role;
+    }
+
+    public static UserBuilder builder(){
+        return new User.UserBuilder();
     }
 
     @Override

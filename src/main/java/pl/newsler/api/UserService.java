@@ -1,10 +1,11 @@
-package pl.newsler.security;
+package pl.newsler.api;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import pl.newsler.security.PasswordEncoder;
 
 import java.util.List;
 

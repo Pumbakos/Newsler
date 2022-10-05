@@ -3,17 +3,19 @@ package pl.newsler.security;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import pl.newsler.api.User;
+import pl.newsler.api.UserRole;
+import pl.newsler.api.UserService;
 
 import java.util.Arrays;
 import java.util.UUID;
 
 @Configuration
-public class H2StartUpConfig {
+public class H2StartupConfig {
     @Bean
     CommandLineRunner saveUsers(UserService service) {
         return args -> {
-            User user1 = new User.UserBuilder()
+            User user1 = User.builder()
                     .name("New")
                     .lastName("Pumbakos")
                     .appKey(UUID.randomUUID().toString())
@@ -26,7 +28,7 @@ public class H2StartUpConfig {
                     .locked(false)
                     .build();
 
-            User user2 = new User.UserBuilder()
+            User user2 = User.builder()
                     .name("Ejs")
                     .lastName("Aizholat")
                     .appKey(UUID.randomUUID().toString())
@@ -39,7 +41,7 @@ public class H2StartUpConfig {
                     .locked(false)
                     .build();
 
-            User user3 = new User.UserBuilder()
+            User user3 = User.builder()
                     .name("Anton")
                     .lastName("Newbie")
                     .appKey(UUID.randomUUID().toString())

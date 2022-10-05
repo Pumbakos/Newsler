@@ -9,6 +9,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import pl.newsler.api.UserRepository;
+import pl.newsler.exceptions.implemenation.UnauthorizedException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
@@ -18,10 +20,13 @@ import java.util.Collections;
 import java.util.Set;
 
 public class JWTFilter extends BasicAuthenticationFilter {
+    private final UserRepository repository;
+
     private static final String SALT = "H4p&D*!HDNAS)IFN_)!";
 
-    public JWTFilter(AuthenticationManager authenticationManager) {
+    public JWTFilter(AuthenticationManager authenticationManager, UserRepository repository) {
         super(authenticationManager);
+        this.repository = repository;
     }
 
     @Override
@@ -34,9 +39,14 @@ public class JWTFilter extends BasicAuthenticationFilter {
     private UsernamePasswordAuthenticationToken getAuthentication(String authToken) {
         final JWTVerifier verifier = JWT.require(Algorithm.HMAC384(SALT)).build();
         final DecodedJWT jwt = verifier.verify(authToken);
-        final String role = jwt.getClaim("role").asString();
         final String email = jwt.getClaim("email").asString();
-        final Set<SimpleGrantedAuthority> roles = Collections.singleton(new SimpleGrantedAuthority(role));
-        return new UsernamePasswordAuthenticationToken(email, null, roles);
+
+        if (repository.findByEmail(email).isEmpty()) {
+            throw new UnauthorizedException("Invalid email", "Could not find username with provided email");
+        } else {
+            final String role = jwt.getClaim("role").asString();
+            final Set<SimpleGrantedAuthority> roles = Collections.singleton(new SimpleGrantedAuthority(role));
+            return new UsernamePasswordAuthenticationToken(email, null, roles);
+        }
     }
 }

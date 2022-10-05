@@ -3,8 +3,6 @@ package pl.newsler.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.encrypt.AesBytesEncryptor;
-import org.springframework.security.crypto.keygen.BytesKeyGenerator;
 import pl.newsler.api.auth.AlgorithmType;
 import pl.newsler.api.auth.JWTClaim;
 import pl.newsler.exceptions.implemenation.DecryptionException;
@@ -26,9 +24,7 @@ import java.util.Base64;
 
 @Configuration
 public class PasswordEncoder {
-    private static final SecureRandom random = new SecureRandom();
-    private static final BytesKeyGenerator KEY_GENERATOR = AesBytesEncryptor.CipherAlgorithm.GCM.defaultIvGenerator();
-    private static final byte[] SALT = random.generateSeed(15);
+    private static final byte[] SALT = new byte[]{-94, 119, -103, -55, -18, 5, -64, 60, -97, -92, 72, 10, 98, -3, 54};
     private static final SecretKey secretKey = generateKey();
 
     public static byte[] salt() {
@@ -39,15 +35,6 @@ public class PasswordEncoder {
     public BCryptPasswordEncoder bCrypt() {
         return new BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.$2Y, 8);
     }
-
-//    @Bean
-//    public AesBytesEncryptor aes(){
-//        return new AesBytesEncryptor(
-//                secretKey,
-//                KEY_GENERATOR,
-//                AesBytesEncryptor.CipherAlgorithm.GCM
-//        );
-//    }
 
     public final String encrypt(String string, AlgorithmType algorithm) {
         try {

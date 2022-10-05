@@ -47,6 +47,7 @@ public class JWTService {
                 .withIssuedAt(now)
                 .withExpiresAt(now.plus(60L, ChronoUnit.MINUTES))
                 .withClaim(JWTClaim.ROLE, user.getRole().toString())
+                .withClaim(JWTClaim.EMAIL, user.getEmail())
                 .sign(jwtConfiguration.hmac384());
     }
 }

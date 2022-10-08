@@ -57,7 +57,7 @@ public class NLPasswordEncoder {
 
     private static SecretKey generateKey() {
         try {
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(AlgorithmType.PBE_WITH_HMAC_SHA256_AND_AES256.getName());
             KeySpec spec = new PBEKeySpec(JWTClaim.JWT_ID, SALT, 65536, 256);
             return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {

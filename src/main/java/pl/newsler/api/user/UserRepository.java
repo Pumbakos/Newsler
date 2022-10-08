@@ -1,4 +1,4 @@
-package pl.newsler.api;
+package pl.newsler.api.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

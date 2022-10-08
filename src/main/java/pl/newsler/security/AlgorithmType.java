@@ -1,4 +1,4 @@
-package pl.newsler.auth;
+package pl.newsler.security;
 
 public enum AlgorithmType {
     AES("AES");

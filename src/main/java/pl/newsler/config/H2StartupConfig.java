@@ -3,9 +3,9 @@ package pl.newsler.config;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import pl.newsler.api.User;
-import pl.newsler.api.UserRole;
-import pl.newsler.api.UserService;
+import pl.newsler.api.user.User;
+import pl.newsler.api.user.UserRole;
+import pl.newsler.api.user.UserService;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -18,11 +18,11 @@ public class H2StartupConfig {
             User user1 = User.builder()
                     .name("New")
                     .lastName("Pumbakos")
-                    .appKey(UUID.randomUUID().toString())
-                    .secretKey(UUID.randomUUID().toString())
-                    .smtpAccount("1.pumbakos.smtp")
+                    .smtpAccount(System.getenv("NEWSLER_SMTP"))
                     .email("dave@newsletter.io")
                     .password("root")
+                    .secretKey(System.getenv("NEWSLER_SECRET_KEY"))
+                    .appKey(System.getenv("NEWSLER_APP_KEY"))
                     .role(UserRole.ADMIN)
                     .enabled(true)
                     .locked(false)

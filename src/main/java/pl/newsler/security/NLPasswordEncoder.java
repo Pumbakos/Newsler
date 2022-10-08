@@ -1,9 +1,7 @@
-package pl.newsler.config.security;
+package pl.newsler.security;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import pl.newsler.auth.AlgorithmType;
+import org.springframework.stereotype.Component;
 import pl.newsler.auth.JWTClaim;
 import pl.newsler.auth.exception.DecryptionException;
 import pl.newsler.auth.exception.EncryptionException;
@@ -18,12 +16,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.util.Arrays;
 import java.util.Base64;
 
 
-@Configuration
-public class PasswordEncoder {
+@Component
+public class NLPasswordEncoder {
     private static final byte[] SALT = new byte[]{-94, 119, -103, -55, -18, 5, -64, 60, -97, -92, 72, 10, 98, -3, 54};
     private static final SecretKey secretKey = generateKey();
 
@@ -31,7 +28,6 @@ public class PasswordEncoder {
         return String.valueOf(JWTClaim.JWT_ID).getBytes(StandardCharsets.UTF_8);
     }
 
-    @Bean
     public BCryptPasswordEncoder bCrypt() {
         return new BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.$2Y, 8);
     }
@@ -53,7 +49,7 @@ public class PasswordEncoder {
             Cipher cipher = Cipher.getInstance(algorithm.getName());
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
             byte[] plainText = cipher.doFinal(Base64.getDecoder().decode(string));
-            return Arrays.toString(plainText).replace("[","").replace("]", "");
+            return new String(plainText);
         } catch (Exception e) {
             throw new DecryptionException(e.getMessage(), "");
         }

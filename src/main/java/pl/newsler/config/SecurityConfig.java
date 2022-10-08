@@ -1,4 +1,4 @@
-package pl.newsler.config.security;
+package pl.newsler.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +12,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import pl.newsler.api.UserRepository;
-import pl.newsler.api.UserService;
-import pl.newsler.auth.JWTConfiguration;
+import pl.newsler.api.user.UserRepository;
+import pl.newsler.api.user.UserService;
+import pl.newsler.auth.JWTUtility;
+import pl.newsler.security.jwt.JWTFilter;
+import pl.newsler.security.NLPasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
@@ -23,8 +25,8 @@ public class SecurityConfig implements WebSecurityCustomizer {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final UserService userService;
     private final UserRepository userRepository;
-    private final JWTConfiguration jwtConfiguration;
-    private final PasswordEncoder passwordEncoder;
+    private final JWTUtility jwtUtility;
+    private final NLPasswordEncoder passwordEncoder;
 
     @Autowired
     void configure(AuthenticationManagerBuilder builder) throws Exception {
@@ -38,7 +40,7 @@ public class SecurityConfig implements WebSecurityCustomizer {
                 .antMatchers("/test2").authenticated()
                 .antMatchers("/test3").hasRole("ADMIN")
                 .and()
-                .addFilter(new JWTFilter(authenticationConfiguration.getAuthenticationManager(), userRepository, jwtConfiguration));
+                .addFilter(new JWTFilter(authenticationConfiguration.getAuthenticationManager(), userRepository, jwtUtility));
 
         return http.build();
     }

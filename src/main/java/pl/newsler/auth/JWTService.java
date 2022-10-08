@@ -1,12 +1,12 @@
-package pl.newsler.api.auth;
+package pl.newsler.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.ApplicationScope;
 import pl.newsler.api.User;
 import pl.newsler.api.UserRepository;
-import pl.newsler.exceptions.implemenation.UnauthorizedException;
-import pl.newsler.security.PasswordEncoder;
+import pl.newsler.api.exceptions.UnauthorizedException;
+import pl.newsler.config.security.PasswordEncoder;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -41,7 +41,7 @@ public class JWTService {
     private String generateToken(User user) {
         final Instant now = Instant.now();
         return jwtConfiguration.builder()
-                .withJWTId(new String(JWTClaim.JWT_ID))
+                .withJWTId(String.valueOf(JWTClaim.JWT_ID))
                 .withKeyId(jwtConfiguration.hmac384().getSigningKeyId())
                 .withIssuer(JWTClaim.ISSUER)
                 .withIssuedAt(now)

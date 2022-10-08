@@ -1,4 +1,4 @@
-package pl.newsler.api.auth;
+package pl.newsler.auth;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

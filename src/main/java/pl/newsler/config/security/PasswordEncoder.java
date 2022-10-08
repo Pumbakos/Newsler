@@ -1,13 +1,13 @@
-package pl.newsler.security;
+package pl.newsler.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import pl.newsler.api.auth.AlgorithmType;
-import pl.newsler.api.auth.JWTClaim;
-import pl.newsler.exceptions.implemenation.DecryptionException;
-import pl.newsler.exceptions.implemenation.EncryptionException;
-import pl.newsler.exceptions.implemenation.KeyInitializationException;
+import pl.newsler.auth.AlgorithmType;
+import pl.newsler.auth.JWTClaim;
+import pl.newsler.auth.exception.DecryptionException;
+import pl.newsler.auth.exception.EncryptionException;
+import pl.newsler.auth.exception.KeyInitializationException;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -16,9 +16,9 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 
 
@@ -28,7 +28,7 @@ public class PasswordEncoder {
     private static final SecretKey secretKey = generateKey();
 
     public static byte[] salt() {
-        return new String(JWTClaim.JWT_ID).getBytes(StandardCharsets.UTF_8);
+        return String.valueOf(JWTClaim.JWT_ID).getBytes(StandardCharsets.UTF_8);
     }
 
     @Bean
@@ -53,7 +53,7 @@ public class PasswordEncoder {
             Cipher cipher = Cipher.getInstance(algorithm.getName());
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
             byte[] plainText = cipher.doFinal(Base64.getDecoder().decode(string));
-            return new String(plainText);
+            return Arrays.toString(plainText).replace("[","").replace("]", "");
         } catch (Exception e) {
             throw new DecryptionException(e.getMessage(), "");
         }

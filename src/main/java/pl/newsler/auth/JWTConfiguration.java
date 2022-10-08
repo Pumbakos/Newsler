@@ -1,4 +1,4 @@
-package pl.newsler.api.auth;
+package pl.newsler.auth;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
@@ -6,7 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import pl.newsler.security.PasswordEncoder;
+import pl.newsler.config.security.PasswordEncoder;
 
 @Configuration
 @NoArgsConstructor

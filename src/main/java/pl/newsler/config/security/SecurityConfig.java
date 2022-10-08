@@ -1,4 +1,4 @@
-package pl.newsler.security;
+package pl.newsler.config.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import pl.newsler.api.UserRepository;
 import pl.newsler.api.UserService;
-import pl.newsler.api.auth.JWTConfiguration;
+import pl.newsler.auth.JWTConfiguration;
 
 @Configuration
 @EnableWebSecurity

@@ -1,4 +1,4 @@
-package pl.newsler.security;
+package pl.newsler.config.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -10,9 +10,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import pl.newsler.api.User;
 import pl.newsler.api.UserRepository;
-import pl.newsler.api.auth.JWTClaim;
-import pl.newsler.api.auth.JWTConfiguration;
-import pl.newsler.exceptions.implemenation.UnauthorizedException;
+import pl.newsler.auth.JWTClaim;
+import pl.newsler.auth.JWTConfiguration;
+import pl.newsler.api.exceptions.UnauthorizedException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
@@ -68,7 +68,7 @@ public class JWTFilter extends BasicAuthenticationFilter {
         final String issuer = jwt.getIssuer();
         final Instant expiration = jwt.getExpiresAtAsInstant();
 
-        return (keyId != null && keyId.equals(new String(JWTClaim.JWT_ID))
+        return (keyId != null && keyId.equals(String.valueOf(JWTClaim.JWT_ID))
                 && issuer != null  && issuer.equals(JWTClaim.ISSUER)
                 && now != null  && now.isBefore(expiration));
     }

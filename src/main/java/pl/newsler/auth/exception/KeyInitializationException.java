@@ -1,4 +1,4 @@
-package pl.newsler.exceptions.implemenation;
+package pl.newsler.auth.exception;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -7,13 +7,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import pl.newsler.exceptions.NLError;
 import pl.newsler.exceptions.NLException;
 
-@ResponseStatus(code = HttpStatus.UNAUTHORIZED, reason = "Unauthorized")
+@ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR, reason = "Cipher key could not be initialized")
 @RequiredArgsConstructor
-public class UnauthorizedException extends NLException {
+public class KeyInitializationException  extends NLException {
     private final String cause;
     private final String message;
 
     public ResponseEntity<NLError> response() {
-        return new ResponseEntity<>(new NLError(cause, message), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(new NLError(cause, message), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

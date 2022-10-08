@@ -63,7 +63,6 @@ public class User implements UserDetails {
 
     @NotBlank
     @Column(name = "PASSWORD", nullable = false, columnDefinition = "VARCHAR(255)")
-    @Getter
     @Setter
     private String password;
 
@@ -74,7 +73,7 @@ public class User implements UserDetails {
 
     /**
      * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find APP KEY here</a><br/>
-     * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
+     * <strong>Note: </strong> it is required to have an active account on <a href="https://emaillabs.io">emaillabs.io</a> and to be logged in
      */
     @Column(name = "APP_KEY", unique = true, columnDefinition = "VARCHAR(255)")
     @Getter
@@ -83,7 +82,7 @@ public class User implements UserDetails {
 
     /**
      * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find SECRET KEY here</a><br/>
-     * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
+     * <strong>Note: </strong> it is required to have an active account on <a href="https://emaillabs.io">emaillabs.io</a> and to be logged in
      */
     @Column(name = "SECRET_KEY", unique = true, columnDefinition = "VARCHAR(255)")
     @Getter
@@ -92,7 +91,7 @@ public class User implements UserDetails {
 
     /**
      * <a href="https://panel.emaillabs.net.pl/pl/smtp">You can find SMTP ACCOUNT here</a><br/>
-     * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
+     * <strong>Note: </strong> it is required to have an active account on <a href="https://emaillabs.io">emaillabs.io</a> and to be logged in
      */
     @Column(name = "SMTP_ACCOUNT", unique = true, columnDefinition = "VARCHAR(255)")
     @Getter
@@ -149,9 +148,13 @@ public class User implements UserDetails {
         return Collections.singletonList(new SimpleGrantedAuthority(this.role.name()));
     }
 
+    /**
+     * Alias for {@link #getEmail()}
+     * @return email
+     */
     @Override
     public String getUsername() {
-        return this.name;
+        return this.email;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package pl.newsler.security;
+package pl.newsler.config;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;

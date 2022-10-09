@@ -98,7 +98,7 @@ public class User implements UserDetails {
     @Setter
     private String smtpAccount;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "ROLE", nullable = false)
     @Getter
     @Setter

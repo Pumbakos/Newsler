@@ -47,6 +47,8 @@ public class SecurityConfig implements WebSecurityCustomizer {
 
     @Override
     public void customize(WebSecurity web) {
-        web.ignoring().antMatchers("/api/jwt"); //FIXME: use .authorizeRequests().antMatchers().permitAll() properly
+        web.ignoring().antMatchers("/api/jwt")
+                .and()
+                .ignoring().antMatchers("/hello"); //FIXME: use .authorizeRequests().antMatchers().permitAll() properly
     }
 }

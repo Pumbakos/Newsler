@@ -10,14 +10,13 @@
 name: Newsler CI with Gradle on Windows
 
 on:
-  name: 'Build windows-latest'
   pull_request:
     branches:
       - master
       - develop
       - release/*
   schedule:
-    - cron: "0 12 * * 5" # Runs at 12:00 UTC on Fri.
+    - cron: '0 12 * * 5' # Runs at 12:00 UTC on Fri.
 
 permissions:
   contents: read

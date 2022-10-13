@@ -3,9 +3,9 @@ package pl.newsler.security;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import pl.newsler.auth.JWTClaim;
-import pl.newsler.auth.exception.DecryptionException;
-import pl.newsler.auth.exception.EncryptionException;
-import pl.newsler.auth.exception.KeyInitializationException;
+import pl.newsler.security.exception.AlgorithmInitializatoinException;
+import pl.newsler.security.exception.DecryptionException;
+import pl.newsler.security.exception.EncryptionException;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -43,7 +43,6 @@ public class NLPasswordEncoder {
         }
     }
 
-
     public final String decrypt(String string, AlgorithmType algorithm) {
         try {
             Cipher cipher = Cipher.getInstance(algorithm.getName());
@@ -61,7 +60,7 @@ public class NLPasswordEncoder {
             KeySpec spec = new PBEKeySpec(JWTClaim.JWT_ID, SALT, 65536, 256);
             return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new KeyInitializationException(e.getMessage(), e.getCause().toString());
+            throw new AlgorithmInitializatoinException(e.getMessage(), e.getCause().toString());
         }
     }
 }

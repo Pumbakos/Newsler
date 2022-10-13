@@ -26,7 +26,6 @@ public class NLCredentials implements Serializable {
         }
 
         NLCredentials that = (NLCredentials) o;
-
         if (!password.equals(that.password)) {
             return false;
         }

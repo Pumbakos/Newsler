@@ -1,4 +1,4 @@
-package pl.newsler.auth.exception;
+package pl.newsler.security.exception;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import pl.newsler.exceptions.NLError;
 import pl.newsler.exceptions.NLException;
 
-@ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR, reason = "Could not finalize encryption process")
+@ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR, reason = "Could not finalize decryption process")
 @RequiredArgsConstructor
-public class EncryptionException extends NLException {
+public class DecryptionException extends NLException {
     private final String cause;
     private final String message;
 

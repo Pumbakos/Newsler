@@ -28,7 +28,6 @@ public class NLAuthenticationToken extends AbstractAuthenticationToken {
         }
 
         NLAuthenticationToken that = (NLAuthenticationToken) o;
-
         if (!principal.equals(that.principal)) {
             return false;
         }

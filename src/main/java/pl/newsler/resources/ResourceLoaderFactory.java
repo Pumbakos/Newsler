@@ -8,8 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Optional;
 
-//@Component
-//@ApplicationScope
+@Component
+@ApplicationScope
 public class ResourceLoaderFactory {
     private static final KeystoreLoader keystoreLoader = new KeystoreLoader();
 

@@ -1,5 +1,6 @@
 package pl.newsler.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import pl.newsler.auth.JWTClaim;
@@ -18,10 +19,10 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
 
-
 @Component
+@RequiredArgsConstructor
 public class NLPasswordEncoder {
-    private static final byte[] SALT = new byte[]{-94, 119, -103, -55, -18, 5, -64, 60, -97, -92, 72, 10, 98, -3, 54};
+    private static final byte[] SALT = NLKeyStore.getKey(NLAlias.PE_SALT);
     private static final SecretKey secretKey = generateKey();
 
     public static byte[] salt() {

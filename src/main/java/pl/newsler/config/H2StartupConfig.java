@@ -6,23 +6,26 @@ import org.springframework.context.annotation.Configuration;
 import pl.newsler.api.user.User;
 import pl.newsler.api.user.UserRole;
 import pl.newsler.api.user.UserService;
+import pl.newsler.security.NLAlias;
+import pl.newsler.security.NLKeyStore;
 
 import java.util.Arrays;
 import java.util.UUID;
 
 @Configuration
 public class H2StartupConfig {
+
     @Bean
     CommandLineRunner saveUsers(UserService service) {
         return args -> {
             User user1 = User.builder()
                     .name("New")
                     .lastName("Pumbakos")
-                    .smtpAccount(System.getenv("NEWSLER_SMTP"))
+                    .smtpAccount(new String(NLKeyStore.getKey(NLAlias.SMTP_ACCOUNT)))
                     .email("dave@newsletter.io")
                     .password("root")
-                    .secretKey(System.getenv("NEWSLER_SECRET_KEY"))
-                    .appKey(System.getenv("NEWSLER_APP_KEY"))
+                    .secretKey(new String(NLKeyStore.getKey(NLAlias.SECRET_KEY)))
+                    .appKey(new String(NLKeyStore.getKey(NLAlias.APP_KEY)))
                     .role(UserRole.ADMIN)
                     .enabled(true)
                     .locked(false)

@@ -19,6 +19,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,6 +39,10 @@ import java.util.Optional;
 
 @Slf4j
 public class NLKeyStore {
+    private static final TriDES triDES;
+    private static final KeyStore keyStore;
+    private static final String KEYSTORE_PASSWORD;
+    private static final byte[] SALT;
     private static final byte[] PWD = new byte[]{
             80, 121, 87, 68, 83, 54, 110, 98, 83, 51, 88, 48, 122, 116, 117, 71, 49, 89, 90, 57, 68, 104, 84, 73, 66,
             112, 48, 72, 110, 109, 117, 103, 115, 109, 102, 99, 112, 80, 84, 54, 88, 82, 78, 111, 65, 100, 82, 80, 70,
@@ -46,22 +51,26 @@ public class NLKeyStore {
             117, 68, 121, 114, 78, 52, 122, 105, 71, 108, 75, 120, 83, 84, 105, 113, 89, 76, 54, 106, 81, 67, 54, 104,
             117, 69, 97, 111
     };
-    private static final byte[] SALT = new byte[]{
-            121, 80, 106, 84, 88, 105, 82, 79, 119, 107, 118, 104, 117, 104, 120, 121, 100, 100, 83, 73, 105, 89, 86,
-            108, 66, 115, 87, 84, 105, 52, 109, 110, 106, 54, 122, 85, 80, 99, 67, 103, 67, 75, 52, 82, 107, 74, 77,
-            66, 99, 56, 56, 90, 99, 81, 71, 79, 106, 53, 98, 121, 111, 84, 71, 104, 121, 103, 84, 70, 116, 105, 65,
-            50, 53, 78, 66, 56, 73, 78, 86, 67, 116, 115, 49, 86, 51, 103, 79, 100, 48, 109, 76, 114, 65, 50, 113, 82,
-            77, 78, 75, 49, 76, 121, 116, 108, 89, 80, 106, 51, 99, 114, 111, 72, 80, 84, 103, 72, 121, 116, 114, 102,
-            86, 48, 88, 56, 97, 117, 85, 106
-    };
-    private static final TriDES triDES = new TriDES(PWD);
-    // FIXME: use environmental variables in docker
-    private static final String NEWSLER_KEYSTORE_PASSWORD = System.getenv("NEWSLER_KEYSTORE_PASSWORD");
-    private static final KeyStore keyStore;
 
     static {
         try {
-            if (!NEWSLER_KEYSTORE_PASSWORD.matches("^[a-zA-Z0-9\"\\\\{},.><~|/\\[]*$")) {
+            triDES = new TriDES(PWD);
+
+            final Optional<InputStream> saltResource = ResourceLoaderFactory.getSaltResource();
+            if (saltResource.isEmpty()) {
+                throw new FileNotFoundException("Could not find file containing salt");
+            }
+            BufferedInputStream saltBIS = new BufferedInputStream(saltResource.get());
+            SALT = triDES.decrypt(saltBIS.readAllBytes());
+
+            final Optional<InputStream> kpResource = ResourceLoaderFactory.getKeystorePasswordResource();
+            if (kpResource.isEmpty()) {
+                throw new FileNotFoundException("Could not find file containing salt");
+            }
+            BufferedInputStream keystorePasswordBIS = new BufferedInputStream(kpResource.get());
+            KEYSTORE_PASSWORD = new String(triDES.decrypt(keystorePasswordBIS.readAllBytes()));
+
+            if (!KEYSTORE_PASSWORD.matches("^[a-zA-Z0-9\"\\\\{},.><~|/\\[]*$")) {
                 throw new RegexNotMatchException("KeyStore password", "Password does not match regex");
             }
 
@@ -72,7 +81,7 @@ public class NLKeyStore {
 
             final InputStream stream = optionalStream.get();
             keyStore = KeyStore.getInstance("PKCS12");
-            keyStore.load(stream, NEWSLER_KEYSTORE_PASSWORD.toCharArray());
+            keyStore.load(stream, KEYSTORE_PASSWORD.toCharArray());
         } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
             throw new KetStoreInitializationException("Error while reading keystore file.", e.getMessage());
         }
@@ -101,7 +110,7 @@ public class NLKeyStore {
             final SecretKey secretKey = encodeKey(new String(encryptedKey).toCharArray());
             final KeyStore.PasswordProtection keyParam = new KeyStore.PasswordProtection(new String(PWD).toCharArray());
             keyStore.setEntry(alias, new KeyStore.SecretKeyEntry(secretKey), keyParam);
-            keyStore.store(new BufferedOutputStream(new FileOutputStream(keystoreFile)), NEWSLER_KEYSTORE_PASSWORD.toCharArray());
+            keyStore.store(new BufferedOutputStream(new FileOutputStream(keystoreFile)), KEYSTORE_PASSWORD.toCharArray());
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
             throw new EncryptionException("Could not set new key", e.getMessage());
         }
@@ -127,8 +136,8 @@ public class NLKeyStore {
     }
 
     private static class TriDES {
-        private final Cipher cipher;
-        private final SecretKey key;
+        final Cipher cipher;
+        final SecretKey key;
 
         TriDES(byte[] encKey) throws AlgorithmInitializatoinException {
             try {

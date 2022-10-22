@@ -1,8 +1,7 @@
 package pl.newsler.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 import pl.newsler.exceptions.NoResourceFoundException;
 import pl.newsler.exceptions.RegexNotMatchException;
 import pl.newsler.resources.ResourceLoaderFactory;
@@ -20,8 +19,13 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -32,6 +36,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Optional;
 
+@Slf4j
 public class NLKeyStore {
     private static final byte[] PWD = new byte[]{
             80, 121, 87, 68, 83, 54, 110, 98, 83, 51, 88, 48, 122, 116, 117, 71, 49, 89, 90, 57, 68, 104, 84, 73, 66,
@@ -56,24 +61,22 @@ public class NLKeyStore {
 
     static {
         try {
-            if (NEWSLER_KEYSTORE_PASSWORD.matches("^[a-zA-Z0-9\"\\\\{},.><~|/\\[]*$")) {
-                final Optional<InputStream> optionalStream = ResourceLoaderFactory.getKeystoreResource();
-                if (optionalStream.isPresent()) {
-                    final InputStream stream = optionalStream.get();
-                    keyStore = KeyStore.getInstance("PKCS12");
-                    keyStore.load(stream, NEWSLER_KEYSTORE_PASSWORD.toCharArray());
-                } else {
-                    throw new NoResourceFoundException("KeyStore resource not found", "Could not find keystore file");
-                }
-            } else {
+            if (!NEWSLER_KEYSTORE_PASSWORD.matches("^[a-zA-Z0-9\"\\\\{},.><~|/\\[]*$")) {
                 throw new RegexNotMatchException("KeyStore password", "Password does not match regex");
             }
+
+            final Optional<InputStream> optionalStream = ResourceLoaderFactory.getKeystoreResource();
+            if (optionalStream.isEmpty()) {
+                throw new NoResourceFoundException("KeyStore resource not found", "Could not find keystore file");
+            }
+
+            final InputStream stream = optionalStream.get();
+            keyStore = KeyStore.getInstance("PKCS12");
+            keyStore.load(stream, NEWSLER_KEYSTORE_PASSWORD.toCharArray());
         } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
             throw new KetStoreInitializationException("Error while reading keystore file.", e.getMessage());
         }
     }
-
-//  keyStore.store(new BufferedOutputStream(new FileOutputStream("D:\\Desktop\\Newsler\\Newsler\\src\\main\\resources\\keystore\\keystore.p12")), NEWSLER_KEYSTORE_PASSWORD.toCharArray());
 
     public static byte[] getKey(NLAlias alias) {
         try {
@@ -81,11 +84,30 @@ public class NLKeyStore {
             final KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) keyStore.getEntry(alias.getName(), aliasPasswordProtection);
             return triDES.decrypt(secretKeyEntry.getSecretKey().getEncoded());
         } catch (UnrecoverableEntryException | KeyStoreException | NoSuchAlgorithmException e) {
+            log.warn(e.getMessage());
             return new byte[]{};
         }
     }
 
-    private SecretKey encodeKey(char[] password) throws EncryptionException {
+    public static void setKey(String alias, String key) {
+        try {
+            final Optional<File> keystoreResource = ResourceLoaderFactory.getKeystoreResourceAsFile();
+            if (keystoreResource.isEmpty()) {
+                throw new FileNotFoundException("Could not load keystore file");
+            }
+            final File keystoreFile = keystoreResource.get();
+
+            final byte[] encryptedKey = triDES.encrypt(key.getBytes(StandardCharsets.UTF_8));
+            final SecretKey secretKey = encodeKey(new String(encryptedKey).toCharArray());
+            final KeyStore.PasswordProtection keyParam = new KeyStore.PasswordProtection(new String(PWD).toCharArray());
+            keyStore.setEntry(alias, new KeyStore.SecretKeyEntry(secretKey), keyParam);
+            keyStore.store(new BufferedOutputStream(new FileOutputStream(keystoreFile)), NEWSLER_KEYSTORE_PASSWORD.toCharArray());
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
+            throw new EncryptionException("Could not set new key", e.getMessage());
+        }
+    }
+
+    private static SecretKey encodeKey(char[] password) throws EncryptionException {
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance(AlgorithmType.PBE_WITH_HMAC_SHA256_AND_AES256.getName());
             KeySpec spec = new PBEKeySpec(password, SALT, 65536, 256);
@@ -95,7 +117,7 @@ public class NLKeyStore {
         }
     }
 
-    private SecretKey decodeKey(KeyStore.SecretKeyEntry entry) throws DecryptionException {
+    private static SecretKey decodeKey(KeyStore.SecretKeyEntry entry) throws DecryptionException {
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance(AlgorithmType.PBE_WITH_HMAC_SHA256_AND_AES256.getName());
             return factory.translateKey(entry.getSecretKey());
@@ -114,8 +136,7 @@ public class NLKeyStore {
                 SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(AlgorithmType.TRIPLE_DES.getName());
                 cipher = Cipher.getInstance(AlgorithmType.TRIPLE_DES.getName());
                 key = keyFactory.generateSecret(keySpec);
-            } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException |
-                     InvalidKeySpecException e) {
+            } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeySpecException e) {
                 throw new AlgorithmInitializatoinException(e.getMessage(), e.getCause().toString());
             }
         }

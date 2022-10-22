@@ -1,4 +1,4 @@
-package pl.newsler.models.user.registration;
+package pl.newsler.components.user;
 
 public record UserActivationRequest(String email, String password) {
 }

@@ -1,4 +1,4 @@
-package pl.newsler.models.user;
+package pl.newsler.components.user;
 
 public record UserRequest(
         String name,

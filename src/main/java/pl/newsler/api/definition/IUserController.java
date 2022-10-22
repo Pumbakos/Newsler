@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.newsler.models.user.NLUser;
-import pl.newsler.models.user.UserRequest;
+import pl.newsler.components.user.NLUser;
+import pl.newsler.components.user.UserRequest;
 
 import javax.validation.Valid;
 import java.util.List;

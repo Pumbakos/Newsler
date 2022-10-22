@@ -1,20 +1,22 @@
 package pl.newsler.security;
 
 import lombok.Getter;
+import pl.newsler.commons.models.NLSecretKey;
+import pl.newsler.commons.models.Password;
 
 import java.io.Serializable;
 
 @SuppressWarnings("record")
 public class NLCredentials implements Serializable {
-    public NLCredentials(String password, String secretKey) {
-        this.password = password;
+    public NLCredentials(String password, NLSecretKey secretKey) {
+        this.password = Password.of(password);
         this.secretKey = secretKey;
     }
 
     @Getter
-    private final String password;
+    private final Password password;
     @Getter
-    private final String secretKey;
+    private final NLSecretKey secretKey;
 
     @Override
     public boolean equals(Object o) {

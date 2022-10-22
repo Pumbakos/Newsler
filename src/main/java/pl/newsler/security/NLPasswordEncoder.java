@@ -1,6 +1,7 @@
 package pl.newsler.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import pl.newsler.auth.JWTClaim;
@@ -29,6 +30,7 @@ public class NLPasswordEncoder {
         return String.valueOf(JWTClaim.JWT_ID).getBytes(StandardCharsets.UTF_8);
     }
 
+    @Bean
     public BCryptPasswordEncoder bCrypt() {
         return new BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.$2Y, 8);
     }

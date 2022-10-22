@@ -1,10 +1,10 @@
-package pl.newsler.models.tokens;
+package pl.newsler.components.confirmationtoken;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import pl.newsler.models.user.NLUser;
+import pl.newsler.components.user.NLUser;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,27 +22,28 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name = "CONFIRMATION_TOEKN", schema = "PUBLIC")
-public class ConfirmationToken {@SequenceGenerator(
-        name = "confirmation_token_seq",
-        sequenceName = "confirmation_token_seq",
-        allocationSize = 1
-)
-@Id
-@ToString.Exclude
-@GeneratedValue(strategy = GenerationType.SEQUENCE)
-private long id;
+@Table(name = "CONFIRMATION_TOKEN", schema = "PUBLIC")
+public class ConfirmationToken {
+    @SequenceGenerator(
+            name = "confirmation_token_seq",
+            sequenceName = "confirmation_token_seq",
+            allocationSize = 1
+    )
+    @Id
+    @ToString.Exclude
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private long id;
 
     @NotNull
-    @Column(name = "TOKEN", nullable = false,columnDefinition = "VARCHAR(255)")
+    @Column(name = "TOKEN", nullable = false, columnDefinition = "VARCHAR(255)")
     private String token;
 
     @NotNull
-    @Column(name = "CREATION_DATE", nullable = false,columnDefinition = "TIMESTAMP")
+    @Column(name = "CREATION_DATE", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime creationDate;
 
     @NotNull
-    @Column(name = "EXPIRATION_DATE", nullable = false,columnDefinition = "TIMESTAMP")
+    @Column(name = "EXPIRATION_DATE", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime expirationDate;
 
     @Column(name = "CONFIRMATION_DATE", columnDefinition = "TIMESTAMP")

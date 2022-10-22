@@ -1,6 +1,10 @@
 package pl.newsler.security;
 
 import lombok.Getter;
+import pl.newsler.commons.models.Email;
+import pl.newsler.commons.models.NLAppKey;
+import pl.newsler.commons.models.NLSmtpAccount;
+import pl.newsler.components.user.NLId;
 
 import javax.security.auth.Subject;
 import java.io.Serializable;
@@ -9,15 +13,15 @@ import java.security.Principal;
 @SuppressWarnings("record")
 public class NLPrincipal implements Principal, Serializable {
     @Getter
-    private final long id;
+    private final NLId id;
     @Getter
-    private final String email;
+    private final Email email;
     @Getter
-    private final String smtpAccount;
+    private final NLSmtpAccount smtpAccount;
     @Getter
-    private final String appKey;
+    private final NLAppKey appKey;
 
-    public NLPrincipal(long id, String email, String smtpAccount, String appKey) {
+    public NLPrincipal(NLId id, Email email, NLSmtpAccount smtpAccount, NLAppKey appKey) {
         this.id = id;
         this.email = email;
         this.smtpAccount = smtpAccount;
@@ -31,7 +35,7 @@ public class NLPrincipal implements Principal, Serializable {
      */
     @Override
     public String getName() {
-        return email;
+        return email.getValue();
     }
 
     @Override
@@ -64,7 +68,7 @@ public class NLPrincipal implements Principal, Serializable {
 
     @Override
     public int hashCode() {
-        int result = (int) (id ^ (id >>> 32));
+        int result = (int) (id.getValue() ^ (id.getValue() >>> 32));
         result = 31 * result + email.hashCode();
         result = 31 * result + smtpAccount.hashCode();
         result = 31 * result + appKey.hashCode();
@@ -73,6 +77,6 @@ public class NLPrincipal implements Principal, Serializable {
 
     @Override
     public String toString() {
-        return String.format("{%n'id':%d,%n'email':%s,%n'smtpAccount':%s,%n'appKey':%s%n}", id, email, smtpAccount, appKey);
+        return String.format("{%n'id':%d,%n'email':%s,%n'smtpAccount':%s,%n'appKey':%s%n}", id.getValue(), email.getValue(), smtpAccount.getValue(), appKey.getValue());
     }
 }

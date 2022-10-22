@@ -9,10 +9,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import pl.newsler.api.exceptions.UnauthorizedException;
-import pl.newsler.api.user.User;
-import pl.newsler.api.user.UserRepository;
 import pl.newsler.auth.JWTClaim;
 import pl.newsler.auth.JWTUtility;
+import pl.newsler.commons.models.Email;
+import pl.newsler.components.user.NLDUser;
+import pl.newsler.components.user.NLUser;
+import pl.newsler.components.user.NLIUserRepository;
 import pl.newsler.security.NLAuthenticationToken;
 import pl.newsler.security.NLCredentials;
 import pl.newsler.security.NLPrincipal;
@@ -26,11 +28,11 @@ import java.util.Optional;
 import java.util.Set;
 
 public class JWTFilter extends BasicAuthenticationFilter {
-    private final UserRepository repository;
+    private final NLIUserRepository repository;
 
     private final JWTUtility configuration;
 
-    public JWTFilter(AuthenticationManager authenticationManager, UserRepository repository, JWTUtility configuration) {
+    public JWTFilter(AuthenticationManager authenticationManager, NLIUserRepository repository, JWTUtility configuration) {
         super(authenticationManager);
         this.repository = repository;
         this.configuration = configuration;
@@ -51,10 +53,10 @@ public class JWTFilter extends BasicAuthenticationFilter {
     private NLAuthenticationToken getAuthentication(String authToken) {
         final DecodedJWT jwt = verifyToken(authToken);
         final String email = jwt.getClaim(JWTClaim.EMAIL).asString();
-        final Optional<User> optionalUser = repository.findByEmail(email);
+        final Optional<NLUser> optionalUser = repository.findByEmail(Email.of(email));
 
         if (optionalUser.isPresent() && JWTFilterHelper.resolveJWT(jwt)) {
-            final User user = optionalUser.get();
+            final NLDUser user = optionalUser.get().map();
 
             final NLPrincipal principal = JWTFilterHelper.createPrincipal(user);
             final NLCredentials credentials = JWTFilterHelper.createCredentials(user);

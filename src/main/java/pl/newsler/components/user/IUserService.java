@@ -1,4 +1,4 @@
-package pl.newsler.services;
+package pl.newsler.components.user;
 
 import java.util.List;
 
@@ -6,8 +6,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import pl.newsler.models.user.UserRequest;
-import pl.newsler.models.user.NLUser;
 
 import javax.validation.constraints.NotNull;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package pl.newsler.config;
+package pl.newsler.security.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +12,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import pl.newsler.api.user.UserRepository;
-import pl.newsler.api.user.UserService;
 import pl.newsler.auth.JWTUtility;
+import pl.newsler.components.user.IUserService;
+import pl.newsler.components.user.NLIUserRepository;
 import pl.newsler.security.jwt.JWTFilter;
 import pl.newsler.security.NLPasswordEncoder;
 
@@ -23,14 +23,16 @@ import pl.newsler.security.NLPasswordEncoder;
 @RequiredArgsConstructor
 public class SecurityConfig implements WebSecurityCustomizer {
     private final AuthenticationConfiguration authenticationConfiguration;
-    private final UserService userService;
-    private final UserRepository userRepository;
+    private final IUserService userService;
+    private final NLIUserRepository userRepository;
     private final JWTUtility jwtUtility;
     private final NLPasswordEncoder passwordEncoder;
 
     @Autowired
+    @SuppressWarnings({"java:S5344"}) //provided in implementation class
     void configure(AuthenticationManagerBuilder builder) throws Exception {
-        builder.userDetailsService(userService).passwordEncoder(passwordEncoder.bCrypt());
+        builder.userDetailsService(userService)
+                .passwordEncoder(passwordEncoder.bCrypt());
     }
 
     @Bean(name = "SecurityFilterChain")

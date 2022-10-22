@@ -4,8 +4,8 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import pl.newsler.api.user.User;
 import pl.newsler.auth.JWTClaim;
+import pl.newsler.components.user.NLDUser;
 import pl.newsler.security.NLCredentials;
 import pl.newsler.security.NLPrincipal;
 
@@ -32,11 +32,11 @@ public class JWTFilterHelper {
         );
     }
 
-    static NLPrincipal createPrincipal(User user) {
+    static NLPrincipal createPrincipal(NLDUser user) {
         return new NLPrincipal(user.getId(), user.getEmail(), user.getSmtpAccount(), user.getAppKey());
     }
 
-    static NLCredentials createCredentials(User user) {
-        return new NLCredentials(user.getPassword(), user.getSecretKey());
+    static NLCredentials createCredentials(NLDUser user) {
+        return new NLCredentials(user.getPassword().getValue(), user.getSecretKey());
     }
 }

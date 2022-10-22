@@ -1,4 +1,4 @@
-package pl.newsler.models.user.registration;
+package pl.newsler.components.user;
 
 public enum ValueProvider {
     HOME_DOMAIN("http://localhost:8080"),

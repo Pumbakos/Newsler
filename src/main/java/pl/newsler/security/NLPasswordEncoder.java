@@ -35,7 +35,7 @@ public class NLPasswordEncoder {
 
     public final String encrypt(String string, AlgorithmType algorithm) {
         try {
-            Cipher cipher = Cipher.getInstance(algorithm.getName());
+            Cipher cipher = Cipher.getInstance(algorithm.toString());
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             byte[] cipherText = cipher.doFinal(string.getBytes());
             return Base64.getEncoder().encodeToString(cipherText);
@@ -46,7 +46,7 @@ public class NLPasswordEncoder {
 
     public final String decrypt(String string, AlgorithmType algorithm) {
         try {
-            Cipher cipher = Cipher.getInstance(algorithm.getName());
+            Cipher cipher = Cipher.getInstance(algorithm.toString());
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
             byte[] plainText = cipher.doFinal(Base64.getDecoder().decode(string));
             return new String(plainText);
@@ -57,7 +57,7 @@ public class NLPasswordEncoder {
 
     private static SecretKey generateKey() {
         try {
-            SecretKeyFactory factory = SecretKeyFactory.getInstance(AlgorithmType.PBE_WITH_HMAC_SHA256_AND_AES256.getName());
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(AlgorithmType.PBE_WITH_HMAC_SHA256_AND_AES256.toString());
             KeySpec spec = new PBEKeySpec(JWTClaim.JWT_ID, SALT, 65536, 256);
             return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {

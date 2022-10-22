@@ -109,9 +109,9 @@ public class NLKeyStore {
 
     private static SecretKey encodeKey(char[] password) throws EncryptionException {
         try {
-            SecretKeyFactory factory = SecretKeyFactory.getInstance(AlgorithmType.PBE_WITH_HMAC_SHA256_AND_AES256.getName());
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(AlgorithmType.PBE_WITH_HMAC_SHA256_AND_AES256.toString());
             KeySpec spec = new PBEKeySpec(password, SALT, 65536, 256);
-            return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), AlgorithmType.AES.getName());
+            return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), AlgorithmType.AES.toString());
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new EncryptionException("Error while encoding secret key", e.getMessage());
         }
@@ -119,7 +119,7 @@ public class NLKeyStore {
 
     private static SecretKey decodeKey(KeyStore.SecretKeyEntry entry) throws DecryptionException {
         try {
-            SecretKeyFactory factory = SecretKeyFactory.getInstance(AlgorithmType.PBE_WITH_HMAC_SHA256_AND_AES256.getName());
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(AlgorithmType.PBE_WITH_HMAC_SHA256_AND_AES256.toString());
             return factory.translateKey(entry.getSecretKey());
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             throw new DecryptionException("Error while decoding secret key", e.getMessage());
@@ -133,8 +133,8 @@ public class NLKeyStore {
         TriDES(byte[] encKey) throws AlgorithmInitializatoinException {
             try {
                 KeySpec keySpec = new DESedeKeySpec(encKey);
-                SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(AlgorithmType.TRIPLE_DES.getName());
-                cipher = Cipher.getInstance(AlgorithmType.TRIPLE_DES.getName());
+                SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(AlgorithmType.TRIPLE_DES.toString());
+                cipher = Cipher.getInstance(AlgorithmType.TRIPLE_DES.toString());
                 key = keyFactory.generateSecret(keySpec);
             } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeySpecException e) {
                 throw new AlgorithmInitializatoinException(e.getMessage(), e.getCause().toString());

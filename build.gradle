@@ -2,14 +2,15 @@ plugins {
     id 'org.springframework.boot' version '2.7.4'
     id 'io.spring.dependency-management' version '1.0.14.RELEASE'
     id 'java'
+    id 'war'
 }
 
 group = 'pl.newsler'
 version = '0.0.1'
 sourceCompatibility = '17'
 
-jar {
-    archiveName 'newsler.jar'
+war {
+    archiveName 'newsler.war'
 }
 
 configurations {
@@ -41,7 +42,7 @@ dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
 
-//     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'

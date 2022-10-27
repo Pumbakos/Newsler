@@ -1,6 +1,6 @@
 package pl.newsler.security;
 
-public enum NLAlias {
+enum NLAlias {
     SMTP_ACCOUNT(new byte[]{78, 69, 87, 83, 76, 69, 82, 95, 83, 77, 84, 80}),
     APP_KEY(new byte[]{78, 69, 87, 83, 76, 69, 82, 95, 65, 80, 80, 95, 75, 69, 89}),
     SECRET_KEY(new byte[]{78, 69, 87, 83, 76, 69, 82, 95, 83, 69, 67, 82, 69, 84, 95, 75, 69, 89}),

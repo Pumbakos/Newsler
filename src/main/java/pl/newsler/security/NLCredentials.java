@@ -4,10 +4,14 @@ import lombok.Getter;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.Password;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @SuppressWarnings("record")
 public class NLCredentials implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -7419573552282464417L;
+
     public NLCredentials(String password, NLSecretKey secretKey) {
         this.password = Password.of(password);
         this.secretKey = secretKey;

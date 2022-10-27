@@ -17,6 +17,7 @@ import pl.newsler.commons.models.NLSmtpAccount;
 import pl.newsler.commons.models.Name;
 import pl.newsler.commons.models.Password;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -24,6 +25,8 @@ import java.util.Collections;
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class NLUser implements UserDetails {
+    @Serial
+    private static final long serialVersionUID = -1087455812902755879L;
     @Getter(AccessLevel.PACKAGE)
     private NLId id;
 

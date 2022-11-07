@@ -6,9 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import pl.newsler.functions.EmailValidator;
+import org.apache.commons.lang3.StringUtils;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -17,11 +16,12 @@ import java.io.Serializable;
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @RequiredArgsConstructor(staticName = "of")
 @EqualsAndHashCode
-public class Email implements Serializable {
+public class NLPassword implements NLModel, Serializable {
     @Serial
-    private static final long serialVersionUID = -5992977381869264449L;
-
-    @NotBlank
-    @javax.validation.constraints.Email(regexp = EmailValidator.EMAIL_PATTERN)
+    private static final long serialVersionUID = 9034287199490303946L;
     private final String value;
+
+    public boolean validate() {
+        return StringUtils.isNotBlank(value) && value.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{12,}$");
+    }
 }

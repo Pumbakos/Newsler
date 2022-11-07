@@ -1,31 +1,29 @@
 package pl.newsler.security;
 
 import lombok.Getter;
-import pl.newsler.commons.models.Email;
-import pl.newsler.commons.models.NLAppKey;
-import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.components.user.NLId;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import pl.newsler.commons.models.NLEmail;
+import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLName;
 
 import javax.security.auth.Subject;
 import java.io.Serializable;
 import java.security.Principal;
+import java.util.Objects;
 
 @SuppressWarnings("record")
 public class NLPrincipal implements Principal, Serializable {
     @Getter
     private final NLId id;
     @Getter
-    private final Email email;
-    @Getter
-    private final NLSmtpAccount smtpAccount;
-    @Getter
-    private final NLAppKey appKey;
+    private final NLEmail email;
 
-    public NLPrincipal(NLId id, Email email, NLSmtpAccount smtpAccount, NLAppKey appKey) {
+    private final NLName name;
+
+    public NLPrincipal(NLId id, NLEmail email, NLName name) {
         this.id = id;
         this.email = email;
-        this.smtpAccount = smtpAccount;
-        this.appKey = appKey;
+        this.name = name;
     }
 
     /**
@@ -48,35 +46,23 @@ public class NLPrincipal implements Principal, Serializable {
         if (this == o) {
             return true;
         }
+
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
         NLPrincipal that = (NLPrincipal) o;
 
-        if (id != that.id) {
-            return false;
-        }
-        if (!email.equals(that.email)) {
-            return false;
-        }
-        if (!smtpAccount.equals(that.smtpAccount)) {
-            return false;
-        }
-        return appKey.equals(that.appKey);
+        return new EqualsBuilder().append(id, that.id).append(email, that.email).append(name, that.name).isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = (int) (id.getValue() ^ (id.getValue() >>> 32));
-        result = 31 * result + email.hashCode();
-        result = 31 * result + smtpAccount.hashCode();
-        result = 31 * result + appKey.hashCode();
-        return result;
+        return Objects.hash(id, email, name);
     }
 
     @Override
     public String toString() {
-        return String.format("{%n'id':%d,%n'email':%s,%n'smtpAccount':%s,%n'appKey':%s%n}", id.getValue(), email.getValue(), smtpAccount.getValue(), appKey.getValue());
+        return String.format("{%n'id':%s,%n'email':%s,%n'name':%s%n}", id.getValue(), email.getValue(), name.getValue());
     }
 }

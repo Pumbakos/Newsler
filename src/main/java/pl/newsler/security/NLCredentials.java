@@ -2,7 +2,7 @@ package pl.newsler.security;
 
 import lombok.Getter;
 import pl.newsler.commons.models.NLSecretKey;
-import pl.newsler.commons.models.Password;
+import pl.newsler.commons.models.NLPassword;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -13,12 +13,12 @@ public class NLCredentials implements Serializable {
     private static final long serialVersionUID = -7419573552282464417L;
 
     public NLCredentials(String password, NLSecretKey secretKey) {
-        this.password = Password.of(password);
+        this.password = NLPassword.of(password);
         this.secretKey = secretKey;
     }
 
     @Getter
-    private final Password password;
+    private final NLPassword password;
     @Getter
     private final NLSecretKey secretKey;
 

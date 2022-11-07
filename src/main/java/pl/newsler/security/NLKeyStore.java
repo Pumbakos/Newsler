@@ -41,7 +41,7 @@ import java.util.Optional;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class NLKeyStore {
+final class NLKeyStore {
     private static final TriDES triDES;
     private static final KeyStore keyStore;
     private static final String KEYSTORE_PASSWORD;
@@ -90,7 +90,7 @@ public class NLKeyStore {
         }
     }
 
-    public static byte[] getKey(NLAlias alias) {
+    static byte[] getKey(NLAlias alias) {
         try {
             final KeyStore.PasswordProtection aliasPasswordProtection = new KeyStore.PasswordProtection(new String(PWD).toCharArray());
             final KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) keyStore.getEntry(alias.getName(), aliasPasswordProtection);
@@ -101,7 +101,18 @@ public class NLKeyStore {
         }
     }
 
-    public static void setKey(String alias, String key) {
+    static byte[] getKey(NLPublicAlias alias) {
+        try {
+            final KeyStore.PasswordProtection aliasPasswordProtection = new KeyStore.PasswordProtection(new String(PWD).toCharArray());
+            final KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) keyStore.getEntry(alias.getName(), aliasPasswordProtection);
+            return triDES.decrypt(secretKeyEntry.getSecretKey().getEncoded());
+        } catch (UnrecoverableEntryException | KeyStoreException | NoSuchAlgorithmException e) {
+            log.warn(e.getMessage());
+            return new byte[]{};
+        }
+    }
+
+    static void setKey(String alias, String key) {
         try {
             final Optional<File> keystoreResource = ResourceLoaderFactory.getKeystoreResourceAsFile();
             if (keystoreResource.isEmpty()) {

@@ -1,10 +1,6 @@
 package pl.newsler.security;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Component;
-import pl.newsler.auth.JWTClaim;
 import pl.newsler.security.exception.AlgorithmInitializatoinException;
 import pl.newsler.security.exception.DecryptionException;
 import pl.newsler.security.exception.EncryptionException;
@@ -14,27 +10,20 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
 
-@Component
 @RequiredArgsConstructor
-public class NLPasswordEncoder {
-    private static final byte[] SALT = NLKeyStore.getKey(NLAlias.PE_SALT);
-    private static final SecretKey secretKey = generateKey();
+class NLPasswordEncoder implements NLIPasswordEncoder {
+    private final NLIKeyProvider keyProvider;
+    private final byte[] salt = NLKeyStore.getKey(NLAlias.PE_SALT);
+//    private final char[] password = keyProvider.getCharKey(NLPublicAlias.PE_PASSWORD);
+    private final SecretKey secretKey = generateKey();
 
-    public static byte[] salt() {
-        return String.valueOf(JWTClaim.JWT_ID).getBytes(StandardCharsets.UTF_8);
-    }
 
-    @Bean
-    public BCryptPasswordEncoder bCrypt() {
-        return new BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.$2Y, 8);
-    }
-
+    @Override
     public final String encrypt(String string, AlgorithmType algorithm) {
         try {
             Cipher cipher = Cipher.getInstance(algorithm.toString());
@@ -46,6 +35,7 @@ public class NLPasswordEncoder {
         }
     }
 
+    @Override
     public final String decrypt(String string, AlgorithmType algorithm) {
         try {
             Cipher cipher = Cipher.getInstance(algorithm.toString());
@@ -57,10 +47,10 @@ public class NLPasswordEncoder {
         }
     }
 
-    private static SecretKey generateKey() {
+    private SecretKey generateKey() {
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance(AlgorithmType.PBE_WITH_HMAC_SHA256_AND_AES256.toString());
-            KeySpec spec = new PBEKeySpec(JWTClaim.JWT_ID, SALT, 65536, 256);
+            KeySpec spec = new PBEKeySpec("password".toCharArray(), salt, 65536, 256);
             return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new AlgorithmInitializatoinException(e.getMessage(), e.getCause().toString());

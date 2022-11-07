@@ -13,26 +13,26 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import pl.newsler.auth.JWTUtility;
-import pl.newsler.components.user.IUserService;
-import pl.newsler.components.user.NLIUserRepository;
-import pl.newsler.security.jwt.JWTFilter;
-import pl.newsler.security.NLPasswordEncoder;
+//import pl.newsler.components.user.definition.IUserCrudService;
+//import pl.newsler.components.user.definition.NLIUserRepository;
+//import pl.newsler.security.jwt.JWTFilter;
+import pl.newsler.security.NLIPasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig implements WebSecurityCustomizer {
     private final AuthenticationConfiguration authenticationConfiguration;
-    private final IUserService userService;
-    private final NLIUserRepository userRepository;
+//    private final IUserCrudService userService;
+//    private final NLIUserRepository userRepository;
     private final JWTUtility jwtUtility;
-    private final NLPasswordEncoder passwordEncoder;
+    private final NLIPasswordEncoder passwordEncoder;
 
     @Autowired
     @SuppressWarnings({"java:S5344"}) //provided in implementation class
     void configure(AuthenticationManagerBuilder builder) throws Exception {
-        builder.userDetailsService(userService)
-                .passwordEncoder(passwordEncoder.bCrypt());
+//        builder.userDetailsService(userService)
+//                .passwordEncoder(passwordEncoder.bCrypt());
     }
 
     @Bean(name = "SecurityFilterChain")
@@ -40,9 +40,9 @@ public class SecurityConfig implements WebSecurityCustomizer {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.authorizeRequests()
                 .antMatchers("/test2").authenticated()
-                .antMatchers("/test3").hasRole("ADMIN")
-                .and()
-                .addFilter(new JWTFilter(authenticationConfiguration.getAuthenticationManager(), userRepository, jwtUtility));
+                .antMatchers("/test3").hasRole("ADMIN");
+//                .and()
+//                .addFilter(new JWTFilter(authenticationConfiguration.getAuthenticationManager(), userRepository, jwtUtility));
 
         return http.build();
     }

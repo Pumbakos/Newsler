@@ -1,35 +1,17 @@
 package pl.newsler.components.user;
 
-import java.util.List;
+import pl.newsler.commons.models.NLAppKey;
+import pl.newsler.commons.models.NLFirstName;
+import pl.newsler.commons.models.NLEmail;
+import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLLastName;
+import pl.newsler.commons.models.NLPassword;
+import pl.newsler.commons.models.NLSecretKey;
+import pl.newsler.commons.models.NLSmtpAccount;
 
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
+public interface IUserService {
+    NLDUser getById(NLId id);
+    NLId create(NLFirstName name, NLLastName lastName, NLEmail email, NLPassword password);
 
-import javax.validation.constraints.NotNull;
-import java.util.Optional;
-
-@Service
-public interface IUserService extends UserDetailsService {
-    List<NLUser> findAll();
-
-    NLUser findById(@NotNull Long id);
-
-    boolean update(@NotNull long id, UserRequest user);
-
-    boolean delete(@NotNull long id);
-
-    @Override
-    UserDetails loadUserByUsername(String email) throws UsernameNotFoundException;
-
-    String singUp(UserRequest user);
-
-    //ConfirmationToken getConfirmationToken(User user, String token);
-
-    void enableUser(String email);
-
-    Optional<NLUser> getUserByEmailAndPassword(String email, String password);
-
-    String generateToken();
+    boolean update(NLId id, NLAppKey appKey, NLSecretKey secretKey, NLSmtpAccount smtpAccount);
 }

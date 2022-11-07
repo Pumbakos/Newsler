@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serial;
@@ -17,10 +18,14 @@ import java.io.Serializable;
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @RequiredArgsConstructor(staticName = "of")
 @EqualsAndHashCode
-public class NLSecretKey implements Serializable {
+public class NLSecretKey implements NLModel, Serializable {
     @Serial
     private static final long serialVersionUID = -2644062944440678684L;
 
-    @NotBlank
     private final String value;
+
+    @Override
+    public boolean validate() {
+        return StringUtils.isNotBlank(value) && value.matches("^[a-zA-Z\\d]{40}$");
+    }
 }

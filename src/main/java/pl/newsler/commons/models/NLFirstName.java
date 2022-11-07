@@ -7,8 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -17,10 +17,13 @@ import java.io.Serializable;
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @RequiredArgsConstructor(staticName = "of")
 @EqualsAndHashCode
-public class LastName implements Serializable {
+public class NLFirstName implements NLName, NLModel, Serializable {
     @Serial
-    private static final long serialVersionUID = 499088190913111003L;
+    private static final long serialVersionUID = -1870987064998095498L;
 
-    @NotBlank
     private final String value;
+
+    public boolean validate() {
+        return StringUtils.isNotBlank(value) && value.matches("(?i)[a-z]([a-z]{0,23}[a-z])?");
+    }
 }

@@ -8,22 +8,30 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.validation.constraints.NotBlank;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.UUID;
 
 @Getter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
-@RequiredArgsConstructor(staticName = "of")
+@RequiredArgsConstructor
 @EqualsAndHashCode
-public class NLAppKey implements NLModel, Serializable {
+public class NLId implements NLModel, Serializable {
     @Serial
-    private static final long serialVersionUID = -6828434776883712910L;
+    private static final long serialVersionUID = -2838811969171019799L;
 
     private final String value;
 
+    public static NLId of(UUID uuid, NLType type) {
+        return switch (type) {
+            case USER -> new NLId("usr_" + uuid.toString());
+            case ADMIN -> new NLId("adm_" + uuid.toString());
+        };
+    }
+
+    @Override
     public boolean validate() {
-        return StringUtils.isNotBlank(value) && value.matches("^[a-zA-Z\\d]{40}$");
+        return value != null && StringUtils.isNotBlank(value.toString());
     }
 }

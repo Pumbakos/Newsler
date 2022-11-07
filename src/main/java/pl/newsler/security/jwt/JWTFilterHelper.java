@@ -11,7 +11,7 @@ import pl.newsler.security.NLPrincipal;
 
 import java.time.Instant;
 
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JWTFilterHelper {
     static boolean resolveJWT(DecodedJWT jwt) {
         final Instant now = Instant.now();
@@ -33,7 +33,7 @@ public class JWTFilterHelper {
     }
 
     static NLPrincipal createPrincipal(NLDUser user) {
-        return new NLPrincipal(user.getId(), user.getEmail(), user.getSmtpAccount(), user.getAppKey());
+        return new NLPrincipal(user.getId(), user.getEmail(), user.getName());
     }
 
     static NLCredentials createCredentials(NLDUser user) {

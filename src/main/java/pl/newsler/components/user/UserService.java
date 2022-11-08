@@ -14,11 +14,9 @@ import pl.newsler.commons.models.NLModel;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.commons.models.NLType;
 import pl.newsler.security.NLIPasswordEncoder;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 class UserService implements UserDetailsService, IUserService {
@@ -50,8 +48,6 @@ class UserService implements UserDetailsService, IUserService {
         user.setLastName(lastName);
         user.setEmail(email);
         user.setPassword(password);
-        user.setRole(NLType.USER);
-        user.setId(NLId.of(UUID.randomUUID(), NLType.USER));
         return userRepository.save(user).getId();
     }
 

@@ -7,8 +7,8 @@ import pl.newsler.testcommons.InMemoryJpaRepository;
 import java.util.Map;
 import java.util.Optional;
 
-class UserRepositoryMock extends InMemoryJpaRepository<NLUser, NLId> implements UserRepository {
-    UserRepositoryMock() {
+class MockUserRepository extends InMemoryJpaRepository<NLUser, NLId> implements UserRepository {
+    MockUserRepository() {
         super(NLUser::getId);
     }
 

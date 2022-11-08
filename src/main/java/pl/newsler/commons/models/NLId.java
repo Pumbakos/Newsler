@@ -23,6 +23,10 @@ public class NLId implements NLModel, Serializable {
 
     private final String value;
 
+    public static NLId of(UUID uuid) {
+        return of(uuid, NLType.USER);
+    }
+
     public static NLId of(UUID uuid, NLType type) {
         return switch (type) {
             case USER -> new NLId("usr_" + uuid.toString());

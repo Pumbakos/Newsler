@@ -68,7 +68,7 @@ public class InMemoryJpaRepository<T, ID> implements JpaRepository<T, ID> {
 
     @Override
     public void deleteAll() {
-        throw new PleaseImplementMeException();
+        database.clear();
     }
 
     @Override

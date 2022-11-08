@@ -22,12 +22,12 @@ import pl.newsler.commons.models.NLSmtpAccount;
 import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 
 @ToString
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 class NLUser implements UserDetails {
     @Serial
     private static final long serialVersionUID = -1087455812902755879L;
@@ -73,6 +73,11 @@ class NLUser implements UserDetails {
     private Boolean enabled = false;
 
     private Boolean locked = false;
+
+    NLUser() {
+        setRole(NLType.USER);
+        setId(NLId.of(UUID.randomUUID()));
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,6 +1,7 @@
 package pl.newsler.components.user;
 
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
@@ -11,7 +12,7 @@ import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
 
-public interface IUserService {
+public interface IUserService extends UserDetailsService {
     NLDUser getById(NLId id) throws UserDataNotFineException;
 
     NLId create(NLFirstName name, NLLastName lastName, NLEmail email, NLPassword password) throws UserDataNotFineException;

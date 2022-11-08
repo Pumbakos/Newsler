@@ -1,6 +1,7 @@
 package pl.newsler.components.user;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import pl.newsler.security.NLIPasswordEncoder;
@@ -12,6 +13,7 @@ class UserConfiguration {
     private final NLIPasswordEncoder passwordEncoder;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Bean
     public IUserService userService(){
         return new UserService(userRepository, passwordEncoder, bCryptPasswordEncoder);
     }

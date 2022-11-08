@@ -2,7 +2,6 @@ package pl.newsler.components.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import pl.newsler.commons.models.NLAppKey;
@@ -21,7 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-class UserService implements UserDetailsService, IUserService {
+class UserService implements IUserService {
     private final UserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
     private final BCryptPasswordEncoder bCrypt;

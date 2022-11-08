@@ -24,13 +24,17 @@ import pl.newsler.commons.models.NLVersion;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.Enumerated;
+import javax.persistence.Table;
 import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
 
 @Entity
+@Table(name = "USERS", catalog = "NEWSLER", schema = "PUBLIC")
 @ToString
 @Getter
 @Setter
@@ -40,13 +44,14 @@ public class NLUser implements UserDetails {
     private static final long serialVersionUID = -1087455812902755879L;
 
     @Getter(AccessLevel.PACKAGE)
-    @Id
+    @EmbeddedId
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ID")))
     private NLId id;
 
     @Getter(AccessLevel.PACKAGE)
     private NLVersion version;
 
+    @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "EMAIL")))
     private NLEmail email;
 
@@ -56,12 +61,15 @@ public class NLUser implements UserDetails {
      * <strong>not</strong> "name = Microsoft", lastName = "Corporation"
      */
 
+    @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "FIRST_NAME")))
     private NLFirstName firstName;
 
+    @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "LAST_NAME")))
     private NLLastName lastName;
 
+    @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "PASSWORD")))
     private NLPassword password;
 
@@ -69,6 +77,7 @@ public class NLUser implements UserDetails {
      * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find APP KEY here</a><br/>
      * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
      */
+    @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "APP_KEY")))
     private NLAppKey appKey;
 
@@ -76,6 +85,7 @@ public class NLUser implements UserDetails {
      * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find SECRET KEY here</a><br/>
      * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
      */
+    @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SECRET_KEY")))
     private NLSecretKey secretKey;
 
@@ -83,9 +93,11 @@ public class NLUser implements UserDetails {
      * <a href="https://panel.emaillabs.net.pl/pl/smtp">You can find SMTP ACCOUNT here</a><br/>
      * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
      */
+    @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SMTP_ACCOUNT")))
     private NLSmtpAccount smtpAccount;
 
+    @Enumerated
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ROLE")))
     private NLType role;
 

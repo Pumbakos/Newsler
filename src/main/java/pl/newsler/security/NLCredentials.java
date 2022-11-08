@@ -12,15 +12,15 @@ public class NLCredentials implements Serializable {
     @Serial
     private static final long serialVersionUID = -7419573552282464417L;
 
-    public NLCredentials(String password, NLSecretKey secretKey) {
-        this.password = NLPassword.of(password);
-        this.secretKey = secretKey;
-    }
-
     @Getter
     private final NLPassword password;
     @Getter
     private final NLSecretKey secretKey;
+
+    public NLCredentials(NLPassword password, NLSecretKey secretKey) {
+        this.password = password;
+        this.secretKey = secretKey;
+    }
 
     @Override
     public boolean equals(Object o) {

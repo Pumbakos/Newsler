@@ -37,6 +37,6 @@ public class JWTFilterHelper {
     }
 
     static NLCredentials createCredentials(NLDUser user) {
-        return new NLCredentials(user.getPassword().getValue(), user.getSecretKey());
+        return new NLCredentials(user.getPassword(), user.getSecretKey());
     }
 }

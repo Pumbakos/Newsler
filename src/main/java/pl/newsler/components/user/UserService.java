@@ -74,6 +74,7 @@ class UserService implements UserDetailsService, IUserService {
         return true;
     }
 
+    @Override
     public boolean delete(NLId id, NLPassword password) {
         if (isPasswordOk(password)) {
             throw new UserDataNotFineException();

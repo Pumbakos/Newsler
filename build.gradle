@@ -38,7 +38,7 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok'
 
-    runtimeOnly 'org.apache.tomcat.embed:tomcat-embed-core:10.1.1'
+//    runtimeOnly 'org.apache.tomcat.embed:tomcat-embed-core:10.1.1'
     runtimeOnly 'com.oracle.database.jdbc:ojdbc8'
     runtimeOnly 'com.h2database:h2'
 
@@ -49,10 +49,10 @@ dependencies {
 
     testCompileOnly 'org.projectlombok:lombok'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:5.7.3'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.5'
     testImplementation 'org.springframework.security:spring-security-test:5.7.5'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
     testImplementation 'org.projectlombok:lombok'
-
 }
 
 tasks.named('test') {

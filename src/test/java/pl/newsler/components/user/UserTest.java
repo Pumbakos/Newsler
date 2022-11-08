@@ -7,19 +7,20 @@ import pl.newsler.commons.models.NLFirstName;
 import pl.newsler.commons.models.NLId;
 import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
-import pl.newsler.security.NLIKeyProviderConfigurationMock;
-import pl.newsler.security.NLPasswordEncoderConfigurationMock;
+import pl.newsler.security.MockNLIKeyProviderConfiguration;
+import pl.newsler.security.MockNLPasswordEncoderConfiguration;
 
 class UserTest {
-    private final NLIKeyProviderConfigurationMock keyProviderConfigurationMock = new NLIKeyProviderConfigurationMock();
-    private final NLPasswordEncoderConfigurationMock passwordEncoderConfigurationMock = new NLPasswordEncoderConfigurationMock(keyProviderConfigurationMock);
+    private final MockNLIKeyProviderConfiguration keyProviderConfigurationMock = new MockNLIKeyProviderConfiguration();
+    private final MockNLPasswordEncoderConfiguration passwordEncoderConfigurationMock = new MockNLPasswordEncoderConfiguration(keyProviderConfigurationMock);
     private final UserConfiguration configuration = new UserConfiguration(
-            new UserRepositoryMock(),
+            new MockUserRepository(),
             passwordEncoderConfigurationMock.passwordEncoder(),
             passwordEncoderConfigurationMock.bCryptPasswordEncoder()
     );
     private final IUserService service = configuration.userService();
 
+    /* ---------------- CREATE USER ---------------- */
     @Test
     void shouldCreateNewUser() {
         NLId id = service.create(

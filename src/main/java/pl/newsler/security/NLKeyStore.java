@@ -55,6 +55,10 @@ final class NLKeyStore {
             117, 69, 97, 111
     };
 
+//    public static void main(String[] args) {
+//        System.out.println(Base64.class.getProtectionDomain().getCodeSource().getLocation());
+//    }
+
     static {
         try {
             triDES = new TriDES(PWD);

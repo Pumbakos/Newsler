@@ -14,4 +14,6 @@ public interface IUserService {
     NLId create(NLFirstName name, NLLastName lastName, NLEmail email, NLPassword password);
 
     boolean update(NLId id, NLAppKey appKey, NLSecretKey secretKey, NLSmtpAccount smtpAccount);
+
+    boolean delete(NLId id, NLPassword password);
 }

@@ -11,23 +11,24 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
+import pl.newsler.commons.models.NLFirstName;
 import pl.newsler.commons.models.NLId;
 import pl.newsler.commons.models.NLLastName;
-import pl.newsler.commons.models.NLName;
 import pl.newsler.commons.models.NLPassword;
-import pl.newsler.commons.models.NLType;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
+import pl.newsler.commons.models.NLType;
+import pl.newsler.commons.models.NLVersion;
 
 import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.UUID;
 
 @ToString
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 class NLUser implements UserDetails {
     @Serial
     private static final long serialVersionUID = -1087455812902755879L;
@@ -35,7 +36,7 @@ class NLUser implements UserDetails {
     private NLId id;
 
     @Getter(AccessLevel.PACKAGE)
-    private Long version;
+    private NLVersion version;
 
     private NLEmail email;
 
@@ -44,7 +45,7 @@ class NLUser implements UserDetails {
      * i.e "name = Microsoft Corporation", "name = EmailLabs" <br/>
      * <strong>not</strong> "name = Microsoft", lastName = "Corporation"
      */
-    private NLName firstName;
+    private NLFirstName firstName;
 
     private NLPassword password;
 
@@ -74,9 +75,13 @@ class NLUser implements UserDetails {
 
     private Boolean locked = false;
 
-    NLUser() {
-        setRole(NLType.USER);
-        setId(NLId.of(UUID.randomUUID()));
+    public NLPassword getNLPassword() {
+        return password;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password.getValue();
     }
 
     @Override
@@ -86,12 +91,7 @@ class NLUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.firstName.getValue();
-    }
-
-    @Override
-    public String getPassword() {
-        return this.password.getValue();
+        return this.email.getValue();
     }
 
     @Override

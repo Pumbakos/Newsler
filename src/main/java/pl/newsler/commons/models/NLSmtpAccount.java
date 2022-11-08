@@ -25,6 +25,6 @@ public class NLSmtpAccount implements NLModel, Serializable {
 
     @Override
     public boolean validate() {
-        return StringUtils.isNotBlank(value) && value.matches("^\\d[.][a-z]{3,}[.]smtp$");
+        return StringUtils.isNotBlank(value) && value.matches("^[0-9][.][a-z]{3,}[.]smtp$");
     }
 }

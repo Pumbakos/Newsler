@@ -1,5 +1,16 @@
 package pl.newsler.commons.models;
 
 public enum NLType {
-    USER, ADMIN
+    USER("usr"),
+    ADMIN("adn");
+
+    private final String prefix;
+
+    NLType(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
 }

@@ -42,7 +42,7 @@ class UserService implements UserDetailsService, IUserService {
         }
 
         if (!isDataOk(name, lastName, email)) {
-            throw new UserDataNotFineException();
+            throw new UserDataNotFineException(String.format("name: %s, lastName: %s, email: %s, ", name, lastName, email));
         }
 
         NLUser user = new NLUser();
@@ -52,11 +52,12 @@ class UserService implements UserDetailsService, IUserService {
         user.setPassword(password);
         user.setRole(NLType.USER);
         user.setId(NLId.of(UUID.randomUUID(), NLType.USER));
+        user.setVersion(UserRepository.version);
         return userRepository.save(user).getId();
     }
 
     @Override
-    public boolean update(NLId id, NLAppKey appKey, NLSecretKey secretKey, NLSmtpAccount smtpAccount) {
+    public void update(NLId id, NLAppKey appKey, NLSecretKey secretKey, NLSmtpAccount smtpAccount) {
         if (!isDataOk(appKey, secretKey, smtpAccount)) {
             throw new UserDataNotFineException();
         }
@@ -71,23 +72,26 @@ class UserService implements UserDetailsService, IUserService {
         nlUser.setSecretKey(secretKey);
         nlUser.setSmtpAccount(smtpAccount);
         userRepository.save(nlUser);
-        return true;
     }
 
     @Override
-    public boolean delete(NLId id, NLPassword password) {
-        if (isPasswordOk(password)) {
+    public void delete(NLId id, NLPassword password) {
+        if (!isPasswordOk(password)) {
             throw new UserDataNotFineException();
         }
 
-        userRepository.findById(id)
-                .ifPresentOrElse(
-                        user -> bCrypt.matches(password.getValue(), user.getPassword()),
-                        () -> {
-                            throw new UserDataNotFineException();
-                        }
-                );
-        return true;
+        final Optional<NLUser> optionalNLUser = userRepository.findById(id);
+        if ((optionalNLUser.isEmpty())) {
+            throw new UserDataNotFineException();
+        }
+
+        final NLUser user = optionalNLUser.get();
+        final String encodedPassword = user.getPassword();
+        if (!bCrypt.matches(password.getValue(), encodedPassword)) {
+            throw new UserDataNotFineException();
+        }
+
+        userRepository.deleteById(user.getId());
     }
 
     @Override

@@ -1,11 +1,13 @@
 package pl.newsler.components.user;
 
 import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.Hibernate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,24 +22,34 @@ import pl.newsler.commons.models.NLSmtpAccount;
 import pl.newsler.commons.models.NLType;
 import pl.newsler.commons.models.NLVersion;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
+@Entity
 @ToString
 @Getter
 @Setter
-@EqualsAndHashCode(of = "id")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 class NLUser implements UserDetails {
     @Serial
     private static final long serialVersionUID = -1087455812902755879L;
+
     @Getter(AccessLevel.PACKAGE)
+    @Id
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ID")))
     private NLId id;
 
     @Getter(AccessLevel.PACKAGE)
     private NLVersion version;
 
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "EMAIL")))
     private NLEmail email;
 
     /**
@@ -45,34 +57,44 @@ class NLUser implements UserDetails {
      * i.e "name = Microsoft Corporation", "name = EmailLabs" <br/>
      * <strong>not</strong> "name = Microsoft", lastName = "Corporation"
      */
+
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "FIRST_NAME")))
     private NLFirstName firstName;
 
-    private NLPassword password;
-
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "LAST_NAME")))
     private NLLastName lastName;
+
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "PASSWORD")))
+    private NLPassword password;
 
     /**
      * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find APP KEY here</a><br/>
      * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
      */
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "APP_KEY")))
     private NLAppKey appKey;
 
     /**
      * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find SECRET KEY here</a><br/>
      * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
      */
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SECRET_KEY")))
     private NLSecretKey secretKey;
 
     /**
      * <a href="https://panel.emaillabs.net.pl/pl/smtp">You can find SMTP ACCOUNT here</a><br/>
      * <strong>Note: </strong> it is required to have an active account on emaillabs.io and to be logged in
      */
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SMTP_ACCOUNT")))
     private NLSmtpAccount smtpAccount;
 
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ROLE")))
     private NLType role;
 
+    @Column(name = "ENABLED")
     private Boolean enabled = false;
 
+    @Column(name = "LOCKED")
     private Boolean locked = false;
 
     public NLPassword getNLPassword() {
@@ -128,5 +150,50 @@ class NLUser implements UserDetails {
                 .credentialsExpired(false)
                 .enabled(enabled)
                 .build();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final NLUser nlUser = (NLUser) o;
+
+        return new EqualsBuilder()
+                .append(id, nlUser.id)
+                .append(version, nlUser.version)
+                .append(email, nlUser.email)
+                .append(firstName, nlUser.firstName)
+                .append(password, nlUser.password)
+                .append(lastName, nlUser.lastName)
+                .append(appKey, nlUser.appKey)
+                .append(secretKey, nlUser.secretKey)
+                .append(smtpAccount, nlUser.smtpAccount)
+                .append(role, nlUser.role)
+                .append(enabled, nlUser.enabled)
+                .append(locked, nlUser.locked)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(id).append(version)
+                .append(email)
+                .append(firstName)
+                .append(password)
+                .append(lastName)
+                .append(appKey)
+                .append(secretKey)
+                .append(smtpAccount)
+                .append(role)
+                .append(enabled)
+                .append(locked)
+                .toHashCode();
     }
 }

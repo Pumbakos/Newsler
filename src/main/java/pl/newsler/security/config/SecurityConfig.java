@@ -18,8 +18,8 @@ import pl.newsler.auth.JWTUtility;
 //import pl.newsler.security.jwt.JWTFilter;
 import pl.newsler.security.NLIPasswordEncoder;
 
-@Configuration
-@EnableWebSecurity
+//@Configuration
+//@EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig implements WebSecurityCustomizer {
     private final AuthenticationConfiguration authenticationConfiguration;

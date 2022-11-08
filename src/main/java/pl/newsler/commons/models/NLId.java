@@ -28,14 +28,11 @@ public class NLId implements NLModel, Serializable {
     }
 
     public static NLId of(UUID uuid, NLType type) {
-        return switch (type) {
-            case USER -> new NLId("usr_" + uuid.toString());
-            case ADMIN -> new NLId("adm_" + uuid.toString());
-        };
+        return new NLId(String.format("%s_%s", type.getPrefix(), uuid.toString()));
     }
 
     @Override
     public boolean validate() {
-        return value != null && StringUtils.isNotBlank(value.toString());
+        return StringUtils.isNotBlank(value);
     }
 }

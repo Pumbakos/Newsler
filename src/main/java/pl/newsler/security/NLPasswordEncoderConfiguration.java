@@ -12,8 +12,8 @@ class NLPasswordEncoderConfiguration {
     private final NLIKeyProvider keyProvider;
 
     @Bean
-    public NLPasswordEncoder passwordEncoder() {
-        return new NLPasswordEncoder(keyProvider);
+    public NLPasswordEncoder passwordEncoder(BCryptPasswordEncoder bCryptPasswordEncoder) {
+        return new NLPasswordEncoder(bCryptPasswordEncoder, keyProvider);
     }
 
     @Bean

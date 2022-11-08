@@ -8,7 +8,7 @@ import pl.newsler.security.NLIPasswordEncoder;
 @Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor
 class UserConfiguration {
-    private final UserRepository userRepository;
+    private final IUserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 

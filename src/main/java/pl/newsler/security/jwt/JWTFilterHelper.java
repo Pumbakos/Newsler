@@ -18,16 +18,16 @@ public class JWTFilterHelper {
         final String keyId = jwt.getId();
         final String issuer = jwt.getIssuer();
         final String role = jwt.getClaim(JWTClaim.ROLE).asString();
-        final String smtp = jwt.getClaim(JWTClaim.SMTP).asString();
-        final String appKey = jwt.getClaim(JWTClaim.APP_KEY).asString();
+//        final String smtp = jwt.getClaim(JWTClaim.SMTP).asString();
+//        final String appKey = jwt.getClaim(JWTClaim.APP_KEY).asString();
         final Instant expiration = jwt.getExpiresAtAsInstant();
 
         return (
                 StringUtils.isNotBlank(keyId) && keyId.equals(String.valueOf(JWTClaim.JWT_ID))
                         && StringUtils.isNotBlank(issuer) && issuer.equals(JWTClaim.ISSUER)
                         && StringUtils.isNotBlank(role)
-                        && StringUtils.isNotBlank(smtp)
-                        && StringUtils.isNotBlank(appKey)
+//                        && StringUtils.isNotBlank(smtp)
+//                        && StringUtils.isNotBlank(appKey)
                         && now.isBefore(expiration)
         );
     }

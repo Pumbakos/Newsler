@@ -1,6 +1,7 @@
 package pl.newsler.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import pl.newsler.security.exception.AlgorithmInitializatoinException;
 import pl.newsler.security.exception.DecryptionException;
 import pl.newsler.security.exception.EncryptionException;
@@ -17,11 +18,16 @@ import java.util.Base64;
 
 @RequiredArgsConstructor
 class NLPasswordEncoder implements NLIPasswordEncoder {
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final NLIKeyProvider keyProvider;
     private final byte[] salt = NLKeyStore.getKey(NLAlias.PE_SALT);
 //    private final char[] password = keyProvider.getCharKey(NLPublicAlias.PE_PASSWORD);
     private final SecretKey secretKey = generateKey();
 
+    @Override
+    public BCryptPasswordEncoder bCrypt() {
+        return bCryptPasswordEncoder;
+    }
 
     @Override
     public final String encrypt(String string, AlgorithmType algorithm) {

@@ -9,14 +9,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor
 class NLPasswordEncoderConfiguration {
-    private final NLIKeyProvider keyProvider;
-
-    @Bean
+    @Bean(name = "passwordEncoder")
     public NLPasswordEncoder passwordEncoder(BCryptPasswordEncoder bCryptPasswordEncoder) {
-        return new NLPasswordEncoder(bCryptPasswordEncoder, keyProvider);
+        return new NLPasswordEncoder(bCryptPasswordEncoder);
     }
 
-    @Bean
+    @Bean(name = "bCryptPasswordEncoder")
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.$2Y, 8);
     }

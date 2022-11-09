@@ -1,5 +1,7 @@
 package pl.newsler.components.user;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
 import pl.newsler.commons.models.NLLastName;

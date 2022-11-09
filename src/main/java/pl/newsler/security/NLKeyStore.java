@@ -55,10 +55,6 @@ final class NLKeyStore {
             117, 69, 97, 111
     };
 
-//    public static void main(String[] args) {
-//        System.out.println(Base64.class.getProtectionDomain().getCodeSource().getLocation());
-//    }
-
     static {
         try {
             triDES = new TriDES(PWD);
@@ -122,7 +118,7 @@ final class NLKeyStore {
             if (keystoreResource.isEmpty()) {
                 throw new FileNotFoundException("Could not load keystore file");
             }
-            final File keystoreFile = keystoreResource.get();
+            final File keystoreFile = new File("D:\\Desktop\\Newsler\\Newsler\\src\\main\\resources\\keystore\\keystore.p12");
 
             final byte[] encryptedKey = triDES.encrypt(key.getBytes(StandardCharsets.UTF_8));
             final SecretKey secretKey = encodeKey(new String(encryptedKey).toCharArray());

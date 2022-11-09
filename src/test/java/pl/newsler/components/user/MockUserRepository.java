@@ -9,16 +9,13 @@ import pl.newsler.testcommons.InMemoryJpaRepository;
 import java.util.Map;
 import java.util.Optional;
 
-class MockUserRepository extends InMemoryJpaRepository<NLUser, NLId> implements UserRepository {
-    private final PasswordEncoder passwordEncoder;
-    MockUserRepository(PasswordEncoder passwordEncoder) {
+class MockUserRepository extends InMemoryJpaRepository<NLUser, NLId> implements IUserRepository {
+    MockUserRepository() {
         super(NLUser::getId);
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public <S extends NLUser> S save(S entity) {
-        entity.setPassword(NLPassword.of(passwordEncoder.encode(entity.getPassword())));
         return super.save(entity);
     }
 

@@ -3,7 +3,6 @@ package pl.newsler.components.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
@@ -20,10 +19,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-class UserService implements IUserService {
+class UserCrudService implements IUserCrudService {
     private final UserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
-    private final BCryptPasswordEncoder bCrypt;
 
     @Override
     public NLDUser getById(NLId id) {
@@ -48,7 +46,7 @@ class UserService implements IUserService {
         user.setFirstName(name);
         user.setLastName(lastName);
         user.setEmail(email);
-        user.setPassword(password);
+        user.setPassword(NLPassword.of(hash(password.getValue())));
         user.setRole(NLType.USER);
         user.setId(NLId.of(UUID.randomUUID(), NLType.USER));
         user.setVersion(UserRepository.version);
@@ -67,9 +65,9 @@ class UserService implements IUserService {
         }
 
         NLUser nlUser = optionalNLUser.get();
-        nlUser.setAppKey(appKey);
-        nlUser.setSecretKey(secretKey);
-        nlUser.setSmtpAccount(smtpAccount);
+        nlUser.setAppKey(NLAppKey.of(hash(appKey.getValue())));
+        nlUser.setSecretKey(NLSecretKey.of(hash(secretKey.getValue())));
+        nlUser.setSmtpAccount(NLSmtpAccount.of(hash(smtpAccount.getValue())));
         userRepository.save(nlUser);
     }
 
@@ -86,7 +84,7 @@ class UserService implements IUserService {
 
         final NLUser user = optionalNLUser.get();
         final String encodedPassword = user.getPassword();
-        if (!bCrypt.matches(password.getValue(), encodedPassword)) {
+        if (!passwordEncoder.bCrypt().matches(password.getValue(), encodedPassword)) {
             throw new UserDataNotFineException();
         }
 
@@ -96,7 +94,7 @@ class UserService implements IUserService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         NLEmail nlEmail = NLEmail.of(email);
-        if (!(nlEmail.validate())) {
+        if (!nlEmail.validate()) {
             throw new UserDataNotFineException();
         }
 
@@ -114,5 +112,9 @@ class UserService implements IUserService {
 
     private boolean isPasswordOk(NLPassword password) {
         return password.validate();
+    }
+
+    private String hash(String password) {
+        return passwordEncoder.bCrypt().encode(password);
     }
 }

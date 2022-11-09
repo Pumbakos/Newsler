@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor
 class NLKeyProviderConfiguration {
-    @Bean
+    @Bean(name = "keyProvider")
     public NLIKeyProvider keyProvider() {
         return new NLKeyProvider();
     }

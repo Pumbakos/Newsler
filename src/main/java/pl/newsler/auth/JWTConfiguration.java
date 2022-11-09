@@ -14,12 +14,12 @@ public class JWTConfiguration {
     private final NLIPasswordEncoder passwordEncoder;
     private final NLIKeyProvider keyProvider;
 
-    @Bean
+    @Bean(name = "jwtUtility")
     public JWTUtility jwtUtility() {
         return new JWTUtility(keyProvider);
     }
 
-    @Bean
+    @Bean(name = "authService")
     public JWTAuthService authService(JWTUtility utility) {
         return new JWTAuthService(userRepository, passwordEncoder, utility);
     }

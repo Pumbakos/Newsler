@@ -13,7 +13,6 @@ import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.security.MockNLIKeyProviderConfiguration;
 import pl.newsler.security.MockNLPasswordEncoderConfiguration;
 
 import java.util.Optional;
@@ -23,17 +22,16 @@ import static pl.newsler.components.user.UserTestUtils.secretOrAppKey;
 import static pl.newsler.components.user.UserTestUtils.smtpAccount;
 
 @SuppressWarnings("java:S5778")// none of `of()` methods listed below throws any Exception
-class UserTest {
-    private final UserFactory factory = new UserFactory();
+class UserModuleTest {
     private final MockNLPasswordEncoderConfiguration passwordEncoderConfigurationMock =
-            new MockNLPasswordEncoderConfiguration(new MockNLIKeyProviderConfiguration());
-    private final MockUserRepository userRepositoryMock = new MockUserRepository(passwordEncoderConfigurationMock.bCryptPasswordEncoder());
+            new MockNLPasswordEncoderConfiguration();
+    private final MockUserRepository userRepositoryMock = new MockUserRepository();
     private final UserConfiguration configuration = new UserConfiguration(
             userRepositoryMock,
-            passwordEncoderConfigurationMock.passwordEncoder(),
-            passwordEncoderConfigurationMock.bCryptPasswordEncoder()
+            passwordEncoderConfigurationMock.passwordEncoder()
     );
-    private final IUserService service = configuration.userService();
+    private final IUserCrudService service = configuration.userService();
+    private final UserFactory factory = new UserFactory();
 
     @BeforeEach
     void beforeEach() {
@@ -159,13 +157,6 @@ class UserTest {
                 NLFirstName.of("meal"),
                 NLLastName.of("serve-hesitate"),
                 NLEmail.of("organ@person.dev"),
-                NLPassword.of("")
-        ));
-
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.create(
-                NLFirstName.of("meal"),
-                NLLastName.of("serve-hesitate"),
-                NLEmail.of("organ@person.dev"),
                 NLPassword.of("abd123idasmdaw")
         ));
 
@@ -187,13 +178,25 @@ class UserTest {
     /* ---------------- UPDATE USER ---------------- */
     @Test
     void shouldUpdateExistingUser_CorrectData() {
+        final NLId standardId = factory.standard().getId();
+        final String appKey = secretOrAppKey();
+        final String secretKey = secretOrAppKey();
+
         Assertions.assertDoesNotThrow(
                 () -> service.update(
-                        factory.standard().getId(),
-                        NLAppKey.of(secretOrAppKey()),
-                        NLSecretKey.of(secretOrAppKey()),
+                        standardId,
+                        NLAppKey.of(appKey),
+                        NLSecretKey.of(secretKey),
                         NLSmtpAccount.of(smtpAccount())
                 ));
+
+        final Optional<NLUser> optionalNLUser = userRepositoryMock.findById(standardId);
+        if (optionalNLUser.isEmpty()){
+            Assertions.fail();
+        }
+        final NLUser user = optionalNLUser.get();
+        Assertions.assertTrue( passwordEncoderConfigurationMock.bCrypt().matches(appKey, user.getAppKey().getValue()));
+        Assertions.assertTrue( passwordEncoderConfigurationMock.bCrypt().matches(secretKey, user.getSecretKey().getValue()));
     }
 
     @Test

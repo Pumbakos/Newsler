@@ -2,6 +2,7 @@ package pl.newsler.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import pl.newsler.auth.JWTClaim;
 import pl.newsler.security.exception.AlgorithmInitializatoinException;
 import pl.newsler.security.exception.DecryptionException;
 import pl.newsler.security.exception.EncryptionException;
@@ -19,9 +20,8 @@ import java.util.Base64;
 @RequiredArgsConstructor
 class NLPasswordEncoder implements NLIPasswordEncoder {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final NLIKeyProvider keyProvider;
     private final byte[] salt = NLKeyStore.getKey(NLAlias.PE_SALT);
-//    private final char[] password = keyProvider.getCharKey(NLPublicAlias.PE_PASSWORD);
+    private final char[] password = new char[]{'w', 'l', '8', 'k', 'e', 'J', 'k', 't', 'x', 'R', 'x', 'Q', 'I', 'S', 'u', 'Y', '5', 'j', '4', 'g', 'M', '9', 'W', 'X', '6', 'V', 'l', 'V', 'Q', '4', '9', 'M'};
     private final SecretKey secretKey = generateKey();
 
     @Override
@@ -56,8 +56,8 @@ class NLPasswordEncoder implements NLIPasswordEncoder {
     private SecretKey generateKey() {
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance(AlgorithmType.PBE_WITH_HMAC_SHA256_AND_AES256.toString());
-            KeySpec spec = new PBEKeySpec("password".toCharArray(), salt, 65536, 256);
-            return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
+            KeySpec spec = new PBEKeySpec(password, salt, Short.MAX_VALUE, 256);
+            return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), AlgorithmType.AES.toString());
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new AlgorithmInitializatoinException(e.getMessage(), e.getCause().toString());
         }

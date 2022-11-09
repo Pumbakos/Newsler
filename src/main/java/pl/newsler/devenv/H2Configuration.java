@@ -12,7 +12,7 @@ import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.components.user.IUserService;
+import pl.newsler.components.user.IUserCrudService;
 
 import java.sql.SQLException;
 
@@ -31,12 +31,12 @@ class H2Configuration {
     }
 
     @Bean
-    CommandLineRunner saveUsers(IUserService service) {
+    CommandLineRunner saveUsers(IUserCrudService service) {
         return args -> {
             NLId id1 = service.create(
-                    NLFirstName.of(firstName()),
-                    NLLastName.of(lastName()),
-                    NLEmail.of(String.format("%s@%s.devenv", username(), domain())),
+                    NLFirstName.of("Aizholat"),
+                    NLLastName.of("Newsler"),
+                    NLEmail.of("newslerowsky@app.co.devenv"),
                     NLPassword.of("Pa$$word7hat^match3$")
             );
 

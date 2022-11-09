@@ -5,8 +5,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class MockNLPasswordEncoderConfiguration implements NLIPasswordEncoder {
     private final NLPasswordEncoderConfiguration configuration;
 
-    public MockNLPasswordEncoderConfiguration(MockNLIKeyProviderConfiguration keyProviderConfigurationMock) {
-        this.configuration = new NLPasswordEncoderConfiguration(keyProviderConfigurationMock);
+    public MockNLPasswordEncoderConfiguration() {
+        this.configuration = new NLPasswordEncoderConfiguration();
     }
 
     public NLPasswordEncoder passwordEncoder() {

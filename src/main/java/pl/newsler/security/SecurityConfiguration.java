@@ -1,47 +1,49 @@
-package pl.newsler.security.config;
+package pl.newsler.security;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import pl.newsler.auth.JWTUtility;
+import pl.newsler.components.user.IUserCrudService;
 import pl.newsler.components.user.IUserRepository;
-import pl.newsler.components.user.IUserService;
-import pl.newsler.security.NLIPasswordEncoder;
 import pl.newsler.security.jwt.JWTFilter;
+
+import javax.annotation.Resource;
 
 @Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig implements WebSecurityCustomizer {
+class SecurityConfiguration implements WebSecurityCustomizer {
     private final AuthenticationConfiguration authenticationConfiguration;
-    private final IUserService userService;
+
+    @Resource(name = "bCryptPasswordEncoder")
+    private final BCryptPasswordEncoder passwordEncoder;
     private final IUserRepository userRepository;
+
+    @Resource(name = "userService")
+    private final IUserCrudService userService;
     private final JWTUtility jwtUtility;
-    private final NLIPasswordEncoder passwordEncoder;
 
-    @Autowired
-    @SuppressWarnings({"java:S5344"})
-        //provided in implementation class
-    void configure(AuthenticationManagerBuilder builder) throws Exception {
-        builder.userDetailsService(userService)
-                .passwordEncoder(passwordEncoder.bCrypt());
-    }
+//    @Autowired
+//    void configure(AuthenticationManagerBuilder builder, DataSource dataSource) throws Exception {
+//        builder.jdbcAuthentication()
+//                .dataSource(dataSource)
+//                .usersByUsernameQuery("SELECT EMAIL, PASSWORD, ENABLED FROM USERS WHERE EMAIL=?")
+//                .passwordEncoder(new BCryptPasswordEncoder());
+//    }
 
-    @Bean(name = "SecurityFilterChain")
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @Bean(name = "securityFilterChain")
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.authorizeRequests()
-                .antMatchers("/test2").authenticated()
-                .antMatchers("/test3").hasRole("ADMIN")
+        http.authorizeRequests().anyRequest().authenticated()
                 .and()
                 .addFilter(new JWTFilter(authenticationConfiguration.getAuthenticationManager(), userRepository, jwtUtility));
 

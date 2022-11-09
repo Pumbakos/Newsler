@@ -1,10 +1,10 @@
 package pl.newsler.auth;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import pl.newsler.api.exceptions.UnauthorizedException;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.components.user.IUserRepository;
+import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.security.AlgorithmType;
 import pl.newsler.security.NLIPasswordEncoder;
@@ -21,35 +21,36 @@ class JWTAuthService {
 
     public String generateJWT(UserAuthModel userAuthModel) {
         final String email = passwordEncoder.decrypt(userAuthModel.email(), AlgorithmType.AES);
-        final Optional<NLUser> optionalUser = userRepository.findByEmail(NLEmail.of(email));
+        final NLEmail nlEmail = NLEmail.of(email);
+        if (!nlEmail.validate()) {
+            throw new UnauthorizedException("email", "invalid");
+        }
 
+        final Optional<NLUser> optionalUser = userRepository.findByEmail(nlEmail);
         if (optionalUser.isEmpty()) {
             throw new UnauthorizedException("User's credentials not valid", "Token not generated");
         }
-        final NLUser user = optionalUser.get();
 
+        final NLDUser user = NLDUser.of(optionalUser.get());
         if (userCredentialsValid(user, userAuthModel)) {
-            return generateToken(optionalUser.get());
+            return generateToken(user);
         } else {
             throw new UnauthorizedException("User's credentials not valid", "Token not generated");
         }
     }
 
-    private boolean userCredentialsValid(NLUser user, UserAuthModel userAuthModel) {
+    private boolean userCredentialsValid(NLDUser user, UserAuthModel userAuthModel) {
         final String password = passwordEncoder.decrypt(userAuthModel.password(), AlgorithmType.AES);
-        final String smtpAccount = passwordEncoder.decrypt(userAuthModel.smtpAccount(), AlgorithmType.AES);
-        final String appKey = passwordEncoder.decrypt(userAuthModel.appKey(), AlgorithmType.AES);
+        final String email = passwordEncoder.decrypt(userAuthModel.email(), AlgorithmType.AES);
 
-        return (
-                passwordEncoder.bCrypt().matches(password, user.getPassword())
-                        && user.isEnabled()
-                        && user.isCredentialsNonExpired()
-                        && user.getSmtpAccount().getValue().equals(smtpAccount)
-                        && user.getAppKey().getValue().equals(appKey)
+        return (passwordEncoder.bCrypt().matches(password, user.getPassword().getValue())
+                && passwordEncoder.bCrypt().matches(email, user.getEmail().getValue())
+                && user.isEnabled()
+                && !user.isCredentialsExpired()
         );
     }
 
-    private String generateToken(NLUser user) {
+    private String generateToken(NLDUser user) {
         final Instant now = Instant.now();
         return jwtUtility.builder()
                 .withJWTId(String.valueOf(JWTClaim.JWT_ID))
@@ -59,8 +60,6 @@ class JWTAuthService {
                 .withExpiresAt(now.plus(60L, ChronoUnit.MINUTES))
                 .withClaim(JWTClaim.EMAIL, user.getEmail().getValue())
                 .withClaim(JWTClaim.ROLE, user.getRole().toString())
-//                .withClaim(JWTClaim.SMTP, user.getSmtpAccount().getValue())
-//                .withClaim(JWTClaim.APP_KEY, user.getAppKey().getValue())
                 .sign(jwtUtility.hmac384());
     }
 }

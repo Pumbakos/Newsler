@@ -49,6 +49,8 @@ public class NLUser implements UserDetails {
     private NLId id;
 
     @Getter(AccessLevel.PACKAGE)
+    @Embedded
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "VERSION")))
     private NLVersion version;
 
     @Embedded

@@ -1,4 +1,4 @@
-package pl.newsler.security.jwt;
+package pl.newsler.security.filters;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AccessLevel;
@@ -12,22 +12,20 @@ import pl.newsler.security.NLPrincipal;
 import java.time.Instant;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class JWTFilterHelper {
+class JWTFilterHelper {
     static boolean resolveJWT(DecodedJWT jwt) {
         final Instant now = Instant.now();
         final String keyId = jwt.getId();
         final String issuer = jwt.getIssuer();
         final String role = jwt.getClaim(JWTClaim.ROLE).asString();
-//        final String smtp = jwt.getClaim(JWTClaim.SMTP).asString();
-//        final String appKey = jwt.getClaim(JWTClaim.APP_KEY).asString();
+        final String name = jwt.getClaim(JWTClaim.NAME).asString();
         final Instant expiration = jwt.getExpiresAtAsInstant();
 
         return (
                 StringUtils.isNotBlank(keyId) && keyId.equals(String.valueOf(JWTClaim.JWT_ID))
                         && StringUtils.isNotBlank(issuer) && issuer.equals(JWTClaim.ISSUER)
                         && StringUtils.isNotBlank(role)
-//                        && StringUtils.isNotBlank(smtp)
-//                        && StringUtils.isNotBlank(appKey)
+                        && StringUtils.isNotBlank(name)
                         && now.isBefore(expiration)
         );
     }

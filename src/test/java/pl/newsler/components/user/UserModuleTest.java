@@ -13,18 +13,18 @@ import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.security.MockNLPasswordEncoderConfiguration;
+import pl.newsler.security.MockNLPasswordEncoder;
 
 import java.util.Optional;
 import java.util.UUID;
 
-import static pl.newsler.components.user.UserTestUtils.secretOrAppKey;
-import static pl.newsler.components.user.UserTestUtils.smtpAccount;
+import static pl.newsler.testcommons.TestUserUtils.secretOrAppKey;
+import static pl.newsler.testcommons.TestUserUtils.smtpAccount;
 
 @SuppressWarnings("java:S5778")// none of `of()` methods listed below throws any Exception
 class UserModuleTest {
-    private final MockNLPasswordEncoderConfiguration passwordEncoderConfigurationMock =
-            new MockNLPasswordEncoderConfiguration();
+    private final MockNLPasswordEncoder passwordEncoderConfigurationMock =
+            new MockNLPasswordEncoder();
     private final MockUserRepository userRepositoryMock = new MockUserRepository();
     private final UserConfiguration configuration = new UserConfiguration(
             userRepositoryMock,
@@ -61,7 +61,6 @@ class UserModuleTest {
     @AfterEach
     void afterEach() {
         userRepositoryMock.deleteAll();
-//        ids.clear();
     }
 
 
@@ -78,8 +77,7 @@ class UserModuleTest {
 
     @Test
     void shouldNotGetUserById_ThrowUserDataNotFineException() {
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.getById(NLId.of(UUID.randomUUID())));
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.getById(NLId.of(UUID.randomUUID())));
+        Assertions.assertThrows(UserDataNotFineException.class, () -> service.getById(null));
         Assertions.assertThrows(UserDataNotFineException.class, () -> service.getById(NLId.of(UUID.randomUUID())));
     }
 

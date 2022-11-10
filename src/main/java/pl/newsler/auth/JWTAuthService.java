@@ -6,6 +6,7 @@ import pl.newsler.commons.models.NLEmail;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.NLUser;
+import pl.newsler.components.user.UserDataNotFineException;
 import pl.newsler.security.AlgorithmType;
 import pl.newsler.security.NLIPasswordEncoder;
 
@@ -14,12 +15,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-class JWTAuthService {
+class JWTAuthService implements IJWTAuthService{
     private final IUserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
     private final JWTUtility jwtUtility;
 
-    public String generateJWT(UserAuthModel userAuthModel) {
+    @Override
+    public String generateJWT(UserAuthModel userAuthModel) throws IllegalArgumentException, UserDataNotFineException {
         final String email = passwordEncoder.decrypt(userAuthModel.email(), AlgorithmType.AES);
         final NLEmail nlEmail = NLEmail.of(email);
         if (!nlEmail.validate()) {
@@ -32,19 +34,18 @@ class JWTAuthService {
         }
 
         final NLDUser user = NLDUser.of(optionalUser.get());
-        if (userCredentialsValid(user, userAuthModel)) {
-            return generateToken(user);
-        } else {
-            throw new UnauthorizedException("User's credentials not valid", "Token not generated");
+        if (!credentialsValid(user, userAuthModel)) {
+            throw new UnauthorizedException("User's credentials invalid", "Token not generated");
         }
+        return generateToken(user);
     }
 
-    private boolean userCredentialsValid(NLDUser user, UserAuthModel userAuthModel) {
+    private boolean credentialsValid(NLDUser user, UserAuthModel userAuthModel) {
         final String password = passwordEncoder.decrypt(userAuthModel.password(), AlgorithmType.AES);
         final String email = passwordEncoder.decrypt(userAuthModel.email(), AlgorithmType.AES);
 
         return (passwordEncoder.bCrypt().matches(password, user.getPassword().getValue())
-                && passwordEncoder.bCrypt().matches(email, user.getEmail().getValue())
+                && email.equals(user.getEmail().getValue())
                 && user.isEnabled()
                 && !user.isCredentialsExpired()
         );
@@ -60,6 +61,7 @@ class JWTAuthService {
                 .withExpiresAt(now.plus(60L, ChronoUnit.MINUTES))
                 .withClaim(JWTClaim.EMAIL, user.getEmail().getValue())
                 .withClaim(JWTClaim.ROLE, user.getRole().toString())
+                .withClaim(JWTClaim.NAME, user.getName().getValue())
                 .sign(jwtUtility.hmac384());
     }
 }

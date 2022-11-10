@@ -25,6 +25,10 @@ class UserCrudService implements IUserCrudService {
 
     @Override
     public NLDUser getById(NLId id) {
+        if (id == null) {
+            throw new UserDataNotFineException();
+        }
+
         Optional<NLUser> optionalNLUser = userRepository.findById(id);
         if (optionalNLUser.isEmpty()) {
             throw new UserDataNotFineException();

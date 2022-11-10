@@ -20,7 +20,7 @@ public class JWTConfiguration {
     }
 
     @Bean(name = "authService")
-    public JWTAuthService authService(JWTUtility utility) {
+    public IJWTAuthService authService(JWTUtility utility) {
         return new JWTAuthService(userRepository, passwordEncoder, utility);
     }
 }

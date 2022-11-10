@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import pl.newsler.auth.JWTUtility;
 import pl.newsler.components.user.IUserCrudService;
 import pl.newsler.components.user.IUserRepository;
-import pl.newsler.security.jwt.JWTFilter;
+import pl.newsler.security.filters.JWTFilter;
 
 import javax.annotation.Resource;
 

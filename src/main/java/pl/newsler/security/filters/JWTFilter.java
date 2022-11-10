@@ -1,4 +1,4 @@
-package pl.newsler.security.jwt;
+package pl.newsler.security.filters;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;

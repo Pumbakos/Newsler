@@ -3,7 +3,7 @@ package pl.newsler.security;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-public class MockNLIKeyProviderConfiguration implements NLIKeyProvider {
+public class MockNLIKeyProvider implements NLIKeyProvider {
     private final NLKeyProviderConfiguration configuration = new NLKeyProviderConfiguration();
 
     @Override

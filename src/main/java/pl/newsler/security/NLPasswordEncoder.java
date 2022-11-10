@@ -37,7 +37,7 @@ class NLPasswordEncoder implements NLIPasswordEncoder {
             byte[] cipherText = cipher.doFinal(string.getBytes());
             return Base64.getEncoder().encodeToString(cipherText);
         } catch (Exception e) {
-            throw new EncryptionException(e.getMessage(), "");
+            throw new IllegalArgumentException();
         }
     }
 
@@ -49,14 +49,14 @@ class NLPasswordEncoder implements NLIPasswordEncoder {
             byte[] plainText = cipher.doFinal(Base64.getDecoder().decode(string));
             return new String(plainText);
         } catch (Exception e) {
-            throw new DecryptionException(e.getMessage(), "");
+            throw new IllegalArgumentException();
         }
     }
 
     private SecretKey generateKey() {
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance(AlgorithmType.PBE_WITH_HMAC_SHA256_AND_AES256.toString());
-            KeySpec spec = new PBEKeySpec(password, salt, Short.MAX_VALUE, 256);
+            KeySpec spec = new PBEKeySpec(password, salt, Short.MAX_VALUE, 256); //iterations?
             return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), AlgorithmType.AES.toString());
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new AlgorithmInitializatoinException(e.getMessage(), e.getCause().toString());

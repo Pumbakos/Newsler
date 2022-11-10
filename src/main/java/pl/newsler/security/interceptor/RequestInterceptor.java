@@ -3,7 +3,6 @@ package pl.newsler.security.interceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.servlet.HandlerInterceptor;
 import pl.newsler.api.exceptions.UnauthorizedException;
-import pl.newsler.security.AlgorithmType;
 import pl.newsler.security.NLIPasswordEncoder;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +21,7 @@ class RequestInterceptor implements HandlerInterceptor {
         if (!request.isTrailerFieldsReady()) {
             return false;
         }
-        request.getTrailerFields().values().forEach(value -> passwordEncoder.decrypt(value, AlgorithmType.AES));
+        request.getTrailerFields().values().forEach(value -> passwordEncoder.decrypt(value));
         return true;
     }
 }

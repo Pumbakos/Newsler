@@ -11,9 +11,8 @@ import pl.newsler.api.exceptions.UnauthorizedException;
 import pl.newsler.commons.models.NLId;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.components.user.MockUserRepository;
-import pl.newsler.components.user.UserDataNotFineException;
+import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.UserFactory;
-import pl.newsler.security.AlgorithmType;
 import pl.newsler.security.MockNLIKeyProvider;
 import pl.newsler.security.MockNLPasswordEncoder;
 import pl.newsler.security.filters.JWTTestResolver;
@@ -55,12 +54,12 @@ class JWTModuleTest {
 
     @Test
     void shouldGenerateJWT() {
+        NLUser standardUser = factory.standard();
         UserAuthModel model = new UserAuthModel(
-                passwordEncoder.encrypt(factory.standard().getEmail().getValue(), AlgorithmType.AES),
-                passwordEncoder.encrypt(factory.standard_plainPassword(), AlgorithmType.AES)
+                passwordEncoder.encrypt(standardUser.getEmail().getValue()),
+                passwordEncoder.encrypt(factory.standard_plainPassword())
         );
         String token = service.generateJWT(model);
-
         Assertions.assertTrue(JWTTestResolver.resolve(verify(token)));
     }
 
@@ -76,8 +75,8 @@ class JWTModuleTest {
     @Test
     void shouldNotGenerateToken_InvalidEmail_ThrowUnauthorizedException() {
         UserAuthModel model = new UserAuthModel(
-                passwordEncoder.encrypt("email@app.co", AlgorithmType.AES),
-                passwordEncoder.encrypt(factory.dotted_plainPassword(), AlgorithmType.AES)
+                passwordEncoder.encrypt("email@app.co"),
+                passwordEncoder.encrypt(factory.dotted_plainPassword())
         );
         Assertions.assertThrows(UnauthorizedException.class, () -> service.generateJWT(model));
     }
@@ -85,8 +84,8 @@ class JWTModuleTest {
     @Test
     void shouldNotGenerateToken_ValidEmail_InvalidPassword_ThrowUnauthorizedException() {
         UserAuthModel model = new UserAuthModel(
-                passwordEncoder.encrypt(factory.standard().getEmail().getValue(), AlgorithmType.AES),
-                passwordEncoder.encrypt(factory.dotted_plainPassword(), AlgorithmType.AES)
+                passwordEncoder.encrypt(factory.standard().getEmail().getValue()),
+                passwordEncoder.encrypt(factory.dotted_plainPassword())
         );
         Assertions.assertThrows(UnauthorizedException.class, () -> service.generateJWT(model));
     }
@@ -98,8 +97,8 @@ class JWTModuleTest {
         userRepository.save(factory.dotted());
 
         UserAuthModel model = new UserAuthModel(
-                passwordEncoder.encrypt(factory.dotted().getEmail().getValue(), AlgorithmType.AES),
-                passwordEncoder.encrypt(factory.dotted_plainPassword(), AlgorithmType.AES)
+                passwordEncoder.encrypt(factory.dotted().getEmail().getValue()),
+                passwordEncoder.encrypt(factory.dotted_plainPassword())
         );
         Assertions.assertThrows(UnauthorizedException.class, () -> service.generateJWT(model));
     }

@@ -2,10 +2,7 @@ package pl.newsler.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import pl.newsler.auth.JWTClaim;
 import pl.newsler.security.exception.AlgorithmInitializatoinException;
-import pl.newsler.security.exception.DecryptionException;
-import pl.newsler.security.exception.EncryptionException;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -30,9 +27,9 @@ class NLPasswordEncoder implements NLIPasswordEncoder {
     }
 
     @Override
-    public final String encrypt(String string, AlgorithmType algorithm) {
+    public final String encrypt(String string) {
         try {
-            Cipher cipher = Cipher.getInstance(algorithm.toString());
+            Cipher cipher = Cipher.getInstance(AlgorithmType.AES.toString());
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             byte[] cipherText = cipher.doFinal(string.getBytes());
             return Base64.getEncoder().encodeToString(cipherText);
@@ -42,9 +39,9 @@ class NLPasswordEncoder implements NLIPasswordEncoder {
     }
 
     @Override
-    public final String decrypt(String string, AlgorithmType algorithm) {
+    public final String decrypt(String string) {
         try {
-            Cipher cipher = Cipher.getInstance(algorithm.toString());
+            Cipher cipher = Cipher.getInstance(AlgorithmType.AES.toString());
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
             byte[] plainText = cipher.doFinal(Base64.getDecoder().decode(string));
             return new String(plainText);

@@ -23,6 +23,7 @@ public class NLFirstName implements NLName, NLModel, Serializable {
 
     private final String value;
 
+    @Override
     public boolean validate() {
         return StringUtils.isNotBlank(value) && value.matches("(?i)[a-z]([a-z]{0,23}[a-z])?");
     }

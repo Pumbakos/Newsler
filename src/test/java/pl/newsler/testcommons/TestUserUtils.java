@@ -9,19 +9,35 @@ public class TestUserUtils {
     private static final Faker faker = new Faker();
 
     public static String domain() {
-        return faker.app().name().replace(" ", ".").replace("'", ".");
+        return faker.app()
+                .name()
+                .replace(" ", ".")
+                .replace("'", ".")
+                .toLowerCase();
     }
 
     public static String username() {
-        return faker.name().username().replace(" ", ".").replace("'", ".");
+        return faker.name()
+                .username()
+                .replace(" ", ".")
+                .replace("'", ".")
+                .toLowerCase();
     }
 
     public static String lastName() {
-        return faker.name().lastName().replace(" ", ".").replace("'", ".");
+        return faker.name()
+                .lastName()
+                .replace(" ", ".")
+                .replace("'", ".")
+                .toLowerCase();
     }
 
     public static String firstName() {
-        return faker.name().firstName().replace(" ", ".").replace("'", ".");
+        return faker.name()
+                .firstName()
+                .replace(" ", ".")
+                .replace("'", ".")
+                .toLowerCase();
     }
 
     public static String secretOrAppKey() {

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "")
 @RequiredArgsConstructor
-public class UserNotFoundException extends NLException {
+public class ValidationException extends NLException {
     public ResponseEntity<NLError> response() {
         return new ResponseEntity<>(new NLError("", ""), HttpStatus.BAD_REQUEST);
     }

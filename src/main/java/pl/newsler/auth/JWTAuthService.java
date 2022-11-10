@@ -7,7 +7,6 @@ import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.UserDataNotFineException;
-import pl.newsler.security.AlgorithmType;
 import pl.newsler.security.NLIPasswordEncoder;
 
 import java.time.Instant;
@@ -22,7 +21,7 @@ class JWTAuthService implements IJWTAuthService{
 
     @Override
     public String generateJWT(UserAuthModel userAuthModel) throws IllegalArgumentException, UserDataNotFineException {
-        final String email = passwordEncoder.decrypt(userAuthModel.email(), AlgorithmType.AES);
+        final String email = passwordEncoder.decrypt(userAuthModel.email());
         final NLEmail nlEmail = NLEmail.of(email);
         if (!nlEmail.validate()) {
             throw new UnauthorizedException("email", "invalid");
@@ -41,8 +40,8 @@ class JWTAuthService implements IJWTAuthService{
     }
 
     private boolean credentialsValid(NLDUser user, UserAuthModel userAuthModel) {
-        final String password = passwordEncoder.decrypt(userAuthModel.password(), AlgorithmType.AES);
-        final String email = passwordEncoder.decrypt(userAuthModel.email(), AlgorithmType.AES);
+        final String password = passwordEncoder.decrypt(userAuthModel.password());
+        final String email = passwordEncoder.decrypt(userAuthModel.email());
 
         return (passwordEncoder.bCrypt().matches(password, user.getPassword().getValue())
                 && email.equals(user.getEmail().getValue())
@@ -60,8 +59,8 @@ class JWTAuthService implements IJWTAuthService{
                 .withIssuedAt(now)
                 .withExpiresAt(now.plus(60L, ChronoUnit.MINUTES))
                 .withClaim(JWTClaim.EMAIL, user.getEmail().getValue())
-                .withClaim(JWTClaim.ROLE, user.getRole().toString())
                 .withClaim(JWTClaim.NAME, user.getName().getValue())
+                .withClaim(JWTClaim.ROLE, user.getRole().toString())
                 .sign(jwtUtility.hmac384());
     }
 }

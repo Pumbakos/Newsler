@@ -13,9 +13,13 @@ import pl.newsler.api.exceptions.UnauthorizedException;
 import pl.newsler.auth.JWTClaim;
 import pl.newsler.auth.JWTUtility;
 import pl.newsler.commons.models.NLEmail;
+import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLName;
+import pl.newsler.commons.models.NLPassword;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.NLUser;
+import pl.newsler.exceptions.ValidationException;
 import pl.newsler.security.NLAuthenticationToken;
 import pl.newsler.security.NLCredentials;
 import pl.newsler.security.NLPrincipal;
@@ -29,6 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public class JWTFilter extends BasicAuthenticationFilter {
+    private static final String TOKEN = "Token";
     private final IUserRepository repository;
     private final JWTUtility utility;
 
@@ -54,25 +59,24 @@ public class JWTFilter extends BasicAuthenticationFilter {
         final DecodedJWT jwt = verifyToken(authToken);
         final String email = jwt.getClaim(JWTClaim.EMAIL).asString();
         final NLEmail nlEmail = NLEmail.of(email);
-        if (nlEmail.validate()) {
-            throw new UnauthorizedException("Invalid email", "Email does not mach regular expression");
+        if (!nlEmail.validate()) {
+            throw new UnauthorizedException("Email", "Invalid email");
         }
 
         final Optional<NLUser> optionalUser = repository.findByEmail(nlEmail);
-
         if (optionalUser.isEmpty()) {
-            throw new UnauthorizedException("Access denied", "");
+            throw new UnauthorizedException(TOKEN, "Access denied");
         }
 
-        if (JWTFilterHelper.resolveJWT(jwt)) {
+        if (JWTResolver.resolveJWT(jwt)) {
             final NLDUser user = NLDUser.of(optionalUser.get());
-            final NLPrincipal principal = JWTFilterHelper.createPrincipal(user);
-            final NLCredentials credentials = JWTFilterHelper.createCredentials(user);
+            final NLPrincipal principal = createPrincipal(user);
+            final NLCredentials credentials = createCredentials(user);
             final Set<SimpleGrantedAuthority> roles = Collections.singleton(new SimpleGrantedAuthority(jwt.getClaim(JWTClaim.ROLE).asString()));
 
             return new NLAuthenticationToken(principal, credentials, roles);
         }
-        throw new UnauthorizedException("Access denied", "");
+        throw new UnauthorizedException(TOKEN, "Access denied");
     }
 
     private DecodedJWT verifyToken(String authToken) {
@@ -80,7 +84,25 @@ public class JWTFilter extends BasicAuthenticationFilter {
         try {
             return verifier.verify(authToken);
         } catch (JWTVerificationException e) {
-            throw new UnauthorizedException("Invalid token", e.getMessage());
+            throw new UnauthorizedException(TOKEN, "Invalid token");
         }
+    }
+
+    private NLPrincipal createPrincipal(NLDUser user) {
+        final NLId id = user.getId();
+        final NLEmail email = user.getEmail();
+        final NLName name = user.getName();
+        if (!(id.validate() && email.validate() && name.validate())) {
+            throw new ValidationException();
+        }
+        return new NLPrincipal(id, email, name);
+    }
+
+    private NLCredentials createCredentials(NLDUser user) {
+        final NLPassword password = user.getPassword();
+        if (!password.validate()) {
+            throw new ValidationException();
+        }
+        return new NLCredentials(password);
     }
 }

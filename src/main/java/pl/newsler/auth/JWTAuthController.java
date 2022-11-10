@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/jwt")
 class JWTAuthController {
-    private final JWTAuthService jwtService;
+    private final IJWTAuthService jwtService;
 
     @GetMapping
     public ResponseEntity<String> generateJWT(@RequestBody UserAuthModel userAuthModel) {

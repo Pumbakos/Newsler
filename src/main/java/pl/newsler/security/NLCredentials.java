@@ -1,6 +1,8 @@
 package pl.newsler.security;
 
 import lombok.Getter;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLPassword;
 
@@ -14,12 +16,9 @@ public class NLCredentials implements Serializable {
 
     @Getter
     private final NLPassword password;
-    @Getter
-    private final NLSecretKey secretKey;
 
-    public NLCredentials(NLPassword password, NLSecretKey secretKey) {
+    public NLCredentials(NLPassword password) {
         this.password = password;
-        this.secretKey = secretKey;
     }
 
     @Override
@@ -27,26 +26,22 @@ public class NLCredentials implements Serializable {
         if (this == o) {
             return true;
         }
+
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
-        NLCredentials that = (NLCredentials) o;
-        if (!password.equals(that.password)) {
-            return false;
-        }
-        return secretKey.equals(that.secretKey);
+        final NLCredentials that = (NLCredentials) o;
+        return new EqualsBuilder().append(password, that.password).isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = password.hashCode();
-        result = 31 * result + secretKey.hashCode();
-        return result;
+        return new HashCodeBuilder(17, 37).append(password).toHashCode();
     }
 
     @Override
     public String toString() {
-        return String.format("{%n'password':%s,%n'secretKey':%s%n}", password, secretKey);
+        return String.format("{%n'password':'%s'%n}", password);
     }
 }

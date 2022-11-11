@@ -37,21 +37,30 @@ class NLModelsTest {
 
     @Test
     void shouldCompareNLAppKeysAndNLSecretKeys() {
-        String secretOrAppKey = secretOrAppKey();
+        String first = secretOrAppKey();
+        String second = secretOrAppKey();
 
-        Assertions.assertTrue(NLAppKey.of(secretOrAppKey).canEqual(NLAppKey.of(secretOrAppKey)));
-        Assertions.assertFalse(NLAppKey.of(secretOrAppKey).canEqual(NLSecretKey.of(secretOrAppKey)));
-        Assertions.assertEquals(NLAppKey.of(secretOrAppKey), NLAppKey.of(secretOrAppKey));
-        Assertions.assertEquals(NLAppKey.of(secretOrAppKey).toString(), NLAppKey.of(secretOrAppKey).toString());
-        Assertions.assertEquals(NLAppKey.of(secretOrAppKey).hashCode(), NLAppKey.of(secretOrAppKey).hashCode());
-        Assertions.assertNotEquals(NLAppKey.of(secretOrAppKey()), NLAppKey.of(secretOrAppKey()));
+        NLAppKey appKey = NLAppKey.of(first);
+        Assertions.assertTrue(appKey.canEqual(appKey));
+        Assertions.assertFalse(appKey.canEqual(first));
+        Assertions.assertEquals(appKey, NLAppKey.of(first));
+        Assertions.assertEquals(appKey.toString(), appKey.toString());
+        Assertions.assertEquals(appKey.hashCode(), appKey.hashCode());
+        Assertions.assertNotEquals(appKey, NLAppKey.of(second));
+        Assertions.assertNotEquals(appKey.toString(), NLAppKey.of(second).toString());
+        Assertions.assertNotEquals(appKey.hashCode(), NLAppKey.of(second).hashCode());
+        Assertions.assertNotEquals(NLAppKey.of(first), NLAppKey.of(second));
 
-        Assertions.assertTrue(NLSecretKey.of(secretOrAppKey).canEqual(NLSecretKey.of(secretOrAppKey)));
-        Assertions.assertFalse(NLSecretKey.of(secretOrAppKey).canEqual(NLAppKey.of(secretOrAppKey)));
-        Assertions.assertEquals(NLSecretKey.of(secretOrAppKey), NLSecretKey.of(secretOrAppKey));
-        Assertions.assertEquals(NLSecretKey.of(secretOrAppKey).toString(), NLSecretKey.of(secretOrAppKey).toString());
-        Assertions.assertEquals(NLSecretKey.of(secretOrAppKey).hashCode(), NLSecretKey.of(secretOrAppKey).hashCode());
-        Assertions.assertNotEquals(NLSecretKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()));
+        NLSecretKey secretKey = NLSecretKey.of(first);
+        Assertions.assertTrue(secretKey.canEqual(secretKey));
+        Assertions.assertFalse(secretKey.canEqual(first));
+        Assertions.assertEquals(secretKey, NLSecretKey.of(first));
+        Assertions.assertEquals(secretKey.toString(), secretKey.toString());
+        Assertions.assertEquals(secretKey.hashCode(), secretKey.hashCode());
+        Assertions.assertNotEquals(secretKey, NLSecretKey.of(second));
+        Assertions.assertNotEquals(secretKey.toString(), NLSecretKey.of(second).toString());
+        Assertions.assertNotEquals(secretKey.hashCode(), NLSecretKey.of(second).hashCode());
+        Assertions.assertNotEquals(NLSecretKey.of(first), NLSecretKey.of(second));
     }
 
     @ParameterizedTest
@@ -96,17 +105,19 @@ class NLModelsTest {
 
     @Test
     void shouldCompareNLEmails() {
-        String email = String.format("%s@%s.dev", username(), domain());
+        String first = String.format("%s@%s.dev", username(), domain());
+        String second = String.format("%s@%s.dev", username(), domain());
 
-        Assertions.assertTrue(NLEmail.of(email).canEqual(NLEmail.of(email)));
-        Assertions.assertFalse(NLEmail.of(email).canEqual(email));
-        Assertions.assertEquals(NLEmail.of(email), NLEmail.of(email));
-        Assertions.assertEquals(NLEmail.of(email).toString(), NLEmail.of(email).toString());
-        Assertions.assertEquals(NLEmail.of(email).hashCode(), NLEmail.of(email).hashCode());
-        Assertions.assertNotEquals(
-                NLEmail.of(String.format("%s@%s.dev", username(), domain())),
-                NLEmail.of(String.format("%s@%s.dev", username(), domain()))
-        );
+        NLEmail email = NLEmail.of(first);
+        Assertions.assertTrue(email.canEqual(email));
+        Assertions.assertFalse(email.canEqual(first));
+        Assertions.assertEquals(email, NLEmail.of(first));
+        Assertions.assertEquals(email.toString(), email.toString());
+        Assertions.assertEquals(email.hashCode(), email.hashCode());
+        Assertions.assertNotEquals(email, NLEmail.of(second));
+        Assertions.assertNotEquals(email.toString(), NLEmail.of(second).toString());
+        Assertions.assertNotEquals(email.hashCode(), NLEmail.of(second).hashCode());
+        Assertions.assertNotEquals(NLEmail.of(first), NLEmail.of(second));
     }
 
     //* ---------- NLId ---------- *//
@@ -144,13 +155,18 @@ class NLModelsTest {
 
     @Test
     void shouldCompareNLIds() {
-        UUID uuid = UUID.randomUUID();
+        UUID first = UUID.randomUUID();
+        UUID second = UUID.randomUUID();
 
-        Assertions.assertTrue(NLId.of(uuid).canEqual(NLId.of(uuid)));
-        Assertions.assertFalse(NLId.of(uuid).canEqual(uuid));
-        Assertions.assertEquals(NLId.of(uuid), NLId.of(uuid));
-        Assertions.assertEquals(NLId.of(uuid).toString(), NLId.of(uuid).toString());
-        Assertions.assertEquals(NLId.of(uuid).hashCode(), NLId.of(uuid).hashCode());
+        NLId id = NLId.of(first);
+        Assertions.assertTrue(id.canEqual(id));
+        Assertions.assertFalse(id.canEqual(first));
+        Assertions.assertEquals(id, NLId.of(first));
+        Assertions.assertEquals(id.toString(), id.toString());
+        Assertions.assertEquals(id.hashCode(), id.hashCode());
+        Assertions.assertNotEquals(id, NLId.of(second));
+        Assertions.assertNotEquals(id.toString(), NLId.of(second).toString());
+        Assertions.assertNotEquals(id.hashCode(), NLId.of(second).hashCode());
         Assertions.assertNotEquals(NLId.of(UUID.randomUUID()), NLId.of(UUID.randomUUID()));
     }
 
@@ -185,14 +201,19 @@ class NLModelsTest {
 
     @Test
     void shouldCompareNLPassword() {
-        String password = "U$Ad3na923mas$dmi";
+        String first = "U$Ad3na923mas$dmi";
+        String second = "Pa$$word7hat^match3$";
 
-        Assertions.assertTrue(NLPassword.of(password).canEqual(NLPassword.of(password)));
-        Assertions.assertFalse(NLPassword.of(password).canEqual(password));
-        Assertions.assertEquals(NLPassword.of(password), NLPassword.of(password));
-        Assertions.assertEquals(NLPassword.of(password).toString(), NLPassword.of(password).toString());
-        Assertions.assertEquals(NLPassword.of(password).hashCode(), NLPassword.of(password).hashCode());
-        Assertions.assertNotEquals(NLPassword.of("UJk6ds81#@^dsa"), NLPassword.of("Pa$$word7hat^match3$"));
+        NLPassword password = NLPassword.of(first);
+        Assertions.assertTrue(password.canEqual(password));
+        Assertions.assertFalse(password.canEqual(first));
+        Assertions.assertEquals(password, NLPassword.of(first));
+        Assertions.assertEquals(password.toString(), password.toString());
+        Assertions.assertEquals(password.hashCode(), password.hashCode());
+        Assertions.assertNotEquals(password, NLPassword.of(second));
+        Assertions.assertNotEquals(password.toString(), NLPassword.of(second).toString());
+        Assertions.assertNotEquals(password.hashCode(), NLPassword.of(second).hashCode());
+        Assertions.assertNotEquals(password, NLPassword.of(second));
     }
 
     //* ---------- NLFirstName ---------- *//
@@ -220,14 +241,19 @@ class NLModelsTest {
 
     @Test
     void shouldCompareNLFirstName() {
-        String firstName = "Newsler";
+        String first = "Newsler";
+        String second = "Newslertest";
 
-        Assertions.assertTrue(NLFirstName.of(firstName).canEqual(NLFirstName.of(firstName)));
-        Assertions.assertFalse(NLFirstName.of(firstName).canEqual(firstName));
-        Assertions.assertEquals(NLFirstName.of(firstName), NLFirstName.of(firstName));
-        Assertions.assertEquals(NLFirstName.of(firstName).toString(), NLFirstName.of(firstName).toString());
-        Assertions.assertEquals(NLFirstName.of(firstName).hashCode(), NLFirstName.of(firstName).hashCode());
-        Assertions.assertNotEquals(NLFirstName.of("Newsler"), NLFirstName.of("Newslertest"));
+        NLFirstName firstName = NLFirstName.of(first);
+        Assertions.assertTrue(firstName.canEqual(firstName));
+        Assertions.assertFalse(firstName.canEqual(first));
+        Assertions.assertEquals(firstName, NLFirstName.of(first));
+        Assertions.assertEquals(firstName.toString(), firstName.toString());
+        Assertions.assertEquals(firstName.hashCode(), firstName.hashCode());
+        Assertions.assertNotEquals(firstName, NLFirstName.of(second));
+        Assertions.assertNotEquals(firstName.toString(), NLFirstName.of(second).toString());
+        Assertions.assertNotEquals(firstName.hashCode(), NLFirstName.of(second).hashCode());
+        Assertions.assertNotEquals(NLFirstName.of(first), NLFirstName.of(second));
     }
 
     //* ---------- NLLastName ---------- *//
@@ -258,14 +284,19 @@ class NLModelsTest {
 
     @Test
     void shouldCompareNLLastName() {
-        String lastName = "Newsler";
+        String first = "Newsler";
+        String second = "Newslertest";
 
-        Assertions.assertTrue(NLLastName.of(lastName).canEqual(NLLastName.of(lastName)));
-        Assertions.assertFalse(NLLastName.of(lastName).canEqual(lastName));
-        Assertions.assertEquals(NLLastName.of(lastName), NLLastName.of(lastName));
-        Assertions.assertEquals(NLLastName.of(lastName).toString(), NLLastName.of(lastName).toString());
-        Assertions.assertEquals(NLLastName.of(lastName).hashCode(), NLLastName.of(lastName).hashCode());
-        Assertions.assertNotEquals(NLLastName.of("Newsler"), NLLastName.of("Newslertest"));
+        NLLastName lastName = NLLastName.of(first);
+        Assertions.assertTrue(lastName.canEqual(lastName));
+        Assertions.assertFalse(lastName.canEqual(first));
+        Assertions.assertEquals(lastName, NLLastName.of(first));
+        Assertions.assertEquals(lastName.toString(), lastName.toString());
+        Assertions.assertEquals(lastName.hashCode(), lastName.hashCode());
+        Assertions.assertNotEquals(lastName, NLLastName.of(second));
+        Assertions.assertNotEquals(lastName.toString(), NLLastName.of(second).toString());
+        Assertions.assertNotEquals(lastName.hashCode(), NLLastName.of(second).hashCode());
+        Assertions.assertNotEquals(NLLastName.of(first), NLLastName.of(second));
     }
 
     //* ---------- NLSmtpAccount ---------- *//
@@ -294,14 +325,20 @@ class NLModelsTest {
 
     @Test
     void shouldCompareNLSmtpAccount() {
-        String smtp = "3.test.smtp";
+        String first = "3.test.smtp";
+        String second = "3.model.smtp";
 
-        Assertions.assertTrue(NLSmtpAccount.of(smtp).canEqual(NLSmtpAccount.of(smtp)));
-        Assertions.assertFalse(NLSmtpAccount.of(smtp).canEqual(smtp));
-        Assertions.assertEquals(NLSmtpAccount.of(smtp), NLSmtpAccount.of(smtp));
-        Assertions.assertEquals(NLSmtpAccount.of(smtp).toString(), NLSmtpAccount.of(smtp).toString());
-        Assertions.assertEquals(NLSmtpAccount.of(smtp).hashCode(), NLSmtpAccount.of(smtp).hashCode());
-        Assertions.assertNotEquals(NLSmtpAccount.of("3.test.smtp"), NLSmtpAccount.of("1.testcase.smtp"));
+        NLSmtpAccount smtpAccount = NLSmtpAccount.of(first);
+        Assertions.assertTrue(smtpAccount.canEqual(smtpAccount));
+        Assertions.assertFalse(smtpAccount.canEqual(first));
+        Assertions.assertFalse(smtpAccount.canEqual(first));
+        Assertions.assertEquals(smtpAccount, NLSmtpAccount.of(first));
+        Assertions.assertEquals(smtpAccount.toString(), smtpAccount.toString());
+        Assertions.assertEquals(smtpAccount.hashCode(), smtpAccount.hashCode());
+        Assertions.assertNotEquals(smtpAccount, NLSmtpAccount.of(second));
+        Assertions.assertNotEquals(smtpAccount.toString(), NLSmtpAccount.of(second).toString());
+        Assertions.assertNotEquals(smtpAccount.hashCode(), NLSmtpAccount.of(second).hashCode());
+        Assertions.assertNotEquals(smtpAccount, NLSmtpAccount.of(second));
     }
 
     @Test
@@ -334,13 +371,16 @@ class NLModelsTest {
 
     @Test
     void shouldCompareNLVersion() {
-        String smtp = "0.0.0";
+        String first = "0.0.0";
+        String second = "0.0.0TEST";
+        NLVersion version = NLVersion.of(first);
 
-        Assertions.assertTrue(NLVersion.of(smtp).canEqual(NLVersion.of(smtp)));
-        Assertions.assertFalse(NLVersion.of(smtp).canEqual(smtp));
-        Assertions.assertEquals(NLVersion.of(smtp), NLVersion.of(smtp));
-        Assertions.assertEquals(NLVersion.of(smtp).toString(), NLVersion.of(smtp).toString());
-        Assertions.assertEquals(NLVersion.of(smtp).hashCode(), NLVersion.of(smtp).hashCode());
-        Assertions.assertNotEquals(NLVersion.of("0.0.0TEST"), NLVersion.of("0.0.0SNAP"));
+        Assertions.assertTrue(version.canEqual(version));
+        Assertions.assertFalse(version.canEqual(first));
+        Assertions.assertFalse(version.canEqual(first));
+        Assertions.assertEquals(version, NLVersion.of(first));
+        Assertions.assertEquals(version.toString(), version.toString());
+        Assertions.assertEquals(version.hashCode(), version.hashCode());
+        Assertions.assertNotEquals(version, NLVersion.of(second));
     }
 }

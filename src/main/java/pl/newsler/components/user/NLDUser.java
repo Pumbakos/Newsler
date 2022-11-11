@@ -3,7 +3,6 @@ package pl.newsler.components.user;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
 import lombok.Value;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
@@ -29,7 +28,7 @@ public class NLDUser {
     NLAppKey appKey;
     NLType role;
     boolean enabled;
-    boolean credentialsExpired;
+    boolean credentialsNonExpired;
 
     public static NLDUser of(NLUser user) {
         return NLDUser.builder()
@@ -43,7 +42,7 @@ public class NLDUser {
                 .appKey(user.getAppKey())
                 .role(user.getRole())
                 .enabled(user.getEnabled())
-                .credentialsExpired(!user.isCredentialsNonExpired())
+                .credentialsNonExpired(user.isCredentialsNonExpired())
                 .build();
     }
 }

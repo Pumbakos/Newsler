@@ -7,6 +7,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import pl.newsler.api.IJWTAuthController;
 import pl.newsler.api.exceptions.UnauthorizedException;
 import pl.newsler.commons.models.NLId;
 import pl.newsler.commons.models.NLPassword;
@@ -26,6 +29,7 @@ class JWTModuleTest {
     private final JWTConfiguration configuration = new JWTConfiguration(userRepository, passwordEncoder, keyProvider);
     private final JWTUtility utility = configuration.jwtUtility();
     private final IJWTAuthService service = configuration.authService(utility);
+    private final IJWTAuthController controller = new JWTAuthController(service);
     private final UserFactory factory = new UserFactory();
     final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
 
@@ -53,6 +57,29 @@ class JWTModuleTest {
     }
 
     @Test
+    void shouldReturn_200OK(){
+        NLUser standardUser = factory.standard();
+        UserAuthModel model = new UserAuthModel(
+                passwordEncoder.encrypt(standardUser.getEmail().getValue()),
+                passwordEncoder.encrypt(factory.standard_plainPassword())
+        );
+        ResponseEntity<String> response = controller.generateJWT(model);
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void shouldReturn_401Unauthorized_InvalidEncryption(){
+        UserAuthModel model = new UserAuthModel(
+                factory.standard().getEmail().getValue(),
+                factory.standard_plainPassword()
+        );
+        ResponseEntity<String> response = controller.generateJWT(model);
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
+
+    @Test
     void shouldGenerateJWT() {
         NLUser standardUser = factory.standard();
         UserAuthModel model = new UserAuthModel(
@@ -64,12 +91,21 @@ class JWTModuleTest {
     }
 
     @Test
-    void shouldNotGenerateToken_InvalidEmailEncryption_ThrowIllegalArgumentException() {
+    void shouldNotGenerateToken_InvalidEncryption_ThrowIllegalArgumentException() {
         UserAuthModel model = new UserAuthModel(
                 factory.standard().getEmail().getValue(),
                 factory.standard_plainPassword()
         );
         Assertions.assertThrows(IllegalArgumentException.class, () -> service.generateJWT(model));
+    }
+
+    @Test
+    void shouldNotGenerateToken_InvalidEmail_RegexDoesNotMatch_ThrowUnauthorizedException() {
+        UserAuthModel model = new UserAuthModel(
+                passwordEncoder.encrypt("email'app@app.co"),
+                passwordEncoder.encrypt(factory.dotted_plainPassword())
+        );
+        Assertions.assertThrows(UnauthorizedException.class, () -> service.generateJWT(model));
     }
 
     @Test

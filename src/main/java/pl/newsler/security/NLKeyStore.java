@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import pl.newsler.exceptions.NoResourceFoundException;
 import pl.newsler.exceptions.RegexNotMatchException;
-import pl.newsler.resources.ResourceLoaderFactory;
 import pl.newsler.security.exception.AlgorithmInitializatoinException;
 import pl.newsler.security.exception.DecryptionException;
 import pl.newsler.security.exception.EncryptionException;

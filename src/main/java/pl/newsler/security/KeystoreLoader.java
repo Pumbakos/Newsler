@@ -1,7 +1,7 @@
-package pl.newsler.resources;
+package pl.newsler.security;
 
 import org.springframework.util.ResourceUtils;
-import pl.newsler.resources.definition.FixedResourceLoader;
+import pl.newsler.resources.FixedResourceLoader;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,7 +14,7 @@ class KeystoreLoader implements FixedResourceLoader {
         try {
             return new FileInputStream(ResourceUtils.getFile("classpath:keystore/keystore.p12"));
         } catch (FileNotFoundException e) {
-            throw new FileNotFoundException("File keystore.p12 not found");
+            throw new FileNotFoundException();
         }
     }
 
@@ -22,7 +22,7 @@ class KeystoreLoader implements FixedResourceLoader {
         try {
             return ResourceUtils.getFile("classpath:keystore/keystore.p12");
         } catch (FileNotFoundException e) {
-            throw new FileNotFoundException("File keystore.p12 not found");
+            throw new FileNotFoundException();
         }
     }
 }

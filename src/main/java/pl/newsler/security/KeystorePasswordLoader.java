@@ -1,7 +1,7 @@
-package pl.newsler.resources;
+package pl.newsler.security;
 
 import org.springframework.util.ResourceUtils;
-import pl.newsler.resources.definition.FixedResourceLoader;
+import pl.newsler.resources.FixedResourceLoader;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -13,7 +13,7 @@ public class KeystorePasswordLoader implements FixedResourceLoader {
         try {
             return new FileInputStream(ResourceUtils.getFile("classpath:keystore/nkp.bin"));
         } catch (FileNotFoundException e) {
-            throw new FileNotFoundException("KP file not found");
+            throw new FileNotFoundException();
         }
     }
 }

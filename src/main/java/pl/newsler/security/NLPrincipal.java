@@ -1,6 +1,7 @@
 package pl.newsler.security;
 
 import lombok.Getter;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLId;
@@ -37,7 +38,7 @@ public class NLPrincipal implements Principal, Serializable {
 
     @Override
     public boolean implies(Subject subject) {
-        return Principal.super.implies(subject);
+        throw new NotImplementedException();
     }
 
     @Override

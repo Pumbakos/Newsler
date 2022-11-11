@@ -3,6 +3,8 @@ package pl.newsler.security.filters;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -29,7 +31,10 @@ import pl.newsler.security.MockNLPasswordEncoder;
 import pl.newsler.security.NLPublicAlias;
 
 import javax.ws.rs.core.HttpHeaders;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
@@ -89,6 +94,34 @@ class JWTFilterTest {
         Assertions.assertEquals(standardUser.getEmail().getValue(), decodedJWT.getClaim(JWTClaim.EMAIL).asString());
         Assertions.assertEquals(standardUser.getFirstName().getValue(), decodedJWT.getClaim(JWTClaim.NAME).asString());
         Assertions.assertEquals(standardUser.getRole().toString(), decodedJWT.getClaim(JWTClaim.ROLE).asString());
+    }
+
+    @Test
+    void shouldNotResolveJWT() {
+        Instant now = Instant.now();
+        Assertions.assertFalse(
+                JWTResolver.resolveJWT(
+                        verify(generateToken(now, null, null, null, null, null, null))
+                )
+        );
+        Assertions.assertFalse(
+                JWTResolver.resolveJWT(
+                        verify(generateToken(now, "", "", "", "", "", ""))
+                )
+        );
+        Assertions.assertFalse(
+                JWTResolver.resolveJWT(
+                        verify(generateToken(now, "test", "test", "test", "test", "test", "test"))
+                )
+        );
+
+        Instant after = Instant.now(Clock.offset(Clock.system(ZoneId.systemDefault()), Duration.of(-61L, ChronoUnit.MINUTES)));
+        Assertions.assertThrows(
+                UnauthorizedException.class,
+                () -> JWTResolver.resolveJWT(
+                        verify(generateToken(after, "test", "test", "test", "test", "test", "test"))
+                )
+        );
     }
 
     @Test
@@ -158,11 +191,28 @@ class JWTFilterTest {
     }
 
     private DecodedJWT verify(String token) {
-        return verifier.verify(token);
+        try {
+            return verifier.verify(token);
+        } catch (JWTVerificationException e) {
+            throw new UnauthorizedException("Token", "Invalid token");
+        }
     }
 
     private Algorithm hmac384() {
         return Algorithm.HMAC384(keyProvider.getKey(NLPublicAlias.PE_PASSWORD));
+    }
+
+    private String generateToken(Instant now, String jwtId, String keyId, String issuer, String email, String name, String role) {
+        return utility.builder()
+                .withJWTId(String.valueOf(JWTClaim.JWT_ID))
+                .withKeyId(utility.hmac384().getSigningKeyId())
+                .withIssuer("")
+                .withIssuedAt(now)
+                .withExpiresAt(now.plus(60L, ChronoUnit.MINUTES))
+                .withClaim(JWTClaim.EMAIL, "")
+                .withClaim(JWTClaim.NAME, "")
+                .withClaim(JWTClaim.ROLE, "")
+                .sign(utility.hmac384());
     }
 
     private String generateToken(String issuer, String email, String name, String role) {

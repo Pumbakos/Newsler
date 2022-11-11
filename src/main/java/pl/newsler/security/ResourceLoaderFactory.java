@@ -1,18 +1,15 @@
-package pl.newsler.resources;
+package pl.newsler.security;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.ApplicationScope;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Optional;
 
-@Component
-@ApplicationScope
-@RequiredArgsConstructor
-public class ResourceLoaderFactory {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+class ResourceLoaderFactory {
     private static final KeystoreLoader KEYSTORE_LOADER = new KeystoreLoader();
     private static final SaltLoader SALT_LOADER = new SaltLoader();
     private static final KeystorePasswordLoader KEYSTORE_PASSWORD_LOADER = new KeystorePasswordLoader();

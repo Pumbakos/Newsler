@@ -1,11 +1,11 @@
-package pl.newsler.resources.definition;
+package pl.newsler.resources;
 
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-public interface Loader {
+interface Loader {
     @SuppressWarnings({"unused"})
     default InputStream getResource() throws FileNotFoundException {
         throw new NotImplementedException(String.format("Do not use %s explicitly, use one of child that overrides method", Loader.class.getName()));

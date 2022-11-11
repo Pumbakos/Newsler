@@ -159,7 +159,7 @@ public class NLUser implements UserDetails {
                 .secretKey(secretKey)
                 .appKey(appKey)
                 .role(role)
-                .credentialsExpired(false)
+                .credentialsNonExpired(false)
                 .enabled(enabled)
                 .build();
     }

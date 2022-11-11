@@ -89,20 +89,10 @@ public class JWTFilter extends BasicAuthenticationFilter {
     }
 
     private NLPrincipal createPrincipal(NLDUser user) {
-        final NLId id = user.getId();
-        final NLEmail email = user.getEmail();
-        final NLName name = user.getName();
-        if (!(id.validate() && email.validate() && name.validate())) {
-            throw new ValidationException();
-        }
-        return new NLPrincipal(id, email, name);
+        return new NLPrincipal(user.getId(), user.getEmail(), user.getName());
     }
 
     private NLCredentials createCredentials(NLDUser user) {
-        final NLPassword password = user.getPassword();
-        if (!password.validate()) {
-            throw new ValidationException();
-        }
-        return new NLCredentials(password);
+        return new NLCredentials(user.getPassword());
     }
 }

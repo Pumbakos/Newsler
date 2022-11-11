@@ -345,4 +345,34 @@ class UserModuleTest {
     void shouldNotLoadUserByUsername_ValidEmail_NonExistingUser() {
         Assertions.assertThrows(UserDataNotFineException.class, () -> service.loadUserByUsername("user.d-amora@person.dev"));
     }
+
+    @Test
+    void shouldGetNLDUserProperties() {
+        final NLUser standardUser = factory.standard();
+
+        NLDUser nldUser = NLDUser.of(standardUser);
+        Assertions.assertNotNull(nldUser);
+        Assertions.assertEquals(standardUser.getId(), nldUser.getId());
+        Assertions.assertEquals(standardUser.getEmail(), nldUser.getEmail());
+        Assertions.assertEquals(standardUser.getFirstName(), nldUser.getName());
+        Assertions.assertEquals(standardUser.getLastName(), nldUser.getLastName());
+        Assertions.assertEquals(standardUser.getNLPassword(), nldUser.getPassword());
+        Assertions.assertEquals(standardUser.getSmtpAccount(), nldUser.getSmtpAccount());
+        Assertions.assertEquals(standardUser.getSecretKey(), nldUser.getSecretKey());
+        Assertions.assertEquals(standardUser.getAppKey(), nldUser.getAppKey());
+        Assertions.assertEquals(standardUser.getRole(), nldUser.getRole());
+        Assertions.assertEquals(standardUser.isEnabled(), nldUser.isEnabled());
+        Assertions.assertEquals(standardUser.isCredentialsNonExpired(), nldUser.isCredentialsNonExpired());
+    }
+
+    @Test
+    void shouldCompareNLDUser() {
+        final NLUser standardUser = factory.standard();
+        NLDUser nldUser = NLDUser.of(standardUser);
+
+        Assertions.assertEquals(NLDUser.of(standardUser), nldUser);
+        Assertions.assertEquals(nldUser.toString(), nldUser.toString());
+        Assertions.assertEquals(nldUser.hashCode(), nldUser.hashCode());
+        Assertions.assertNotEquals(nldUser, NLDUser.of(factory.dashed()));
+    }
 }

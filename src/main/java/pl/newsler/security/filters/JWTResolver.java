@@ -26,7 +26,7 @@ class JWTResolver {
                         && (StringUtils.isNotBlank(email)) && (NLEmail.of(email).validate())
                         && (StringUtils.isNotBlank(role))
                         && (StringUtils.isNotBlank(name))
-                        && (now.isBefore(expiration))
+                        && (expiration != null) && (now.isBefore(expiration))
         );
     }
 }

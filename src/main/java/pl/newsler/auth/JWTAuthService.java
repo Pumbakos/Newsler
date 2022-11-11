@@ -6,7 +6,6 @@ import pl.newsler.commons.models.NLEmail;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.NLUser;
-import pl.newsler.components.user.UserDataNotFineException;
 import pl.newsler.security.NLIPasswordEncoder;
 
 import java.time.Instant;
@@ -20,7 +19,7 @@ class JWTAuthService implements IJWTAuthService{
     private final JWTUtility jwtUtility;
 
     @Override
-    public String generateJWT(UserAuthModel userAuthModel) throws IllegalArgumentException, UserDataNotFineException {
+    public String generateJWT(UserAuthModel userAuthModel) throws UnauthorizedException {
         final String email = passwordEncoder.decrypt(userAuthModel.email());
         final NLEmail nlEmail = NLEmail.of(email);
         if (!nlEmail.validate()) {
@@ -46,7 +45,7 @@ class JWTAuthService implements IJWTAuthService{
         return (passwordEncoder.bCrypt().matches(password, user.getPassword().getValue())
                 && email.equals(user.getEmail().getValue())
                 && user.isEnabled()
-                && !user.isCredentialsExpired()
+                && user.isCredentialsNonExpired()
         );
     }
 

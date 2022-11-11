@@ -9,7 +9,6 @@ import pl.newsler.commons.models.NLPassword;
 import java.io.Serial;
 import java.io.Serializable;
 
-@SuppressWarnings("record")
 public class NLCredentials implements Serializable {
     @Serial
     private static final long serialVersionUID = -7419573552282464417L;

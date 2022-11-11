@@ -11,7 +11,6 @@ import java.io.Serializable;
 import java.security.Principal;
 import java.util.Objects;
 
-@SuppressWarnings("record")
 public class NLPrincipal implements Principal, Serializable {
     @Getter
     private final NLId id;

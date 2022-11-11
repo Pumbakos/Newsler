@@ -52,7 +52,7 @@ class UserCrudService implements IUserCrudService {
         user.setEmail(email);
         user.setPassword(NLPassword.of(hash(password.getValue())));
         user.setRole(NLType.USER);
-        user.setId(NLId.of(UUID.randomUUID(), NLType.USER));
+        user.setId(NLId.of(UUID.randomUUID()));
         user.setVersion(UserRepository.version);
         return userRepository.save(user).getId();
     }

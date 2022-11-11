@@ -118,13 +118,17 @@ final class NLKeyStore {
             if (keystoreResource.isEmpty()) {
                 throw new FileNotFoundException("Could not load keystore file");
             }
-            final File keystoreFile = new File("D:\\Desktop\\Newsler\\Newsler\\src\\main\\resources\\keystore\\keystore.p12");
+            Optional<File> optionalFile = ResourceLoaderFactory.getKeystoreResourceAsFile();
+            if (optionalFile.isEmpty()) {
+                throw new SecurityException();
+            }
 
+            final File file = optionalFile.get();
             final byte[] encryptedKey = triDES.encrypt(key.getBytes(StandardCharsets.UTF_8));
             final SecretKey secretKey = encodeKey(new String(encryptedKey).toCharArray());
             final KeyStore.PasswordProtection keyParam = new KeyStore.PasswordProtection(new String(PWD).toCharArray());
             keyStore.setEntry(alias, new KeyStore.SecretKeyEntry(secretKey), keyParam);
-            keyStore.store(new BufferedOutputStream(new FileOutputStream(keystoreFile)), KEYSTORE_PASSWORD.toCharArray());
+            keyStore.store(new BufferedOutputStream(new FileOutputStream(file)), KEYSTORE_PASSWORD.toCharArray());
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
             throw new EncryptionException("Could not set new key", e.getMessage());
         }

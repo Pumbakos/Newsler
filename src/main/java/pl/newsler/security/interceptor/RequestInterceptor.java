@@ -21,7 +21,7 @@ class RequestInterceptor implements HandlerInterceptor {
         if (!request.isTrailerFieldsReady()) {
             return false;
         }
-        request.getTrailerFields().values().forEach(value -> passwordEncoder.decrypt(value));
+        request.getTrailerFields().values().forEach(passwordEncoder::decrypt);
         return true;
     }
 }

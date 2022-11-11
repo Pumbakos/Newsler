@@ -47,6 +47,8 @@ class NLModelsTest {
         Assertions.assertEquals(appKey.toString(), appKey.toString());
         Assertions.assertEquals(appKey.hashCode(), appKey.hashCode());
         Assertions.assertNotEquals(appKey, NLAppKey.of(second));
+        Assertions.assertNotEquals(appKey, null);
+        Assertions.assertNotEquals(appKey, "");
         Assertions.assertNotEquals(appKey.toString(), NLAppKey.of(second).toString());
         Assertions.assertNotEquals(appKey.hashCode(), NLAppKey.of(second).hashCode());
         Assertions.assertNotEquals(NLAppKey.of(first), NLAppKey.of(second));
@@ -58,6 +60,8 @@ class NLModelsTest {
         Assertions.assertEquals(secretKey.toString(), secretKey.toString());
         Assertions.assertEquals(secretKey.hashCode(), secretKey.hashCode());
         Assertions.assertNotEquals(secretKey, NLSecretKey.of(second));
+        Assertions.assertNotEquals(appKey, null);
+        Assertions.assertNotEquals(appKey, "");
         Assertions.assertNotEquals(secretKey.toString(), NLSecretKey.of(second).toString());
         Assertions.assertNotEquals(secretKey.hashCode(), NLSecretKey.of(second).hashCode());
         Assertions.assertNotEquals(NLSecretKey.of(first), NLSecretKey.of(second));
@@ -115,6 +119,8 @@ class NLModelsTest {
         Assertions.assertEquals(email.toString(), email.toString());
         Assertions.assertEquals(email.hashCode(), email.hashCode());
         Assertions.assertNotEquals(email, NLEmail.of(second));
+        Assertions.assertNotEquals(email, null);
+        Assertions.assertNotEquals(email, "");
         Assertions.assertNotEquals(email.toString(), NLEmail.of(second).toString());
         Assertions.assertNotEquals(email.hashCode(), NLEmail.of(second).hashCode());
         Assertions.assertNotEquals(NLEmail.of(first), NLEmail.of(second));
@@ -165,6 +171,8 @@ class NLModelsTest {
         Assertions.assertEquals(id.toString(), id.toString());
         Assertions.assertEquals(id.hashCode(), id.hashCode());
         Assertions.assertNotEquals(id, NLId.of(second));
+        Assertions.assertNotEquals(id, null);
+        Assertions.assertNotEquals(id, "");
         Assertions.assertNotEquals(id.toString(), NLId.of(second).toString());
         Assertions.assertNotEquals(id.hashCode(), NLId.of(second).hashCode());
         Assertions.assertNotEquals(NLId.of(UUID.randomUUID()), NLId.of(UUID.randomUUID()));
@@ -211,6 +219,8 @@ class NLModelsTest {
         Assertions.assertEquals(password.toString(), password.toString());
         Assertions.assertEquals(password.hashCode(), password.hashCode());
         Assertions.assertNotEquals(password, NLPassword.of(second));
+        Assertions.assertNotEquals(password, null);
+        Assertions.assertNotEquals(password, "");
         Assertions.assertNotEquals(password.toString(), NLPassword.of(second).toString());
         Assertions.assertNotEquals(password.hashCode(), NLPassword.of(second).hashCode());
         Assertions.assertNotEquals(password, NLPassword.of(second));
@@ -251,6 +261,8 @@ class NLModelsTest {
         Assertions.assertEquals(firstName.toString(), firstName.toString());
         Assertions.assertEquals(firstName.hashCode(), firstName.hashCode());
         Assertions.assertNotEquals(firstName, NLFirstName.of(second));
+        Assertions.assertNotEquals(firstName, null);
+        Assertions.assertNotEquals(firstName, "");
         Assertions.assertNotEquals(firstName.toString(), NLFirstName.of(second).toString());
         Assertions.assertNotEquals(firstName.hashCode(), NLFirstName.of(second).hashCode());
         Assertions.assertNotEquals(NLFirstName.of(first), NLFirstName.of(second));
@@ -294,6 +306,8 @@ class NLModelsTest {
         Assertions.assertEquals(lastName.toString(), lastName.toString());
         Assertions.assertEquals(lastName.hashCode(), lastName.hashCode());
         Assertions.assertNotEquals(lastName, NLLastName.of(second));
+        Assertions.assertNotEquals(lastName, null);
+        Assertions.assertNotEquals(lastName, "");
         Assertions.assertNotEquals(lastName.toString(), NLLastName.of(second).toString());
         Assertions.assertNotEquals(lastName.hashCode(), NLLastName.of(second).hashCode());
         Assertions.assertNotEquals(NLLastName.of(first), NLLastName.of(second));
@@ -336,6 +350,8 @@ class NLModelsTest {
         Assertions.assertEquals(smtpAccount.toString(), smtpAccount.toString());
         Assertions.assertEquals(smtpAccount.hashCode(), smtpAccount.hashCode());
         Assertions.assertNotEquals(smtpAccount, NLSmtpAccount.of(second));
+        Assertions.assertNotEquals(smtpAccount, null);
+        Assertions.assertNotEquals(smtpAccount, "");
         Assertions.assertNotEquals(smtpAccount.toString(), NLSmtpAccount.of(second).toString());
         Assertions.assertNotEquals(smtpAccount.hashCode(), NLSmtpAccount.of(second).hashCode());
         Assertions.assertNotEquals(smtpAccount, NLSmtpAccount.of(second));
@@ -382,5 +398,7 @@ class NLModelsTest {
         Assertions.assertEquals(version.toString(), version.toString());
         Assertions.assertEquals(version.hashCode(), version.hashCode());
         Assertions.assertNotEquals(version, NLVersion.of(second));
+        Assertions.assertNotEquals(version, null);
+        Assertions.assertNotEquals(version, "");
     }
 }

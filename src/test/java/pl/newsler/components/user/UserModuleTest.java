@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
@@ -347,11 +348,69 @@ class UserModuleTest {
     }
 
     @Test
+    void shouldCompareNLUser() {
+        final NLUser standardUser = factory.standard();
+        final NLUser dottedUser = factory.dotted();
+        NLDUser nldStandardUser = NLDUser.of(standardUser);
+        NLDUser nldDottedUser = NLDUser.of(dottedUser);
+
+        Assertions.assertEquals(nldStandardUser, NLDUser.of(standardUser));
+        Assertions.assertEquals(nldStandardUser.toString(), nldStandardUser.toString());
+        Assertions.assertEquals(nldStandardUser.hashCode(), nldStandardUser.hashCode());
+        Assertions.assertNotEquals(nldStandardUser, nldDottedUser);
+        Assertions.assertNotEquals(nldStandardUser.toString(), nldDottedUser.toString());
+        Assertions.assertNotEquals(nldStandardUser.hashCode(), nldDottedUser.hashCode());
+        Assertions.assertNotEquals(nldStandardUser, nldDottedUser);
+    }
+
+    @Test
+    void shouldGetNLUserProperties() {
+        final NLUser standardUser = factory.standard();
+        standardUser.setAppKey(NLAppKey.of(secretOrAppKey()));
+        standardUser.setSecretKey(NLSecretKey.of(secretOrAppKey()));
+        standardUser.setSmtpAccount(NLSmtpAccount.of("1.test.smp"));
+
+        Assertions.assertNotNull(standardUser);
+        Assertions.assertNotNull(standardUser.getId());
+        Assertions.assertNotNull(standardUser.getEmail());
+        Assertions.assertNotNull(standardUser.getFirstName());
+        Assertions.assertNotNull(standardUser.getLastName());
+        Assertions.assertNotNull(standardUser.getNLPassword());
+        Assertions.assertNotNull(standardUser.getSmtpAccount());
+        Assertions.assertNotNull(standardUser.getSecretKey());
+        Assertions.assertNotNull(standardUser.getAppKey());
+        Assertions.assertNotNull(standardUser.getRole());
+        Assertions.assertNotNull(standardUser.getAuthorities());
+        Assertions.assertTrue(standardUser.getAuthorities().contains(new SimpleGrantedAuthority(standardUser.getRole().name())));
+        Assertions.assertTrue(standardUser.isEnabled());
+        Assertions.assertTrue(standardUser.isCredentialsNonExpired());
+        Assertions.assertTrue(standardUser.isAccountNonExpired());
+        Assertions.assertTrue(standardUser.isAccountNonLocked());
+    }
+
+    @Test
+    void shouldCompareNLDUser() {
+        final NLUser standardUser = factory.standard();
+        final NLUser dottedUser = factory.dotted();
+
+        Assertions.assertEquals(standardUser, factory.standard());
+        Assertions.assertEquals(standardUser.toString(), standardUser.toString());
+        Assertions.assertEquals(standardUser.hashCode(), standardUser.hashCode());
+        Assertions.assertNotEquals(standardUser, NLDUser.of(dottedUser));
+        Assertions.assertNotEquals(standardUser, null);
+        Assertions.assertNotEquals(standardUser, dottedUser);
+        Assertions.assertNotEquals(standardUser.toString(), dottedUser.toString());
+        Assertions.assertNotEquals(standardUser.hashCode(), dottedUser.hashCode());
+        Assertions.assertNotEquals(standardUser, dottedUser);
+    }
+
+    @Test
     void shouldGetNLDUserProperties() {
         final NLUser standardUser = factory.standard();
 
         NLDUser nldUser = NLDUser.of(standardUser);
         Assertions.assertNotNull(nldUser);
+        Assertions.assertNotNull(nldUser.toString());
         Assertions.assertEquals(standardUser.getId(), nldUser.getId());
         Assertions.assertEquals(standardUser.getEmail(), nldUser.getEmail());
         Assertions.assertEquals(standardUser.getFirstName(), nldUser.getName());
@@ -363,16 +422,6 @@ class UserModuleTest {
         Assertions.assertEquals(standardUser.getRole(), nldUser.getRole());
         Assertions.assertEquals(standardUser.isEnabled(), nldUser.isEnabled());
         Assertions.assertEquals(standardUser.isCredentialsNonExpired(), nldUser.isCredentialsNonExpired());
-    }
-
-    @Test
-    void shouldCompareNLDUser() {
-        final NLUser standardUser = factory.standard();
-        NLDUser nldUser = NLDUser.of(standardUser);
-
-        Assertions.assertEquals(NLDUser.of(standardUser), nldUser);
-        Assertions.assertEquals(nldUser.toString(), nldUser.toString());
-        Assertions.assertEquals(nldUser.hashCode(), nldUser.hashCode());
-        Assertions.assertNotEquals(nldUser, NLDUser.of(factory.dashed()));
+        Assertions.assertEquals(nldUser.toString(), NLDUser.of(standardUser).toString());
     }
 }

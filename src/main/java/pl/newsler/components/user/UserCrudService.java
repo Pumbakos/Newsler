@@ -72,6 +72,7 @@ class UserCrudService implements IUserCrudService {
         nlUser.setAppKey(NLAppKey.of(hash(appKey.getValue())));
         nlUser.setSecretKey(NLSecretKey.of(hash(secretKey.getValue())));
         nlUser.setSmtpAccount(NLSmtpAccount.of(hash(smtpAccount.getValue())));
+        nlUser.setEnabled(true);
         userRepository.save(nlUser);
     }
 

@@ -10,6 +10,9 @@ import pl.newsler.commons.models.NLId;
 import pl.newsler.components.user.IUserCrudService;
 import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.UserDataNotFineException;
+import pl.newsler.components.user.models.UserCreateRequest;
+import pl.newsler.components.user.models.UserDeleteRequest;
+import pl.newsler.components.user.models.UserUpdateRequest;
 
 @RequiredArgsConstructor
 class UserController implements IUserController {
@@ -17,10 +20,40 @@ class UserController implements IUserController {
 
     @GetMapping("/{userId}")
     @Override
-    public ResponseEntity<NLDUser> getUser(@PathVariable("userId") NLId id) {
+    public ResponseEntity<NLDUser> getById(@PathVariable("userId") NLId id) {
         try {
             NLDUser user = userService.getById(id);
             return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (UserDataNotFineException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity<NLId> create(UserCreateRequest request) {
+        try {
+            NLId nlId = userService.create(request.name(), request.lastName(), request.email(), request.password());
+            return new ResponseEntity<>(nlId, HttpStatus.OK);
+        } catch (UserDataNotFineException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity<HttpStatus> update(UserUpdateRequest request) {
+        try {
+            userService.update(request.id(), request.appKey(), request.secretKey(), request.smtpAccount());
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (UserDataNotFineException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity<HttpStatus> delete(UserDeleteRequest request) {
+        try {
+            userService.delete(request.id(), request.password());
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (UserDataNotFineException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

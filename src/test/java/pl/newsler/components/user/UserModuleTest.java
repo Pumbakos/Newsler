@@ -32,7 +32,7 @@ class UserModuleTest {
             passwordEncoderConfigurationMock.passwordEncoder()
     );
     private final IUserCrudService service = configuration.userService();
-    private final UserFactory factory = new UserFactory();
+    private final TestUserFactory factory = new TestUserFactory();
 
     @BeforeEach
     void beforeEach() {
@@ -74,6 +74,13 @@ class UserModuleTest {
         Assertions.assertDoesNotThrow(() -> service.getById(factory.standard().getId()));
         Assertions.assertDoesNotThrow(() -> service.getById(factory.dashed().getId()));
         Assertions.assertDoesNotThrow(() -> service.getById(factory.dotted().getId()));
+
+        NLDUser standard = service.getById(factory.standard().getId());
+        NLDUser dashed = service.getById(factory.dashed().getId());
+        NLDUser dotted = service.getById(factory.dotted().getId());
+        Assertions.assertTrue(standard.isEnabled());
+        Assertions.assertTrue(dashed.isEnabled());
+        Assertions.assertTrue(dotted.isEnabled());
     }
 
     @Test

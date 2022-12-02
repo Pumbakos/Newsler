@@ -4,7 +4,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -25,7 +24,7 @@ import pl.newsler.commons.models.NLId;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.components.user.MockUserRepository;
 import pl.newsler.components.user.NLUser;
-import pl.newsler.components.user.UserFactory;
+import pl.newsler.components.user.TestUserFactory;
 import pl.newsler.security.MockNLIKeyProvider;
 import pl.newsler.security.MockNLPasswordEncoder;
 import pl.newsler.security.NLPublicAlias;
@@ -50,7 +49,7 @@ class JWTFilterTest {
     private final JWTConfiguration configuration = new JWTConfiguration(userRepository, passwordEncoder, keyProvider);
     private final JWTUtility utility = configuration.jwtUtility();
     private final IJWTAuthService service = configuration.authService(utility);
-    private final UserFactory factory = new UserFactory();
+    private final TestUserFactory factory = new TestUserFactory();
     private final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
 
     private final JWTFilter filter = new JWTFilter(new MockAuthenticationManager(), userRepository, utility);

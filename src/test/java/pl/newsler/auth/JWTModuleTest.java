@@ -15,7 +15,7 @@ import pl.newsler.commons.models.NLId;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.components.user.MockUserRepository;
 import pl.newsler.components.user.NLUser;
-import pl.newsler.components.user.UserFactory;
+import pl.newsler.components.user.TestUserFactory;
 import pl.newsler.security.MockNLIKeyProvider;
 import pl.newsler.security.MockNLPasswordEncoder;
 import pl.newsler.security.filters.JWTTestResolver;
@@ -30,7 +30,7 @@ class JWTModuleTest {
     private final JWTUtility utility = configuration.jwtUtility();
     private final IJWTAuthService service = configuration.authService(utility);
     private final IJWTAuthController controller = new JWTAuthController(service);
-    private final UserFactory factory = new UserFactory();
+    private final TestUserFactory factory = new TestUserFactory();
     final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
 
     @BeforeEach

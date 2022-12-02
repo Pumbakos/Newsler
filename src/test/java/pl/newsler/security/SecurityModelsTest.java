@@ -4,9 +4,8 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import pl.newsler.commons.models.NLId;
-import pl.newsler.commons.models.NLPassword;
 import pl.newsler.components.user.NLUser;
-import pl.newsler.components.user.UserFactory;
+import pl.newsler.components.user.TestUserFactory;
 
 import javax.security.auth.Subject;
 import java.util.HashSet;
@@ -14,7 +13,7 @@ import java.util.UUID;
 
 @SuppressWarnings({"java:S5778"})
 class SecurityModelsTest {
-    private final UserFactory factory = new UserFactory();
+    private final TestUserFactory factory = new TestUserFactory();
 
     @Test
     void shouldCreateAndCompareNLPrincipal() {

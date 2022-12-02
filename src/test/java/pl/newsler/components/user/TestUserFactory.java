@@ -11,12 +11,12 @@ import static pl.newsler.testcommons.TestUserUtils.firstName;
 import static pl.newsler.testcommons.TestUserUtils.lastName;
 import static pl.newsler.testcommons.TestUserUtils.username;
 
-public class UserFactory {
+public class TestUserFactory {
     private NLUser standard;
     private NLUser dashed;
     private NLUser dotted;
 
-    public UserFactory() {
+    public TestUserFactory() {
         createUserDottedEmail();
         createUserDashedEmail();
         createUserStandardEmail();

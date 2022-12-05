@@ -7,12 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import pl.newsler.api.IUserController;
 import pl.newsler.commons.models.NLId;
-import pl.newsler.components.user.IUserCrudService;
-import pl.newsler.components.user.NLDUser;
-import pl.newsler.components.user.UserDataNotFineException;
-import pl.newsler.components.user.models.UserCreateRequest;
-import pl.newsler.components.user.models.UserDeleteRequest;
-import pl.newsler.components.user.models.UserUpdateRequest;
+import pl.newsler.components.user.dto.UserCreateRequest;
+import pl.newsler.components.user.dto.UserDeleteRequest;
+import pl.newsler.components.user.dto.UserUpdateRequest;
 
 @RequiredArgsConstructor
 class UserController implements IUserController {

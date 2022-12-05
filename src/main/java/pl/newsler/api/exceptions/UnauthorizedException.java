@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import pl.newsler.exceptions.NLError;
-import pl.newsler.exceptions.NLException;
+import pl.newsler.commons.exceptions.NLError;
+import pl.newsler.commons.exceptions.NLException;
 
 @ResponseStatus(code = HttpStatus.UNAUTHORIZED, reason = "Unauthorized")
 @RequiredArgsConstructor

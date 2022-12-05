@@ -2,10 +2,10 @@ package pl.newsler.security;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-public class MockNLPasswordEncoder implements NLIPasswordEncoder {
+public class StubNLPasswordEncoder implements NLIPasswordEncoder {
     private final NLPasswordEncoderConfiguration configuration;
 
-    public MockNLPasswordEncoder() {
+    public StubNLPasswordEncoder() {
         this.configuration = new NLPasswordEncoderConfiguration();
     }
 

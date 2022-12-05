@@ -5,7 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import pl.newsler.testcommons.PleaseImplementMeException;
 
-public class MockAuthenticationManager implements AuthenticationManager {
+public class StubAuthenticationManager implements AuthenticationManager {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         throw new PleaseImplementMeException();

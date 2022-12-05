@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import pl.newsler.exceptions.RegexNotMatchException;
+import pl.newsler.commons.exceptions.RegexNotMatchException;
 
 import java.io.Serial;
 import java.io.Serializable;

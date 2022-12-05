@@ -22,11 +22,11 @@ import pl.newsler.auth.JWTUtility;
 import pl.newsler.auth.UserAuthModel;
 import pl.newsler.commons.models.NLId;
 import pl.newsler.commons.models.NLPassword;
-import pl.newsler.components.user.MockUserRepository;
+import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.TestUserFactory;
-import pl.newsler.security.MockNLIKeyProvider;
-import pl.newsler.security.MockNLPasswordEncoder;
+import pl.newsler.security.StubNLIKeyProvider;
+import pl.newsler.security.StubNLPasswordEncoder;
 import pl.newsler.security.NLPublicAlias;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -43,16 +43,16 @@ import static pl.newsler.testcommons.TestUserUtils.username;
 
 @SuppressWarnings({"java:S5778"})
 class JWTFilterTest {
-    private final MockUserRepository userRepository = new MockUserRepository();
-    private final MockNLIKeyProvider keyProvider = new MockNLIKeyProvider();
-    private final MockNLPasswordEncoder passwordEncoder = new MockNLPasswordEncoder();
+    private final StubUserRepository userRepository = new StubUserRepository();
+    private final StubNLIKeyProvider keyProvider = new StubNLIKeyProvider();
+    private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final JWTConfiguration configuration = new JWTConfiguration(userRepository, passwordEncoder, keyProvider);
     private final JWTUtility utility = configuration.jwtUtility();
-    private final IJWTAuthService service = configuration.authService(utility);
+    private final IJWTAuthService service = configuration.jwtAuthService(utility);
     private final TestUserFactory factory = new TestUserFactory();
     private final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
 
-    private final JWTFilter filter = new JWTFilter(new MockAuthenticationManager(), userRepository, utility);
+    private final JWTFilter filter = new JWTFilter(new StubAuthenticationManager(), userRepository, utility);
 
     @BeforeEach
     void beforeEach() {

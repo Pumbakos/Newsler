@@ -3,7 +3,7 @@ package pl.newsler.resources;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-public class MockLoader implements Loader {
+public class StubLoader implements Loader {
 
     @Override
     public InputStream getResource() throws FileNotFoundException {

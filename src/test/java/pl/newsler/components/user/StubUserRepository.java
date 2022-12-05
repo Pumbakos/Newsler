@@ -1,16 +1,14 @@
 package pl.newsler.components.user;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLId;
-import pl.newsler.commons.models.NLPassword;
 import pl.newsler.testcommons.InMemoryJpaRepository;
 
 import java.util.Map;
 import java.util.Optional;
 
-public class MockUserRepository extends InMemoryJpaRepository<NLUser, NLId> implements IUserRepository {
-    public MockUserRepository() {
+public class StubUserRepository extends InMemoryJpaRepository<NLUser, NLId> implements IUserRepository {
+    public StubUserRepository() {
         super(NLUser::getId);
     }
 

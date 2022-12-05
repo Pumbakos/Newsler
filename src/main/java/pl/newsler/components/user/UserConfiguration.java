@@ -12,7 +12,7 @@ class UserConfiguration {
     private final NLIPasswordEncoder passwordEncoder;
 
     @Bean(name = "userService")
-    public IUserCrudService userService(){
+    IUserCrudService userService(){
         return new UserCrudService(userRepository, passwordEncoder);
     }
 }

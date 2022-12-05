@@ -14,7 +14,7 @@ import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.security.MockNLPasswordEncoder;
+import pl.newsler.security.StubNLPasswordEncoder;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -24,9 +24,9 @@ import static pl.newsler.testcommons.TestUserUtils.smtpAccount;
 
 @SuppressWarnings("java:S5778")// none of `of()` methods listed below throws any Exception
 class UserModuleTest {
-    private final MockNLPasswordEncoder passwordEncoderConfigurationMock =
-            new MockNLPasswordEncoder();
-    private final MockUserRepository userRepositoryMock = new MockUserRepository();
+    private final StubNLPasswordEncoder passwordEncoderConfigurationMock =
+            new StubNLPasswordEncoder();
+    private final StubUserRepository userRepositoryMock = new StubUserRepository();
     private final UserConfiguration configuration = new UserConfiguration(
             userRepositoryMock,
             passwordEncoderConfigurationMock.passwordEncoder()

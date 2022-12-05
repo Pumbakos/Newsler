@@ -1,4 +1,4 @@
-package pl.newsler.components.user.models;
+package pl.newsler.components.user.dto;
 
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLId;

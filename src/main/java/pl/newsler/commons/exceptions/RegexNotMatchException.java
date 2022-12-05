@@ -1,13 +1,13 @@
-package pl.newsler.exceptions;
+package pl.newsler.commons.exceptions;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR, reason = "Resource not found")
+@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Given value does not match with regex validation")
 @RequiredArgsConstructor
-public class NoResourceFoundException extends NLException {
+public class RegexNotMatchException extends NLException {
     private final String cause;
     private final String message;
 

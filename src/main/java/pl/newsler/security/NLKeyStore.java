@@ -1,10 +1,11 @@
 package pl.newsler.security;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
-import pl.newsler.exceptions.NoResourceFoundException;
-import pl.newsler.exceptions.RegexNotMatchException;
-import pl.newsler.resources.ResourceLoaderFactory;
+import pl.newsler.commons.exceptions.NoResourceFoundException;
+import pl.newsler.commons.exceptions.RegexNotMatchException;
 import pl.newsler.security.exception.AlgorithmInitializatoinException;
 import pl.newsler.security.exception.DecryptionException;
 import pl.newsler.security.exception.EncryptionException;
@@ -38,7 +39,8 @@ import java.security.spec.KeySpec;
 import java.util.Optional;
 
 @Slf4j
-public class NLKeyStore {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+final class NLKeyStore {
     private static final TriDES triDES;
     private static final KeyStore keyStore;
     private static final String KEYSTORE_PASSWORD;
@@ -87,7 +89,7 @@ public class NLKeyStore {
         }
     }
 
-    public static byte[] getKey(NLAlias alias) {
+    static byte[] getKey(NLAlias alias) {
         try {
             final KeyStore.PasswordProtection aliasPasswordProtection = new KeyStore.PasswordProtection(new String(PWD).toCharArray());
             final KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) keyStore.getEntry(alias.getName(), aliasPasswordProtection);
@@ -98,19 +100,34 @@ public class NLKeyStore {
         }
     }
 
-    public static void setKey(String alias, String key) {
+    static byte[] getKey(NLPublicAlias alias) {
+        try {
+            final KeyStore.PasswordProtection aliasPasswordProtection = new KeyStore.PasswordProtection(new String(PWD).toCharArray());
+            final KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) keyStore.getEntry(alias.getName(), aliasPasswordProtection);
+            return triDES.decrypt(secretKeyEntry.getSecretKey().getEncoded());
+        } catch (UnrecoverableEntryException | KeyStoreException | NoSuchAlgorithmException e) {
+            log.warn(e.getMessage());
+            return new byte[]{};
+        }
+    }
+
+    static void setKey(String alias, String key) {
         try {
             final Optional<File> keystoreResource = ResourceLoaderFactory.getKeystoreResourceAsFile();
             if (keystoreResource.isEmpty()) {
                 throw new FileNotFoundException("Could not load keystore file");
             }
-            final File keystoreFile = keystoreResource.get();
+            Optional<File> optionalFile = ResourceLoaderFactory.getKeystoreResourceAsFile();
+            if (optionalFile.isEmpty()) {
+                throw new SecurityException();
+            }
 
+            final File file = optionalFile.get();
             final byte[] encryptedKey = triDES.encrypt(key.getBytes(StandardCharsets.UTF_8));
             final SecretKey secretKey = encodeKey(new String(encryptedKey).toCharArray());
             final KeyStore.PasswordProtection keyParam = new KeyStore.PasswordProtection(new String(PWD).toCharArray());
             keyStore.setEntry(alias, new KeyStore.SecretKeyEntry(secretKey), keyParam);
-            keyStore.store(new BufferedOutputStream(new FileOutputStream(keystoreFile)), KEYSTORE_PASSWORD.toCharArray());
+            keyStore.store(new BufferedOutputStream(new FileOutputStream(file)), KEYSTORE_PASSWORD.toCharArray());
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
             throw new EncryptionException("Could not set new key", e.getMessage());
         }

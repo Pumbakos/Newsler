@@ -7,21 +7,20 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PACKAGE, force = true)
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode
-public class NLId implements NLModel, Serializable {
+public class NLId implements NLModel {
     @Serial
     private static final long serialVersionUID = -2838811969171019799L;
 
     private final String value;
 
     public static NLId of(UUID uuid) {
-        return of(uuid, NLType.USER);
+        return of(uuid, NLUserType.USER);
     }
 
     public static NLId of(String id) {
@@ -32,7 +31,7 @@ public class NLId implements NLModel, Serializable {
         return nlId;
     }
 
-    public static NLId of(UUID uuid, NLType type) {
+    public static NLId of(UUID uuid, NLUserType type) {
         if (type == null) {
             throw new IllegalArgumentException();
         }

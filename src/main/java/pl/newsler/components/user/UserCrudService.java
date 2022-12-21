@@ -12,7 +12,7 @@ import pl.newsler.commons.models.NLModel;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.commons.models.NLType;
+import pl.newsler.commons.models.NLUserType;
 import pl.newsler.security.NLIPasswordEncoder;
 
 import java.util.Optional;
@@ -51,7 +51,7 @@ class UserCrudService implements IUserCrudService {
         user.setLastName(lastName);
         user.setEmail(email);
         user.setPassword(NLPassword.of(hash(password.getValue())));
-        user.setRole(NLType.USER);
+        user.setRole(NLUserType.USER);
         user.setId(NLId.of(UUID.randomUUID()));
         user.setVersion(UserRepository.version);
         user.setEnabled(true);
@@ -120,6 +120,6 @@ class UserCrudService implements IUserCrudService {
     }
 
     private String hash(String password) {
-        return passwordEncoder.bCrypt().encode(password);
+        return passwordEncoder.encrypt(password);
     }
 }

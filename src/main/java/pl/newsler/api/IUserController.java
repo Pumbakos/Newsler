@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import pl.newsler.commons.models.ApiVersion;
 import pl.newsler.commons.models.NLId;
 import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.dto.UserCreateRequest;
@@ -18,7 +17,7 @@ import pl.newsler.components.user.dto.UserDeleteRequest;
 import pl.newsler.components.user.dto.UserUpdateRequest;
 
 @CrossOrigin(origins = "*")
-@RequestMapping(ApiVersion.V1 + "/api/users")
+@RequestMapping(NLApi.V1 + "/api/users")
 public interface IUserController {
     @GetMapping("/{userId}")
     ResponseEntity<NLDUser> getById(@PathVariable("userId") String id);

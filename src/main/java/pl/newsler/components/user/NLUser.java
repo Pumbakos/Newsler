@@ -18,7 +18,7 @@ import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.commons.models.NLType;
+import pl.newsler.commons.models.NLUserType;
 import pl.newsler.commons.models.NLVersion;
 
 import javax.persistence.AttributeOverride;
@@ -101,7 +101,7 @@ public class NLUser implements UserDetails {
 
     @Enumerated
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ROLE")))
-    private NLType role;
+    private NLUserType role;
 
     @Column(name = "ENABLED")
     private Boolean enabled = false;

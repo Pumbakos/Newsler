@@ -145,8 +145,8 @@ class NLModelsTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = NLType.class)
-    void shouldValidateNLIdByNLType(NLType type) {
+    @EnumSource(value = NLUserType.class)
+    void shouldValidateNLIdByNLType(NLUserType type) {
         UUID uuid = UUID.randomUUID();
         NLId id = NLId.of(uuid, type);
         Assertions.assertTrue(id.validate());
@@ -180,7 +180,7 @@ class NLModelsTest {
 
     @Test
     void shouldThrowIllegalArgumentException() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> NLId.of(UUID.randomUUID(), NLType.valueOf("TEST_USER")));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NLId.of(UUID.randomUUID(), NLUserType.valueOf("TEST_USER")));
         Assertions.assertThrows(IllegalArgumentException.class, () -> NLId.of(UUID.fromString("")));
         Assertions.assertThrows(IllegalArgumentException.class, () -> NLId.of(UUID.fromString("user")));
     }

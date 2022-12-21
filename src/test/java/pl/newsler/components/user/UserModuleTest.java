@@ -27,7 +27,7 @@ class UserModuleTest {
     private final StubNLPasswordEncoder passwordEncoderConfigurationMock =
             new StubNLPasswordEncoder();
     private final StubUserRepository userRepositoryMock = new StubUserRepository();
-    private final UserConfiguration configuration = new UserConfiguration(
+    private final UserModuleConfiguration configuration = new UserModuleConfiguration(
             userRepositoryMock,
             passwordEncoderConfigurationMock.passwordEncoder()
     );

@@ -1,5 +1,7 @@
 package pl.newsler.commons.models;
 
-public interface NLModel {
+import java.io.Serializable;
+
+public interface NLModel extends Serializable {
     boolean validate();
 }

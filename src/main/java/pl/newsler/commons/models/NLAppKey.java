@@ -14,7 +14,7 @@ import java.io.Serializable;
 @NoArgsConstructor(access = AccessLevel.PACKAGE, force = true)
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC, staticName = "of")
 @EqualsAndHashCode
-public class NLAppKey implements NLModel, Serializable {
+public class NLAppKey implements NLModel {
     @Serial
     private static final long serialVersionUID = -6828434776883712910L;
 

@@ -45,6 +45,6 @@ class SecurityConfiguration implements WebSecurityCustomizer {
 
     @Override
     public void customize(WebSecurity web) {
-        web.ignoring().antMatchers("/v1/api/jwt");
+        web.ignoring().antMatchers("/v1/api/jwt", "/v1/api/mails");
     }
 }

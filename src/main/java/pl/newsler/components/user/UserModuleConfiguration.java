@@ -5,9 +5,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import pl.newsler.security.NLIPasswordEncoder;
 
-@Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor
-class UserConfiguration {
+@Configuration(proxyBeanMethods = false)
+class UserModuleConfiguration {
     private final IUserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
 

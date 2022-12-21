@@ -4,7 +4,7 @@ import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
 import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
-import pl.newsler.commons.models.NLType;
+import pl.newsler.commons.models.NLUserType;
 
 import static pl.newsler.testcommons.TestUserUtils.domain;
 import static pl.newsler.testcommons.TestUserUtils.firstName;
@@ -54,7 +54,7 @@ public class TestUserFactory {
         user.setPassword(NLPassword.of("Pa$$word7hat^match3$"));
         user.setEnabled(true);
         user.setLocked(false);
-        user.setRole(NLType.USER);
+        user.setRole(NLUserType.USER);
         dotted = user;
     }
 
@@ -66,7 +66,7 @@ public class TestUserFactory {
         user.setPassword(NLPassword.of("UJk6ds81#@^dsa"));
         user.setEnabled(true);
         user.setLocked(false);
-        user.setRole(NLType.USER);
+        user.setRole(NLUserType.USER);
         dashed = user;
     }
 
@@ -78,7 +78,7 @@ public class TestUserFactory {
         user.setPassword(NLPassword.of("U$Ad3na923mas$dmi"));
         user.setEnabled(true);
         user.setLocked(false);
-        user.setRole(NLType.USER);
+        user.setRole(NLUserType.USER);
         standard = user;
     }
 }

@@ -3,23 +3,22 @@ package pl.newsler.components.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.IUserController;
 import pl.newsler.commons.models.NLId;
 import pl.newsler.components.user.dto.UserCreateRequest;
 import pl.newsler.components.user.dto.UserDeleteRequest;
 import pl.newsler.components.user.dto.UserUpdateRequest;
 
+@RestController
 @RequiredArgsConstructor
 class UserController implements IUserController {
     private final IUserCrudService userService;
 
-    @GetMapping("/{userId}")
     @Override
-    public ResponseEntity<NLDUser> getById(@PathVariable("userId") NLId id) {
+    public ResponseEntity<NLDUser> getById(String id) {
         try {
-            NLDUser user = userService.getById(id);
+            NLDUser user = userService.getById(NLId.of(id));
             return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (UserDataNotFineException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

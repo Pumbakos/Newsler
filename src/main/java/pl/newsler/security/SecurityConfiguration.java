@@ -14,7 +14,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import pl.newsler.auth.JWTUtility;
 import pl.newsler.components.user.IUserCrudService;
 import pl.newsler.components.user.IUserRepository;
-import pl.newsler.security.filters.JWTFilter;
 
 import javax.annotation.Resource;
 
@@ -25,33 +24,27 @@ class SecurityConfiguration implements WebSecurityCustomizer {
     private final AuthenticationConfiguration authenticationConfiguration;
 
     @Resource(name = "bCryptPasswordEncoder")
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
     private final IUserRepository userRepository;
 
     @Resource(name = "userService")
     private final IUserCrudService userService;
     private final JWTUtility jwtUtility;
 
-//    @Autowired
-//    void configure(AuthenticationManagerBuilder builder, DataSource dataSource) throws Exception {
-//        builder.jdbcAuthentication()
-//                .dataSource(dataSource)
-//                .usersByUsernameQuery("SELECT EMAIL, PASSWORD, ENABLED FROM USERS WHERE EMAIL=?")
-//                .passwordEncoder(new BCryptPasswordEncoder());
-//    }
-
     @Bean(name = "securityFilterChain")
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.authorizeRequests().anyRequest().authenticated()
-                .and()
-                .addFilter(new JWTFilter(authenticationConfiguration.getAuthenticationManager(), userRepository, jwtUtility));
+//        http.authorizeRequests().anyRequest().authenticated()
+//                .and()
+//                .addFilter(new JWTFilter(authenticationConfiguration.getAuthenticationManager(), userRepository, jwtUtility));
+        //FIXME: https://www.baeldung.com/spring-security-oauth-jwt
 
         return http.build();
     }
 
     @Override
     public void customize(WebSecurity web) {
-        web.ignoring().antMatchers("/api/jwt"); //FIXME: use .authorizeRequests().antMatchers().permitAll() properly
+        web.ignoring().antMatchers("/v1/api/jwt");
     }
 }

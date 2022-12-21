@@ -24,6 +24,14 @@ public class NLId implements NLModel, Serializable {
         return of(uuid, NLType.USER);
     }
 
+    public static NLId of(String id) {
+        NLId nlId = new NLId(id);
+        if (!nlId.validate()) {
+            throw new IllegalArgumentException();
+        }
+        return nlId;
+    }
+
     public static NLId of(UUID uuid, NLType type) {
         if (type == null) {
             throw new IllegalArgumentException();

@@ -88,8 +88,8 @@ class UserCrudService implements IUserCrudService {
         }
 
         final NLUser user = optionalNLUser.get();
-        final String encodedPassword = user.getPassword();
-        if (!passwordEncoder.bCrypt().matches(password.getValue(), encodedPassword)) {
+        final String encodedPassword = passwordEncoder.decrypt(user.getPassword());
+        if (!password.getValue().equals(encodedPassword)) {
             throw new UserDataNotFineException();
         }
 

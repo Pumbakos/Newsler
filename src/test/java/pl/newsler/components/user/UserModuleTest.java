@@ -197,12 +197,12 @@ class UserModuleTest {
                 ));
 
         final Optional<NLUser> optionalNLUser = userRepositoryMock.findById(standardId);
-        if (optionalNLUser.isEmpty()){
+        if (optionalNLUser.isEmpty()) {
             Assertions.fail();
         }
         final NLUser user = optionalNLUser.get();
-        Assertions.assertTrue( passwordEncoderConfigurationMock.bCrypt().matches(appKey, user.getAppKey().getValue()));
-        Assertions.assertTrue( passwordEncoderConfigurationMock.bCrypt().matches(secretKey, user.getSecretKey().getValue()));
+        Assertions.assertEquals(passwordEncoderConfigurationMock.encrypt(appKey), user.getAppKey().getValue());
+        Assertions.assertEquals(passwordEncoderConfigurationMock.encrypt(secretKey), user.getSecretKey().getValue());
     }
 
     @Test

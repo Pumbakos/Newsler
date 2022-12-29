@@ -68,7 +68,7 @@ class H2Configuration {
                     NLPassword.of("E#7r4)4$$$^P931p)a$*")
             );
 
-            service.update(id1, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
+            service.update(id1, NLAppKey.of("18aa9884e66e0064fea46ef5ea81bd0129d35632"), NLSecretKey.of("c89ebf74312ee0b5933a03faff05f6d2165d60f3"), NLSmtpAccount.of("1.pumbakos.smtp"));
             service.update(id2, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id3, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id4, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));

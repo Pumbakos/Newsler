@@ -170,7 +170,7 @@ final class NLKeyStore {
         byte[] encrypt(byte[] bytes) throws EncryptionException {
             try {
                 cipher.init(Cipher.ENCRYPT_MODE, key);
-                return Base64.encodeBase64(cipher.doFinal(bytes));
+                return Base64.encodeBase64(cipher.doFinal(bytes), false);
             } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
                 throw new EncryptionException("Error while encrypting key", e.getMessage());
             }
@@ -179,7 +179,7 @@ final class NLKeyStore {
         byte[] decrypt(byte[] bytes) throws DecryptionException {
             try {
                 cipher.init(Cipher.DECRYPT_MODE, key);
-                return cipher.doFinal(Base64.decodeBase64(bytes));
+                return cipher.doFinal(Base64.decodeBase64(bytes, 0, bytes.length));
             } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
                 throw new DecryptionException("Error while decrypting key", e.getMessage());
             }

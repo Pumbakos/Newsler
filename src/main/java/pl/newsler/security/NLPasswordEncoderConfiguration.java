@@ -3,9 +3,11 @@ package pl.newsler.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+@ComponentScan
 @Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor
 class NLPasswordEncoderConfiguration {

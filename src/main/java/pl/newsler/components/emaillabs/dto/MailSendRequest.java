@@ -1,4 +1,4 @@
-package pl.newsler.components.mail.dto;
+package pl.newsler.components.emaillabs.dto;
 
 import org.springframework.lang.Nullable;
 

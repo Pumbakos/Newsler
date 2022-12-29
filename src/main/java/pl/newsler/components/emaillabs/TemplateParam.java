@@ -1,4 +1,4 @@
-package pl.newsler.components.mail;
+package pl.newsler.components.emaillabs;
 
 /**
  * <a href="https://dev.emaillabs.io/#api-Send-sendmail_templates">EmailLabs: Send e-mail with template API documentation</a>

@@ -1,4 +1,4 @@
-package pl.newsler.components.mail;
+package pl.newsler.components.emaillabs;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -10,10 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.NLApi;
-import pl.newsler.components.mail.dto.MailSendRequest;
+import pl.newsler.components.emaillabs.dto.MailSendRequest;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 

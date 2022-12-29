@@ -1,4 +1,4 @@
-package pl.newsler.components.mail;
+package pl.newsler.components.emaillabs;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.task.TaskExecutor;
@@ -6,7 +6,7 @@ import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.components.mail.dto.MailSendRequest;
+import pl.newsler.components.emaillabs.dto.MailSendRequest;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.UserDataNotFineException;

@@ -1,4 +1,4 @@
-package pl.newsler.components.mail;
+package pl.newsler.components.emaillabs;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

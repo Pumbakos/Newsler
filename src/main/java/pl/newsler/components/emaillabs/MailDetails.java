@@ -1,8 +1,8 @@
-package pl.newsler.components.mail;
+package pl.newsler.components.emaillabs;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import pl.newsler.components.mail.dto.MailSendRequest;
+import pl.newsler.components.emaillabs.dto.MailSendRequest;
 
 import java.util.List;
 import java.util.Map;

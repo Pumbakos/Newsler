@@ -1,8 +1,7 @@
-package pl.newsler.components.mail;
+package pl.newsler.components.emaillabs;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.util.Pair;
 import pl.newsler.components.user.NLUser;
 
 import java.io.BufferedReader;
@@ -17,7 +16,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor(staticName = "of")

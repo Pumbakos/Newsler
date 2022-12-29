@@ -1,8 +1,8 @@
 plugins {
-    id 'org.springframework.boot' version '2.7.4'
-    id 'io.spring.dependency-management' version '1.0.14.RELEASE'
     id 'java'
     id 'jacoco'
+    id 'org.springframework.boot' version '3.0.1'
+    id 'io.spring.dependency-management' version '1.1.0'
 }
 
 group = 'pl.newsler'
@@ -26,19 +26,20 @@ repositories {
 
 jacoco {
     toolVersion = "0.8.8"
-    reportsDirectory = layout.buildDirectory.dir('test-coverage-results')
+    reportsDirectory = layout.buildDirectory.dir('test-coverage-results') as Directory
 }
 
 dependencies {
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
 
-    implementation 'org.springframework.boot:spring-boot-starter-validation:2.7.5'
-    implementation 'org.springframework.boot:spring-boot-starter-data-rest:2.7.5'
-    implementation 'org.springframework.boot:spring-boot-starter-security:2.7.5'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.7.5'
-    implementation 'org.springframework.boot:spring-boot-starter-jersey:2.7.5'
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.5'
+    implementation 'org.springframework.boot:spring-boot-starter-validation:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-data-rest:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-security:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-jersey:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.0.1'
 
     implementation('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4.2'

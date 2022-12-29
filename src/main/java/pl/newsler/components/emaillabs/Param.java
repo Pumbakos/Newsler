@@ -1,7 +1,7 @@
 package pl.newsler.components.emaillabs;
 
 /**
- * <a href="https://dev.emaillabs.io/#api-Send">EmailLabs: Send e-mails API documentation</a>'
+ * <a href="https://dev.emaillabs.io/#api-Send-new_sendmail">EmailLabs: Send e-mails API documentation</a>'
  * <p><strong>Note:</strong> parameters are required unless stated otherwise</p>
  */
 public sealed class Param permits TemplateParam {

@@ -2,6 +2,7 @@ package pl.newsler.components.emaillabs;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import pl.newsler.components.user.NLUser;
 
 import java.io.BufferedReader;
@@ -42,10 +43,9 @@ class ExecutableMailCommand implements Runnable {
         String auth = "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
 
         try {
-            //FIXME: It is recommended to use new_sendmail method
             URL url = new URL("https://api.emaillabs.net.pl/api/new_sendmail");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            connection.setRequestProperty("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE);
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Authorization", auth);
             connection.setDoOutput(true);
@@ -55,7 +55,8 @@ class ExecutableMailCommand implements Runnable {
             String name = String.format("%s %s", user.getFirstName(), user.getLastName());
             params.put(Param.FROM_NAME, name);
             params.put(Param.SMTP_ACCOUNT, user.getSmtpAccount().getValue());
-            params.put(String.format(Param.TO_ADDRESS_NAME, userEmail, name), createKeyValueArray(details));
+            String key = String.format(Param.TO_ADDRESS_NAME, createToAddressesArray(details), name);
+            params.put(key, "");
             params.put(Param.SUBJECT, details.getSubject());
             params.put(Param.HTML, String.format("<pre>%s</pre>", details.getMessage()));
             params.put(Param.TEXT, details.getMessage());
@@ -67,14 +68,15 @@ class ExecutableMailCommand implements Runnable {
                 } else {
                     query.append("&");
                 }
-                query.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8))
+                query.append(entry.getKey())
                         .append("=")
-                        .append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
+                        .append(entry.getValue());
             }
+            String encoded = URLEncoder.encode(query.toString(), StandardCharsets.UTF_8);
 
             // send data
             OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
-            out.write(query.toString());
+            out.write(encoded);
             out.close();
 
             log.info(String.format("QUERY: %s%n", query));
@@ -91,11 +93,11 @@ class ExecutableMailCommand implements Runnable {
         }
     }
 
-    private String createKeyValueArray(MailDetails details) {
+    private String createToAddressesArray(MailDetails details) {
         StringBuilder builder = new StringBuilder();
-        builder.append("[");
-        details.getToAddresses().forEach((k, v) -> builder.append(k).append(",").append(v));
-        builder.append("]");
+        details.getToAddresses().forEach(email -> builder.append(email).append(","));
+        int i = builder.length();
+        builder.delete(i -1, i);
         return builder.toString();
     }
 }

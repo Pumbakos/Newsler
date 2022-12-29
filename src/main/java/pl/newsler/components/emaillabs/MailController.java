@@ -13,8 +13,7 @@ import pl.newsler.api.NLApi;
 import pl.newsler.components.emaillabs.dto.MailSendRequest;
 
 import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
+import java.util.List;
 
 @CrossOrigin(origins = {"*"})
 @RestController
@@ -31,7 +30,6 @@ public class MailController {
 
     @GetMapping
     public ResponseEntity<MailSendRequest> test() {
-        String email = "newslerowsky@app.co.devenv";
-        return new ResponseEntity<>(new MailSendRequest("", Map.of(email, String.format("%s.%s", UUID.randomUUID(), email)), Collections.emptyList(), Collections.emptyList(), "TEST", "TEST"), HttpStatus.OK);
+        return new ResponseEntity<>(new MailSendRequest("", List.of("newslerowsky@app.co.devenv"), Collections.emptyList(), Collections.emptyList(), "TEST", "TEST"), HttpStatus.OK);
     }
 }

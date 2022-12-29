@@ -10,7 +10,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Getter
 public class MailDetails {
-    private final Map<String, String> toAddresses;
+    private final List<String> toAddresses;
     private final List<String> cc;
     private final List<String> bcc;
     private final String subject;

@@ -1,6 +1,7 @@
 package pl.newsler.security;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
@@ -13,6 +14,12 @@ public class NLAuthenticationToken extends AbstractAuthenticationToken {
         super(authorities);
         this.principal = principal;
         this.credentials = credentials;
+    }
+
+    public NLAuthenticationToken(Authentication authentication) {
+        super(authentication.getAuthorities());
+        this.principal = (NLPrincipal) authentication.getPrincipal();
+        this.credentials = (NLCredentials) authentication.getCredentials();
     }
 
     @Override

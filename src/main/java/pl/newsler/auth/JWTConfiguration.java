@@ -11,23 +11,23 @@ import pl.newsler.security.NLIPasswordEncoder;
 @ComponentScan
 @RequiredArgsConstructor
 @Configuration(proxyBeanMethods = false)
-public class JWTConfiguration {
+class JWTConfiguration {
     private final IUserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
     private final NLIKeyProvider keyProvider;
 
     @Bean(name = "jwtUtility")
-    public JWTUtility jwtUtility() {
+    JWTUtility jwtUtility() {
         return new JWTUtility(keyProvider);
     }
 
     @Bean(name = "jwtAuthService")
-    public IJWTAuthService jwtAuthService(JWTUtility utility) {
+    IJWTAuthService jwtAuthService(JWTUtility utility) {
         return new JWTAuthService(userRepository, passwordEncoder, utility);
     }
 
-//    @Bean
-//    EntityManagerFactory entityManagerFactory() {
-//        return Enti
-//    }
+    @Bean(name = "jwtAuthenticationEntryPoint")
+    JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
+        return new JwtAuthenticationEntryPoint();
+    }
 }

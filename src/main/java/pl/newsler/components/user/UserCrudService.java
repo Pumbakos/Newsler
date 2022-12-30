@@ -1,8 +1,6 @@
 package pl.newsler.components.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
@@ -50,7 +48,7 @@ class UserCrudService implements IUserCrudService {
         user.setFirstName(name);
         user.setLastName(lastName);
         user.setEmail(email);
-        user.setPassword(NLPassword.of(hash(password.getValue())));
+        user.setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(password.getValue())));
         user.setRole(NLUserType.USER);
         user.setId(NLId.of(UUID.randomUUID()));
         user.setVersion(UserRepository.version);
@@ -88,27 +86,11 @@ class UserCrudService implements IUserCrudService {
         }
 
         final NLUser user = optionalNLUser.get();
-        final String encodedPassword = passwordEncoder.decrypt(user.getPassword());
-        if (!password.getValue().equals(encodedPassword)) {
+        if (!passwordEncoder.bCrypt().matches(password.getValue(), user.getPassword())) {
             throw new UserDataNotFineException();
         }
 
         userRepository.deleteById(user.getId());
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        NLEmail nlEmail = NLEmail.of(email);
-        if (!nlEmail.validate()) {
-            throw new UserDataNotFineException();
-        }
-
-        Optional<NLUser> optionalNLUser = userRepository.findByEmail(nlEmail);
-        if (optionalNLUser.isEmpty()) {
-            throw new UserDataNotFineException();
-        }
-
-        return optionalNLUser.get();
     }
 
     private boolean isDataOk(NLModel first, NLModel second, NLModel third) {

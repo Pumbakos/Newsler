@@ -1,22 +1,18 @@
 package pl.newsler.components.emaillabs;
 
+import jakarta.ws.rs.core.HttpHeaders;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 import pl.newsler.components.user.NLUser;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 
 @Slf4j
 @RequiredArgsConstructor(staticName = "of")
@@ -37,60 +33,37 @@ class ExecutableMailCommand implements Runnable {
      */
     @Override
     public void run() {
-        final HashMap<String, String> params = new HashMap<>();
-        final StringBuilder query = new StringBuilder();
+        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         String userPass = user.getAppKey() + ":" + user.getSecretKey();
         String auth = "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
 
-        try {
-            URL url = new URL("https://api.emaillabs.net.pl/api/new_sendmail");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestProperty("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Authorization", auth);
-            connection.setDoOutput(true);
+        WebClient client = WebClient.builder()
+                .baseUrl("https://api.emaillabs.net.pl/api")
+                .defaultHeader(HttpHeaders.AUTHORIZATION, auth)
+                .build();
 
-            String userEmail = user.getEmail().getValue();
-            params.put(Param.FROM, userEmail);
-            String name = String.format("%s %s", user.getFirstName(), user.getLastName());
-            params.put(Param.FROM_NAME, name);
-            params.put(Param.SMTP_ACCOUNT, user.getSmtpAccount().getValue());
-            String key = String.format(Param.TO_ADDRESS_NAME, createToAddressesArray(details), name);
-            params.put(key, "");
-            params.put(Param.SUBJECT, details.getSubject());
-            params.put(Param.HTML, String.format("<pre>%s</pre>", details.getMessage()));
-            params.put(Param.TEXT, details.getMessage());
+        String userEmail = user.getEmail().getValue();
+        params.put(Param.FROM, Collections.singletonList(userEmail));
+        String name = String.format("%s %s", user.getFirstName(), user.getLastName());
+        params.put(Param.FROM_NAME, Collections.singletonList(name));
+        params.put(Param.SMTP_ACCOUNT, Collections.singletonList(user.getSmtpAccount().getValue()));
+        String key = String.format(Param.TO_ADDRESS_NAME, createToAddressesArray(details), name);
+        params.put(key, Collections.singletonList(""));
+        params.put(Param.SUBJECT, Collections.singletonList(details.getSubject()));
+        params.put(Param.HTML, Collections.singletonList(String.format("<pre>%s</pre>", details.getMessage())));
+        params.put(Param.TEXT, Collections.singletonList(details.getMessage()));
 
-            boolean first = true;
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-                if (first) {
-                    first = false;
-                } else {
-                    query.append("&");
-                }
-                query.append(entry.getKey())
-                        .append("=")
-                        .append(entry.getValue());
-            }
-            String encoded = URLEncoder.encode(query.toString(), StandardCharsets.UTF_8);
+        BodyInserters.FormInserter<String> formData = BodyInserters.fromFormData(params);
 
-            // send data
-            OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
-            out.write(encoded);
-            out.close();
+        ELASendMailResponse response = client.post()
+                .uri("URL")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(formData)
+                .retrieve()
+                .bodyToMono(ELASendMailResponse.class)
+                .block();
 
-            log.info(String.format("QUERY: %s%n", query));
-
-            // read output
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            log.info(in.readLine());
-
-            in.close();
-            connection.disconnect();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            log.error(Arrays.toString(e.getStackTrace()));
-        }
+        log.info(String.format("QUERY: %s%n", response));
     }
 
     private String createToAddressesArray(MailDetails details) {

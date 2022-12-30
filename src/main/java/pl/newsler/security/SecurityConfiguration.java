@@ -1,43 +1,52 @@
 package pl.newsler.security;
 
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CsrfFilter;
+import pl.newsler.auth.CustomAuthenticationProvider;
 import pl.newsler.auth.JWTUtility;
-import pl.newsler.components.user.IUserCrudService;
+import pl.newsler.auth.JwtAuthenticationEntryPoint;
 import pl.newsler.components.user.IUserRepository;
+import pl.newsler.security.filters.JWTFilter;
 
 @ComponentScan
 @Configuration(proxyBeanMethods = false)
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 @RequiredArgsConstructor
 class SecurityConfiguration {
-//    private final AuthenticationConfiguration authenticationConfiguration;
-//
-//    @Resource(name = "bCryptPasswordEncoder")
-//    private final BCryptPasswordEncoder bCryptPasswordEncoder;
-//
-//    private final IUserRepository userRepository;
-//
-//    @Resource(name = "userService")
-//    private final IUserCrudService userService;
-//    private final JWTUtility jwtUtility;
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final JWTUtility jwtUtility;
+    private final IUserRepository userRepository;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final CustomAuthenticationProvider customAuthenticationProvider;
+
+    @Bean
+    public AuthenticationManager authManager() {
+        return authenticationManagerBuilder.authenticationProvider(customAuthenticationProvider).getOrBuild();
+    }
 
     @Bean(name = "securityFilterChain")
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-//        http.authorizeRequests().anyRequest().authenticated()
-//                .and()
-//                .addFilter(new JWTFilter(authenticationConfiguration.getAuthenticationManager(), userRepository, jwtUtility));
-        //FIXME: https://www.baeldung.com/spring-security-oauth-jwt
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests()
+                .requestMatchers("/v1/api/jwt").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().csrf().disable()
+                .cors().disable();
+
+        http.addFilterAfter(new JWTFilter(authenticationManagerBuilder.getOrBuild(), userRepository, jwtUtility), CsrfFilter.class);
 
         return http.build();
     }

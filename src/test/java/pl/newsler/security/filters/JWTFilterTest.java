@@ -17,8 +17,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import pl.newsler.api.exceptions.UnauthorizedException;
 import pl.newsler.auth.IJWTAuthService;
 import pl.newsler.auth.JWTClaim;
-import pl.newsler.auth.JWTConfiguration;
 import pl.newsler.auth.JWTUtility;
+import pl.newsler.auth.StubJWTConfiguration;
 import pl.newsler.auth.UserAuthModel;
 import pl.newsler.commons.models.NLId;
 import pl.newsler.commons.models.NLPassword;
@@ -29,7 +29,7 @@ import pl.newsler.security.StubNLIKeyProvider;
 import pl.newsler.security.StubNLPasswordEncoder;
 import pl.newsler.security.NLPublicAlias;
 
-import javax.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.HttpHeaders;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -46,13 +46,13 @@ class JWTFilterTest {
     private final StubUserRepository userRepository = new StubUserRepository();
     private final StubNLIKeyProvider keyProvider = new StubNLIKeyProvider();
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
-    private final JWTConfiguration configuration = new JWTConfiguration(userRepository, passwordEncoder, keyProvider);
+    private final StubAuthenticationManager authenticationManager = new StubAuthenticationManager();
+    private final StubJWTConfiguration configuration = new StubJWTConfiguration(userRepository, keyProvider, passwordEncoder);
     private final JWTUtility utility = configuration.jwtUtility();
     private final IJWTAuthService service = configuration.jwtAuthService(utility);
     private final TestUserFactory factory = new TestUserFactory();
     private final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
-
-    private final JWTFilter filter = new JWTFilter(new StubAuthenticationManager(), userRepository, utility);
+    private final JWTFilter filter = new JWTFilter(authenticationManager, userRepository, utility);
 
     @BeforeEach
     void beforeEach() {

@@ -324,34 +324,8 @@ class UserModuleTest {
         final NLUser user = optionalNLUser.get();
 
         Assertions.assertEquals(standardUserId, user.getId());
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.delete(user.getId(), NLPassword.of("PL3ks81#@^dsa")));
+        Assertions.assertThrows(UserDataNotFineException.class, () -> service.delete(user.getId(), NLPassword.of(factory.standard_plainPassword())));
         Assertions.assertEquals(optionalNLUser, userRepositoryMock.findById(standardUserId));
-    }
-
-    /* ----------------- LOAD USER ----------------- */
-    @Test
-    void shouldLoadUserByUsername_ValidEmail_ExistingUser() {
-        final NLUser standardUser = factory.standard();
-        Assertions.assertDoesNotThrow(() -> service.loadUserByUsername(standardUser.getEmail().getValue()));
-
-        final Optional<NLUser> optionalNLUser = userRepositoryMock.findById(standardUser.getId());
-        if (optionalNLUser.isEmpty()) {
-            Assertions.fail();
-        }
-
-        final UserDetails userDetails = service.loadUserByUsername(standardUser.getEmail().getValue());
-        Assertions.assertEquals(userDetails.getUsername(), standardUser.getUsername());
-        Assertions.assertEquals(userDetails.getPassword(), optionalNLUser.get().getPassword());
-    }
-
-    @Test
-    void shouldNotLoadUserByUsername_InvalidEmail() {
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.loadUserByUsername("user.d'amora@person.dev"));
-    }
-
-    @Test
-    void shouldNotLoadUserByUsername_ValidEmail_NonExistingUser() {
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.loadUserByUsername("user.d-amora@person.dev"));
     }
 
     @Test

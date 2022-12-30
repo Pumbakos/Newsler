@@ -1,11 +1,14 @@
 package pl.newsler.auth;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import pl.newsler.api.exceptions.UnauthorizedException;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.NLUser;
+import pl.newsler.components.user.UserDataNotFineException;
 import pl.newsler.security.NLIPasswordEncoder;
 
 import java.time.Instant;
@@ -13,7 +16,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-class JWTAuthService implements IJWTAuthService{
+class JWTAuthService implements IJWTAuthService {
     private final IUserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
     private final JWTUtility jwtUtility;
@@ -35,7 +38,24 @@ class JWTAuthService implements IJWTAuthService{
         if (!credentialsValid(user, userAuthModel)) {
             throw new UnauthorizedException("User's credentials invalid", "Token not generated");
         }
-        return generateToken(user);
+
+        NLUser userDetails = (NLUser) loadUserByUsername(user.getEmail().getValue());
+        return generateToken(userDetails.map());
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        NLEmail nlEmail = NLEmail.of(email);
+        if (!nlEmail.validate()) {
+            throw new UserDataNotFineException();
+        }
+
+        Optional<NLUser> optionalUser = userRepository.findByEmail(nlEmail);
+        if (optionalUser.isEmpty()) {
+            throw new UserDataNotFineException();
+        }
+
+        return optionalUser.get();
     }
 
     private boolean credentialsValid(NLDUser user, UserAuthModel userAuthModel) {

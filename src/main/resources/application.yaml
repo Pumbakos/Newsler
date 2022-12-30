@@ -1,8 +1,9 @@
 server:
-  port: 8080
+  port: 8443
   error:
     include-message: always
     include-binding-errors: always
+    include-exception: true
   tomcat:
     accesslog:
       enabled: true

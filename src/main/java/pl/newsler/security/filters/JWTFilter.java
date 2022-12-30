@@ -62,7 +62,11 @@ public class JWTFilter extends OncePerRequestFilter {
 
         performAuthentication(authentication);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-//            chain.doFilter(request, response);
+        try {
+            chain.doFilter(request, response);
+        } catch (IOException | ServletException e) {
+            throw new UnauthorizedException(TOKEN, e.getMessage());
+        }
     }
 
     private void performAuthentication(NLAuthenticationToken authentication) {

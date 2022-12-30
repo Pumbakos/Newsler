@@ -38,9 +38,7 @@ class SecurityConfiguration {
         http
                 .authorizeHttpRequests()
                 .requestMatchers("/v1/api/jwt").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .anyRequest().authenticated().and().csrf().ignoringRequestMatchers("/**")
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().csrf().disable()

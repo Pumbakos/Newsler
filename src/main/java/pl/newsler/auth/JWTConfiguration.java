@@ -25,9 +25,4 @@ class JWTConfiguration {
     IJWTAuthService jwtAuthService(JWTUtility utility) {
         return new JWTAuthService(userRepository, passwordEncoder, utility);
     }
-
-    @Bean(name = "jwtAuthenticationEntryPoint")
-    JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
-        return new JwtAuthenticationEntryPoint();
-    }
 }

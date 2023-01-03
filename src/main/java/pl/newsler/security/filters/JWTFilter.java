@@ -43,15 +43,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain chain) {
-        if (request.getRequestURI().equals("/v1/api/jwt")) {
-            try {
-                chain.doFilter(request, response);
-            } catch (IOException | ServletException e) {
-                throw new UnauthorizedException(TOKEN, e.getMessage());
-            }
-            return;
-        }
-
         final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.isBlank(header)) {
             throw new UnauthorizedException("Nullable or empty auth header", "Not authorized");

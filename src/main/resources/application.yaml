@@ -45,5 +45,14 @@ spring:
           writetimeout: 5000
 
 logging:
+  level:
+#    root: debug
+    org:
+      springframework:
+        web: trace
+        http: trace
+        security: trace
   pattern:
     dateformat: "dd/MM/yyyy HH:mm:ss"
+
+debug: true

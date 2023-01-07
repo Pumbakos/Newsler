@@ -2,6 +2,7 @@ package pl.newsler.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
@@ -14,19 +15,22 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class CustomAuthenticationProvider implements AuthenticationProvider {
+public class NLAuthenticationProvider implements AuthenticationProvider {
     private final IUserRepository userRepository;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        if (authentication instanceof NLAuthenticationToken token && token.isValidated()) {
+            return token;
+        }
+
         NLPrincipal principal = (NLPrincipal) authentication.getPrincipal();
         Optional<NLUser> optionalUser = userRepository.findByEmail(principal.getEmail());
 
         if (optionalUser.isPresent()) {
             return new NLAuthenticationToken(authentication);
-        } else {
-            return null;
         }
+        throw new BadCredentialsException("Incorrect credentials. Not authenticated.");
     }
 
     @Override

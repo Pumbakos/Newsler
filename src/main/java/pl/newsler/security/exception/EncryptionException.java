@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import pl.newsler.api.exceptions.Advised;
 import pl.newsler.commons.exceptions.NLError;
 import pl.newsler.commons.exceptions.NLException;
 
+@Advised
 @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR, reason = "Could not finalize encryption process")
 @RequiredArgsConstructor
 public class EncryptionException extends NLException {

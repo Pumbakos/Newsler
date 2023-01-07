@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.security.NLIKeyProvider;
 import pl.newsler.security.NLIPasswordEncoder;
+import pl.newsler.security.filters.JWTFilter;
 
 @ComponentScan
 @RequiredArgsConstructor

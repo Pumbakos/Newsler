@@ -2,7 +2,8 @@ package pl.newsler.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import pl.newsler.security.exception.AlgorithmInitializatoinException;
+import pl.newsler.api.exceptions.Advised;
+import pl.newsler.security.exception.AlgorithmInitializationException;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -14,6 +15,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
 
+@Advised
 @RequiredArgsConstructor
 class NLPasswordEncoder implements NLIPasswordEncoder {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -56,7 +58,7 @@ class NLPasswordEncoder implements NLIPasswordEncoder {
             KeySpec spec = new PBEKeySpec(password, salt, Short.MAX_VALUE, 256); //iterations?
             return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), AlgorithmType.AES.toString());
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new AlgorithmInitializatoinException(e.getMessage(), e.getCause().toString());
+            throw new AlgorithmInitializationException(e.getMessage(), e.getCause().toString());
         }
     }
 }

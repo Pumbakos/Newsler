@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.NLApi;
+import pl.newsler.api.exceptions.Advised;
 import pl.newsler.components.emaillabs.dto.MailSendRequest;
 
 import java.util.Collections;
 import java.util.List;
 
+@Advised
 @CrossOrigin(origins = {"*"})
 @RestController
 @RequiredArgsConstructor

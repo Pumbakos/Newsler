@@ -4,17 +4,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.SecurityConfigurer;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import pl.newsler.auth.CustomAuthenticationProvider;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import pl.newsler.auth.NLAuthenticationProvider;
 import pl.newsler.auth.DatabaseUserDetailService;
 import pl.newsler.auth.Http401UnauthorizedEntryPoint;
 import pl.newsler.auth.JWTUtility;
@@ -24,34 +26,45 @@ import pl.newsler.security.filters.JWTFilter;
 @ComponentScan
 @Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
+@EnableGlobalAuthentication
 @RequiredArgsConstructor
 class SecurityConfiguration {
-    private final CustomAuthenticationProvider customAuthenticationProvider;
     private final DatabaseUserDetailService userDetailService;
     private final NLIPasswordEncoder passwordEncoder;
+    private final Http401UnauthorizedEntryPoint entryPoint = new Http401UnauthorizedEntryPoint();
     private final IUserRepository userRepository;
     private final JWTUtility jwtUtility;
 
     @Bean(name = "securityFilterChain")
     SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-        AuthenticationManager builderObject = authenticationManagerBuilder.getObject();
-//        AuthenticationManager newManager = new
-//                .authenticationProvider(customAuthenticationProvider)
-//                .userDetailsService(userDetailService)
-//                .passwordEncoder(passwordEncoder.bCrypt())
-//                .and().getOrBuild();
-
+        AuthenticationManager manager = authenticationManagerBuilder.getObject();
         http
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
-                .securityMatcher("/v1/api/**")
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/v1/api/jwt").permitAll()
-                        .requestMatchers("/**").authenticated()
+                                .anyRequest().permitAll() // temporarily authenticated via JWT
                 )
-                .addFilterBefore(new JWTFilter(builderObject, userRepository, jwtUtility), UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(customizer -> customizer.authenticationEntryPoint(new Http401UnauthorizedEntryPoint()));
+                .exceptionHandling(customizer -> customizer
+                        .accessDeniedHandler(entryPoint)
+                        .authenticationEntryPoint(entryPoint)
+                )
+                .addFilterBefore(new JWTFilter("/v1/auth/jwt", manager, userDetailService, jwtUtility), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+//    @Bean
+//    public DaoAuthenticationProvider authenticationProvider() {
+//        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+//        authProvider.
+//        authProvider.setUserDetailsService(userDetailService);
+//        authProvider.setPasswordEncoder(passwordEncoder.bCrypt());
+//
+//        return authProvider;
+//    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 }

@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import pl.newsler.commons.exceptions.NoResourceFoundException;
 import pl.newsler.commons.exceptions.RegexNotMatchException;
-import pl.newsler.security.exception.AlgorithmInitializatoinException;
+import pl.newsler.security.exception.AlgorithmInitializationException;
 import pl.newsler.security.exception.DecryptionException;
 import pl.newsler.security.exception.EncryptionException;
 import pl.newsler.security.exception.KetStoreInitializationException;
@@ -156,14 +156,14 @@ final class NLKeyStore {
         final Cipher cipher;
         final SecretKey key;
 
-        TriDES(byte[] encKey) throws AlgorithmInitializatoinException {
+        TriDES(byte[] encKey) throws AlgorithmInitializationException {
             try {
                 KeySpec keySpec = new DESedeKeySpec(encKey);
                 SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(AlgorithmType.TRIPLE_DES.toString());
                 cipher = Cipher.getInstance(AlgorithmType.TRIPLE_DES.toString());
                 key = keyFactory.generateSecret(keySpec);
             } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeySpecException e) {
-                throw new AlgorithmInitializatoinException(e.getMessage(), e.getCause().toString());
+                throw new AlgorithmInitializationException(e.getMessage(), e.getCause().toString());
             }
         }
 

@@ -9,20 +9,21 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.HttpHeaders;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import pl.newsler.api.exceptions.Advised;
 import pl.newsler.api.exceptions.UnauthorizedException;
+import pl.newsler.auth.DatabaseUserDetailService;
 import pl.newsler.auth.JWTClaim;
 import pl.newsler.auth.JWTUtility;
 import pl.newsler.commons.models.NLEmail;
-import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.security.NLAuthenticationToken;
@@ -31,18 +32,43 @@ import pl.newsler.security.NLPrincipal;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 
-@RequiredArgsConstructor
+@Advised
 public class JWTFilter extends OncePerRequestFilter {
     private static final String TOKEN = "Token";
     private final AuthenticationManager authenticationManager;
-    private final IUserRepository repository;
+    private final DatabaseUserDetailService databaseUserDetailService;
     private final JWTUtility utility;
+    private final String filterNotProcessingUrl;
+
+    /**
+     * Creates a new instance with a default filterProcessesUrl and an
+     * {@link AuthenticationManager}
+     *
+     * @param defaultFilterProcessesUrl the default value for <tt>filterProcessesUrl</tt>.
+     * @param authenticationManager     the {@link AuthenticationManager} used to authenticate
+     *                                  an {@link Authentication} object. Cannot be null.
+     * @param databaseUserDetailService {@link org.springframework.security.core.userdetails.UserDetailsService}
+     */
+    public JWTFilter(@NotNull String defaultFilterProcessesUrl, AuthenticationManager authenticationManager, DatabaseUserDetailService databaseUserDetailService, @NotNull JWTUtility utility) {
+        super();
+        this.filterNotProcessingUrl = defaultFilterProcessesUrl;
+        this.authenticationManager = authenticationManager;
+        this.databaseUserDetailService = databaseUserDetailService;
+        this.utility = utility;
+    }
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain chain) {
+        if (request.getRequestURI().contains(filterNotProcessingUrl)) {
+            try {
+                chain.doFilter(request, response);
+            } catch (IOException | ServletException e) {
+                throw new UnauthorizedException(TOKEN, e.getMessage());
+            }
+        }
+
         final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.isBlank(header)) {
             throw new UnauthorizedException("Nullable or empty auth header", "Not authorized");
@@ -76,15 +102,12 @@ public class JWTFilter extends OncePerRequestFilter {
             throw new UnauthorizedException("Email", "Invalid email");
         }
 
-        final Optional<NLUser> optionalUser = repository.findByEmail(nlEmail);
-        if (optionalUser.isEmpty()) {
-            throw new UnauthorizedException(TOKEN, "Access denied");
-        }
+        final NLUser user = (NLUser) databaseUserDetailService.loadUserByUsername(email);
 
         if (JWTResolver.resolveJWT(jwt)) {
-            final NLDUser user = NLDUser.of(optionalUser.get());
-            final NLPrincipal principal = createPrincipal(user);
-            final NLCredentials credentials = createCredentials(user);
+            final NLDUser dtoUser = user.map();
+            final NLPrincipal principal = createPrincipal(dtoUser);
+            final NLCredentials credentials = createCredentials(dtoUser);
             final Set<SimpleGrantedAuthority> roles = Collections.singleton(new SimpleGrantedAuthority(jwt.getClaim(JWTClaim.ROLE).asString()));
 
             return new NLAuthenticationToken(principal, credentials, roles);

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import pl.newsler.api.IJWTAuthController;
 import pl.newsler.api.exceptions.UnauthorizedException;
 import pl.newsler.commons.models.NLId;
@@ -32,6 +33,7 @@ class JWTModuleTest {
     private final JWTConfiguration configuration = new JWTConfiguration(userRepository, passwordEncoder, keyProvider);
     private final JWTUtility utility = configuration.jwtUtility();
     private final IJWTAuthService service = configuration.jwtAuthService(utility);
+    private final UserDetailsService userDetailsService = configuration.databaseUserDetailService();
     private final IJWTAuthController controller = new JWTAuthController(service);
     private final TestUserFactory factory = new TestUserFactory();
     final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
@@ -146,26 +148,26 @@ class JWTModuleTest {
     @Test
     void shouldLoadUserByUsername_ValidEmail_ExistingUser() {
         final NLUser standardUser = factory.standard();
-        Assertions.assertDoesNotThrow(() -> service.loadUserByUsername(standardUser.getEmail().getValue()));
+        Assertions.assertDoesNotThrow(() -> userDetailsService.loadUserByUsername(standardUser.getEmail().getValue()));
 
         final Optional<NLUser> optionalNLUser = userRepository.findById(standardUser.map().getId());
         if (optionalNLUser.isEmpty()) {
             Assertions.fail();
         }
 
-        final UserDetails userDetails = service.loadUserByUsername(standardUser.getEmail().getValue());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(standardUser.getEmail().getValue());
         Assertions.assertEquals(userDetails.getUsername(), standardUser.getUsername());
         Assertions.assertEquals(userDetails.getPassword(), optionalNLUser.get().getPassword());
     }
 
     @Test
     void shouldNotLoadUserByUsername_InvalidEmail() {
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.loadUserByUsername("user.d'amora@person.dev"));
+        Assertions.assertThrows(UserDataNotFineException.class, () -> userDetailsService.loadUserByUsername("user.d'amora@person.dev"));
     }
 
     @Test
     void shouldNotLoadUserByUsername_ValidEmail_NonExistingUser() {
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.loadUserByUsername("user.d-amora@person.dev"));
+        Assertions.assertThrows(UserDataNotFineException.class, () -> userDetailsService.loadUserByUsername("user.d-amora@person.dev"));
     }
 
     private DecodedJWT verify(String token) {

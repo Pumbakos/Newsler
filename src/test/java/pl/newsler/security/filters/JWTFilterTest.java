@@ -52,7 +52,7 @@ class JWTFilterTest {
     private final IJWTAuthService service = configuration.jwtAuthService(utility);
     private final TestUserFactory factory = new TestUserFactory();
     private final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
-    private final JWTFilter filter = new JWTFilter(authenticationManager, userRepository, utility);
+    private final JWTFilter filter = new JWTFilter("/v1/auth/jwt", authenticationManager, configuration.databaseUserDetailService(), utility);
 
     @BeforeEach
     void beforeEach() {
@@ -148,6 +148,7 @@ class JWTFilterTest {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+        request.setRequestURI("/v1/auth/jwt");
         Assertions.assertDoesNotThrow(() -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
     }
 
@@ -203,14 +204,14 @@ class JWTFilterTest {
 
     private String generateToken(Instant now, String jwtId, String keyId, String issuer, String email, String name, String role) {
         return utility.builder()
-                .withJWTId(String.valueOf(JWTClaim.JWT_ID))
-                .withKeyId(utility.hmac384().getSigningKeyId())
-                .withIssuer("")
+                .withJWTId(jwtId)
+                .withKeyId(keyId)
+                .withIssuer(issuer)
                 .withIssuedAt(now)
                 .withExpiresAt(now.plus(60L, ChronoUnit.MINUTES))
-                .withClaim(JWTClaim.EMAIL, "")
-                .withClaim(JWTClaim.NAME, "")
-                .withClaim(JWTClaim.ROLE, "")
+                .withClaim(JWTClaim.EMAIL, email)
+                .withClaim(JWTClaim.NAME, name)
+                .withClaim(JWTClaim.ROLE, role)
                 .sign(utility.hmac384());
     }
 

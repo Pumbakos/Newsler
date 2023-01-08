@@ -1,6 +1,5 @@
 package pl.newsler.auth;
 
-import lombok.RequiredArgsConstructor;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.security.StubNLIKeyProvider;
 import pl.newsler.security.StubNLPasswordEncoder;
@@ -18,5 +17,9 @@ public class StubJWTConfiguration {
 
     public IJWTAuthService jwtAuthService(JWTUtility utility) {
         return configuration.jwtAuthService(utility);
+    }
+
+    public DatabaseUserDetailService databaseUserDetailService() {
+        return configuration.databaseUserDetailService();
     }
 }

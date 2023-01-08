@@ -17,6 +17,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
 import pl.newsler.api.exceptions.Advised;
 import pl.newsler.api.exceptions.UnauthorizedException;
@@ -26,6 +27,7 @@ import pl.newsler.auth.JWTUtility;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.NLUser;
+import pl.newsler.components.user.UserDataNotFineException;
 import pl.newsler.security.NLAuthenticationToken;
 import pl.newsler.security.NLCredentials;
 import pl.newsler.security.NLPrincipal;
@@ -46,14 +48,14 @@ public class JWTFilter extends OncePerRequestFilter {
      * Creates a new instance with a default filterProcessesUrl and an
      * {@link AuthenticationManager}
      *
-     * @param defaultFilterProcessesUrl the default value for <tt>filterProcessesUrl</tt>.
+     * @param filterNotProcessingUrl the default value for <tt>filterProcessesUrl</tt>.
      * @param authenticationManager     the {@link AuthenticationManager} used to authenticate
      *                                  an {@link Authentication} object. Cannot be null.
      * @param databaseUserDetailService {@link org.springframework.security.core.userdetails.UserDetailsService}
      */
-    public JWTFilter(@NotNull String defaultFilterProcessesUrl, AuthenticationManager authenticationManager, DatabaseUserDetailService databaseUserDetailService, @NotNull JWTUtility utility) {
+    public JWTFilter(@NotNull String filterNotProcessingUrl, AuthenticationManager authenticationManager, DatabaseUserDetailService databaseUserDetailService, @NotNull JWTUtility utility) {
         super();
-        this.filterNotProcessingUrl = defaultFilterProcessesUrl;
+        this.filterNotProcessingUrl = filterNotProcessingUrl;
         this.authenticationManager = authenticationManager;
         this.databaseUserDetailService = databaseUserDetailService;
         this.utility = utility;
@@ -64,6 +66,7 @@ public class JWTFilter extends OncePerRequestFilter {
         if (request.getRequestURI().contains(filterNotProcessingUrl)) {
             try {
                 chain.doFilter(request, response);
+                return;
             } catch (IOException | ServletException e) {
                 throw new UnauthorizedException(TOKEN, e.getMessage());
             }
@@ -102,7 +105,12 @@ public class JWTFilter extends OncePerRequestFilter {
             throw new UnauthorizedException("Email", "Invalid email");
         }
 
-        final NLUser user = (NLUser) databaseUserDetailService.loadUserByUsername(email);
+        final NLUser user;
+        try {
+            user = (NLUser) databaseUserDetailService.loadUserByUsername(email);
+        } catch (UsernameNotFoundException | UserDataNotFineException e) {
+            throw new UnauthorizedException(TOKEN, "Incorrect credentials.");
+        }
 
         if (JWTResolver.resolveJWT(jwt)) {
             final NLDUser dtoUser = user.map();
@@ -112,7 +120,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
             return new NLAuthenticationToken(principal, credentials, roles);
         }
-        throw new UnauthorizedException(TOKEN, "Access denied");
+        throw new UnauthorizedException(TOKEN, "Access denied.");
     }
 
     private DecodedJWT verifyToken(String authToken) {

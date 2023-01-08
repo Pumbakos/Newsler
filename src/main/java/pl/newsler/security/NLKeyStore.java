@@ -162,7 +162,8 @@ final class NLKeyStore {
                 SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(AlgorithmType.TRIPLE_DES.toString());
                 cipher = Cipher.getInstance(AlgorithmType.TRIPLE_DES.toString());
                 key = keyFactory.generateSecret(keySpec);
-            } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeySpecException e) {
+            } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException |
+                     InvalidKeySpecException e) {
                 throw new AlgorithmInitializationException(e.getMessage(), e.getCause().toString());
             }
         }

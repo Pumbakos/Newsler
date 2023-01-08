@@ -48,7 +48,7 @@ public class JWTFilter extends OncePerRequestFilter {
      * Creates a new instance with a default filterProcessesUrl and an
      * {@link AuthenticationManager}
      *
-     * @param filterNotProcessingUrl the default value for <tt>filterProcessesUrl</tt>.
+     * @param filterNotProcessingUrl    the default value for <tt>filterProcessesUrl</tt>.
      * @param authenticationManager     the {@link AuthenticationManager} used to authenticate
      *                                  an {@link Authentication} object. Cannot be null.
      * @param databaseUserDetailService {@link org.springframework.security.core.userdetails.UserDetailsService}

@@ -70,7 +70,7 @@ class ExecutableMailCommand implements Runnable {
         StringBuilder builder = new StringBuilder();
         details.getToAddresses().forEach(email -> builder.append(email).append(","));
         int i = builder.length();
-        builder.delete(i -1, i);
+        builder.delete(i - 1, i);
         return builder.toString();
     }
 }

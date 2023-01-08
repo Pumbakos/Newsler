@@ -1,3 +1,4 @@
 package pl.newsler.auth;
 
-public record UserAuthModel(String email, String password){}
+public record UserAuthModel(String email, String password) {
+}

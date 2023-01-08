@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
@@ -15,8 +14,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import pl.newsler.auth.NLAuthenticationProvider;
 import pl.newsler.auth.DatabaseUserDetailService;
 import pl.newsler.auth.Http401UnauthorizedEntryPoint;
 import pl.newsler.auth.JWTUtility;
@@ -42,7 +39,7 @@ class SecurityConfiguration {
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                                .anyRequest().permitAll() // temporarily authenticated via JWT
+                        .anyRequest().permitAll() // temporarily authenticated via JWT
                 )
                 .exceptionHandling(customizer -> customizer
                         .accessDeniedHandler(entryPoint)

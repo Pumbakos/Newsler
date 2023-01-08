@@ -31,6 +31,6 @@ public class NewslerApplication {
                 .run(args);
     }
 
-    private static class NewslerInitializationException extends RuntimeException{
+    private static class NewslerInitializationException extends RuntimeException {
     }
 }

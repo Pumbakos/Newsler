@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import pl.newsler.components.emaillabs.dto.MailSendRequest;
 
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @Getter

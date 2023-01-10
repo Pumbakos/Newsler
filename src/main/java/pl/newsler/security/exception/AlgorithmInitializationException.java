@@ -17,6 +17,6 @@ public class AlgorithmInitializationException extends NLException {
     }
 
     public ResponseEntity<NLError> response() {
-        return new ResponseEntity<>(new NLError(error, message), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(new NLError(error, errorMessage), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

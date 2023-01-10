@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.task.TaskExecutor;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
+import pl.newsler.commons.models.NLId;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
 import pl.newsler.components.emaillabs.dto.MailSendRequest;
@@ -32,7 +33,16 @@ class MailService {
         user.setSecretKey(NLSecretKey.of(passwordEncoder.decrypt(user.getSecretKey().getValue())));
         user.setSmtpAccount(NLSmtpAccount.of(passwordEncoder.decrypt(user.getSmtpAccount().getValue())));
 
-        ExecutableMailCommand command = ExecutableMailCommand.of(user, MailDetails.of(request));
+        ExecutableMailCommand command = ExecutableMailCommand.of(MailDetails.of(request), user);
         executor.execute(command);
+    }
+
+    GetMailStatus getMailStatus(NLId mailId) {
+        Optional<NLUserMail> optionalUserMail = mailRepository.findById(mailId);
+        NLUserMail nlUserMail = optionalUserMail.orElseThrow(() -> {
+            throw new UserDataNotFineException();
+        });
+
+        return GetMailStatus.of(nlUserMail);
     }
 }

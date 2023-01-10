@@ -75,6 +75,10 @@ public class NLUserMail implements Serializable {
     @Enumerated(EnumType.STRING)
     private NLEmailStatus status;
 
+    @Embedded
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ERROR_MESSAGE")))
+    private NLStringValue errorMessage;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

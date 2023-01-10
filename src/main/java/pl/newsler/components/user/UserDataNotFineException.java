@@ -20,6 +20,6 @@ public class UserDataNotFineException extends NLException {
 
     @Override
     public ResponseEntity<NLError> response() {
-        return new ResponseEntity<>(new NLError(error, message), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new NLError(error, errorMessage), HttpStatus.BAD_REQUEST);
     }
 }

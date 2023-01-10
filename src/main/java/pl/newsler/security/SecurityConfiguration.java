@@ -15,9 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import pl.newsler.auth.DatabaseUserDetailService;
-import pl.newsler.auth.Http401UnauthorizedEntryPoint;
 import pl.newsler.auth.JWTUtility;
-import pl.newsler.components.user.IUserRepository;
 import pl.newsler.security.filters.JWTFilter;
 
 @ComponentScan
@@ -27,9 +25,6 @@ import pl.newsler.security.filters.JWTFilter;
 @RequiredArgsConstructor
 class SecurityConfiguration {
     private final DatabaseUserDetailService userDetailService;
-    private final NLIPasswordEncoder passwordEncoder;
-    private final Http401UnauthorizedEntryPoint entryPoint = new Http401UnauthorizedEntryPoint();
-    private final IUserRepository userRepository;
     private final JWTUtility jwtUtility;
 
     @Bean(name = "securityFilterChain")
@@ -40,25 +35,12 @@ class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() // temporarily authenticated via JWT
-                )
-                .exceptionHandling(customizer -> customizer
-                        .accessDeniedHandler(entryPoint)
-                        .authenticationEntryPoint(entryPoint)
+                        .requestMatchers("/v1/api/**")
                 )
                 .addFilterBefore(new JWTFilter("/v1/auth/jwt", manager, userDetailService, jwtUtility), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
-//    @Bean
-//    public DaoAuthenticationProvider authenticationProvider() {
-//        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-//        authProvider.
-//        authProvider.setUserDetailsService(userDetailService);
-//        authProvider.setPasswordEncoder(passwordEncoder.bCrypt());
-//
-//        return authProvider;
-//    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {

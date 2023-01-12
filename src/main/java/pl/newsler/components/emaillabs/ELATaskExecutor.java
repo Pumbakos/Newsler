@@ -7,11 +7,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -27,8 +28,6 @@ import pl.newsler.components.user.NLUser;
 import pl.newsler.security.NLIPasswordEncoder;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Base64;
@@ -36,12 +35,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledFuture;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ELATaskExecutor extends ConcurrentTaskScheduler {
+@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+public class ELATaskExecutor extends ConcurrentTaskExecutor {
     private static final String BASE_URL = "https://api.emaillabs.net.pl/api";
     private static final String SEND_MAIL_URL = "/new_sendmail";
     private final Queue<Pair<NLId, MailDetails>> queue;
@@ -52,7 +50,6 @@ public class ELATaskExecutor extends ConcurrentTaskScheduler {
     private final ObjectMapper objectMapper;
     private final Gson gson;
     private boolean queueExecution = false;
-    private ScheduledFuture<?> activeTask;
 
     void queue(NLId userId, MailDetails details) {
         mailRepository.save(NLUserMail.of(userId, details));
@@ -65,7 +62,7 @@ public class ELATaskExecutor extends ConcurrentTaskScheduler {
 
     private void schedule() {
         try {
-            activeTask = super.scheduleWithFixedDelay(this::execute, Instant.now(), Duration.ofMillis(1L));
+            super.execute(this::execute);
             log.info("Scheduled another task.");
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -78,7 +75,6 @@ public class ELATaskExecutor extends ConcurrentTaskScheduler {
         Pair<NLId, MailDetails> pair = queue.poll();
         if (pair == null) {
             queueExecution = false;
-            retrieveActiveTask();
             return;
         }
 
@@ -151,24 +147,5 @@ public class ELATaskExecutor extends ConcurrentTaskScheduler {
         }
 
         return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, "General error. Check data, it is likely that SMTP, APP KEY or SECRET KEY are incorrect.", LocalDateTime.now());
-    }
-
-    private String createToAddressesArray(MailDetails details) {
-        StringBuilder builder = new StringBuilder();
-        details.toAddresses().forEach(email -> builder.append(email).append(","));
-        int i = builder.length();
-        builder.delete(i - 1, i);
-        return builder.toString();
-    }
-
-    private void retrieveActiveTask() {
-        try {
-            if (activeTask != null) {
-                activeTask.get();
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("Scheduler get() error. {}", e.getMessage());
-            Thread.currentThread().interrupt();
-        }
     }
 }

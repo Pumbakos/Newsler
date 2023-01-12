@@ -1,5 +1,6 @@
 package pl.newsler.devenv;
 
+import lombok.RequiredArgsConstructor;
 import org.h2.tools.Server;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,7 @@ import pl.newsler.commons.models.NLSmtpAccount;
 import pl.newsler.components.user.IUserCrudService;
 
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static pl.newsler.devenv.H2Util.domain;
 import static pl.newsler.devenv.H2Util.firstName;
@@ -24,6 +26,7 @@ import static pl.newsler.devenv.H2Util.smtpAccount;
 import static pl.newsler.devenv.H2Util.username;
 
 @Configuration(proxyBeanMethods = false)
+@RequiredArgsConstructor
 class H2Configuration {
     @Bean(initMethod = "start", destroyMethod = "stop")
     public Server h2Server() throws SQLException {
@@ -32,11 +35,28 @@ class H2Configuration {
 
     @Bean
     CommandLineRunner saveUsers(IUserCrudService service) {
+        AtomicReference<String> appKey = new AtomicReference<>();
+        AtomicReference<String> secretKey = new AtomicReference<>();
+        AtomicReference<String> smtp = new AtomicReference<>();
+        AtomicReference<String> email = new AtomicReference<>();
+
+        try {
+            appKey.set(System.getenv("NEWSLER_APP_KEY"));
+            secretKey.set(System.getenv("NEWSLER_SECRET_KEY"));
+            smtp.set(System.getenv("NEWSLER_SMTP"));
+            email.set(System.getenv("NEWSLER_EMAIL"));
+        } catch (Exception e) {
+            appKey.set(secretOrAppKey());
+            secretKey.set(secretOrAppKey());
+            smtp.set(smtpAccount());
+            email.set("newslerowsky@app.co.devenv");
+        }
+
         return args -> {
             NLId id1 = service.create(
                     NLFirstName.of("Aizholat"),
                     NLLastName.of("Newsler"),
-                    NLEmail.of("newslerowsky@app.co.devenv"),
+                    NLEmail.of(email.get()),
                     NLPassword.of("Pa$$word7hat^match3$")
             );
 
@@ -68,7 +88,7 @@ class H2Configuration {
                     NLPassword.of("E#7r4)4$$$^P931p)a$*")
             );
 
-            service.update(id1, NLAppKey.of("18aa9884e66e0064fea46ef5ea81bd0129d35632"), NLSecretKey.of("c89ebf74312ee0b5933a03faff05f6d2165d60f3"), NLSmtpAccount.of("1.pumbakos.smtp"));
+            service.update(id1, NLAppKey.of(appKey.get()), NLSecretKey.of(secretKey.get()), NLSmtpAccount.of(smtp.get()));
             service.update(id2, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id3, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id4, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));

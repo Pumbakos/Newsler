@@ -11,6 +11,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,6 +26,7 @@ import pl.newsler.commons.models.NLVersion;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Objects;
 
 @Entity
@@ -33,6 +35,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class NLUserMail implements Serializable {
     @Serial
     private static final long serialVersionUID = 9009272834852329455L;
@@ -78,6 +81,21 @@ public class NLUserMail implements Serializable {
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ERROR_MESSAGE")))
     private NLStringValue errorMessage;
+
+    public static NLUserMail of(NLId id, MailDetails details) {
+        return new NLUserMail(
+                details.id(),
+                MailRepository.version,
+                id,
+                NLStringValue.of(Arrays.toString(details.toAddresses().toArray())),
+                NLStringValue.of(Arrays.toString(details.cc() != null ? details.cc().toArray() : new String[0])),
+                NLStringValue.of(Arrays.toString(details.bcc() != null ? details.bcc().toArray() : new String[0])),
+                NLSubject.of(details.subject()),
+                NLMessage.of(details.message()),
+                NLEmailStatus.QUEUED,
+                NLStringValue.of("")
+        );
+    }
 
     @Override
     public boolean equals(Object o) {

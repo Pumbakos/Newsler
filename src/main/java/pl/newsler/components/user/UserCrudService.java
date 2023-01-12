@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 class UserCrudService implements IUserCrudService {
-    private final UserRepository userRepository;
+    private final IUserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
 
     @Override

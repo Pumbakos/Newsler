@@ -38,6 +38,13 @@ public class NLId implements NLModel {
         return new NLId(String.format("%s_%s", type.getPrefix(), uuid.toString()));
     }
 
+    public static NLId of(UUID uuid, NLIdType type) {
+        if (type == null) {
+            throw new IllegalArgumentException();
+        }
+        return new NLId(String.format("%s_%s", type.getPrefix(), uuid.toString()));
+    }
+
     @Override
     public boolean validate() {
         return value.matches("[a-z]{3}_[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}");

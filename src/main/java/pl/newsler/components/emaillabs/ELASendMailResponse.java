@@ -1,4 +1,4 @@
-package pl.newsler.components.emaillabs.exceptions;
+package pl.newsler.components.emaillabs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

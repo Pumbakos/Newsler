@@ -26,8 +26,8 @@ class JWTConfiguration {
         return new JWTAuthService(userRepository, passwordEncoder, utility);
     }
 
-    @Bean(name = "databaseUserDetailService")
-    DatabaseUserDetailService databaseUserDetailService() {
-        return new DatabaseUserDetailService(userRepository);
+    @Bean(name = "authUserDetailService")
+    AuthUserDetailService authUserDetailService() {
+        return new AuthUserDetailService(userRepository);
     }
 }

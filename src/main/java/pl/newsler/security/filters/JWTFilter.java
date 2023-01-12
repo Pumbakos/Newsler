@@ -21,7 +21,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
 import pl.newsler.api.exceptions.Advised;
 import pl.newsler.api.exceptions.UnauthorizedException;
-import pl.newsler.auth.DatabaseUserDetailService;
+import pl.newsler.auth.AuthUserDetailService;
 import pl.newsler.auth.JWTClaim;
 import pl.newsler.auth.JWTUtility;
 import pl.newsler.commons.models.NLEmail;
@@ -40,7 +40,7 @@ import java.util.Set;
 public class JWTFilter extends OncePerRequestFilter {
     private static final String TOKEN = "Token";
     private final AuthenticationManager authenticationManager;
-    private final DatabaseUserDetailService databaseUserDetailService;
+    private final AuthUserDetailService authUserDetailService;
     private final JWTUtility utility;
     private final String filterNotProcessingUrl;
 
@@ -51,13 +51,13 @@ public class JWTFilter extends OncePerRequestFilter {
      * @param filterNotProcessingUrl    the default value for <tt>filterProcessesUrl</tt>.
      * @param authenticationManager     the {@link AuthenticationManager} used to authenticate
      *                                  an {@link Authentication} object. Cannot be null.
-     * @param databaseUserDetailService {@link org.springframework.security.core.userdetails.UserDetailsService}
+     * @param authUserDetailService {@link org.springframework.security.core.userdetails.UserDetailsService}
      */
-    public JWTFilter(@NotNull String filterNotProcessingUrl, AuthenticationManager authenticationManager, DatabaseUserDetailService databaseUserDetailService, @NotNull JWTUtility utility) {
+    public JWTFilter(@NotNull String filterNotProcessingUrl, AuthenticationManager authenticationManager, AuthUserDetailService authUserDetailService, @NotNull JWTUtility utility) {
         super();
         this.filterNotProcessingUrl = filterNotProcessingUrl;
         this.authenticationManager = authenticationManager;
-        this.databaseUserDetailService = databaseUserDetailService;
+        this.authUserDetailService = authUserDetailService;
         this.utility = utility;
     }
 
@@ -107,7 +107,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         final NLUser user;
         try {
-            user = (NLUser) databaseUserDetailService.loadUserByUsername(email);
+            user = (NLUser) authUserDetailService.loadUserByUsername(email);
         } catch (UsernameNotFoundException | UserDataNotFineException e) {
             throw new UnauthorizedException(TOKEN, "Incorrect credentials.");
         }

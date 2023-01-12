@@ -14,7 +14,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import pl.newsler.auth.DatabaseUserDetailService;
+import pl.newsler.auth.AuthUserDetailService;
 import pl.newsler.auth.JWTUtility;
 import pl.newsler.security.filters.JWTFilter;
 
@@ -24,7 +24,7 @@ import pl.newsler.security.filters.JWTFilter;
 @EnableGlobalAuthentication
 @RequiredArgsConstructor
 class SecurityConfiguration {
-    private final DatabaseUserDetailService userDetailService;
+    private final AuthUserDetailService userDetailService;
     private final JWTUtility jwtUtility;
 
     @Bean(name = "securityFilterChain")

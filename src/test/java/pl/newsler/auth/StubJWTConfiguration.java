@@ -19,7 +19,7 @@ public class StubJWTConfiguration {
         return configuration.jwtAuthService(utility);
     }
 
-    public DatabaseUserDetailService databaseUserDetailService() {
+    public AuthUserDetailService databaseUserDetailService() {
         return configuration.databaseUserDetailService();
     }
 }

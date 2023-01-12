@@ -12,7 +12,7 @@ import pl.newsler.components.user.UserDataNotFineException;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-public class DatabaseUserDetailService implements UserDetailsService {
+public class AuthUserDetailService implements UserDetailsService {
     private final IUserRepository userRepository;
 
     @Override

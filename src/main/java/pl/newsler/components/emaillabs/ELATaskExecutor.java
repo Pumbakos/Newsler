@@ -1,8 +1,6 @@
 package pl.newsler.components.emaillabs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.cfg.CoercionAction;
-import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
 import com.google.gson.Gson;
 import jakarta.ws.rs.core.HttpHeaders;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +22,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 import pl.newsler.commons.models.NLEmailStatus;
 import pl.newsler.commons.models.NLId;
 import pl.newsler.commons.models.NLStringValue;
-import pl.newsler.components.emaillabs.exceptions.ELASendMailResponse;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.security.NLIPasswordEncoder;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -64,12 +64,12 @@ public class ELATaskExecutor extends ConcurrentTaskScheduler {
     }
 
     private void schedule() {
-        execute();
-//        try {
-//            activeTask = super.scheduleWithFixedDelay(this::execute, Instant.now(), Duration.ZERO);
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
+        try {
+            activeTask = super.scheduleWithFixedDelay(this::execute, Instant.now(), Duration.ofMillis(1L));
+            log.info("Scheduled another task.");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     //* FLOW: schedule task #execute at fixed rate -> if there is a dozen of mails (which means submitting did not stop) do not stop executor,
@@ -105,6 +105,7 @@ public class ELATaskExecutor extends ConcurrentTaskScheduler {
     }
 
     private ELASentMailResults call(NLUser user, MailDetails details) {
+        log.info("Executing task {}", details.id());
         final Map<String, String> params = new LinkedHashMap<>();
         String userPass = passwordEncoder.decrypt(user.getAppKey().getValue()) + ":" + passwordEncoder.decrypt(user.getSecretKey().getValue());
         String auth = "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
@@ -112,8 +113,8 @@ public class ELATaskExecutor extends ConcurrentTaskScheduler {
         String name = String.format("%s %s", user.getFirstName(), user.getLastName());
         params.put(Param.FROM, user.getEmail().getValue());
         params.put(Param.FROM_NAME, name);
-        params.put(Param.SMTP_ACCOUNT, user.getSmtpAccount().getValue());
-        params.put(String.format(Param.TO_ADDRESS_NAME, createToAddressesArray(details), name), "");
+        params.put(Param.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
+        params.put(String.format(Param.TO_ADDRESS_NAME, user.getEmail().getValue(), name), Arrays.toString(details.toAddresses().toArray()));
         params.put(Param.SUBJECT, details.subject());
         params.put(Param.HTML, String.format("<pre>%s</pre>", details.message()));
         params.put(Param.TEXT, details.message());
@@ -130,10 +131,11 @@ public class ELATaskExecutor extends ConcurrentTaskScheduler {
                 .build();
 
         try {
-            ResponseEntity<ELASendMailResponse> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, entity, ELASendMailResponse.class);
-            log.info(String.format("QUERY: %s%n", gson.toJson(response)));
+            restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, entity, String.class);
+            log.info("MAIL {} SENT", details.id());
             return ELASentMailResults.of(details.id(), user.map().getId(), NLEmailStatus.SENT, "Mail sent successfully", LocalDateTime.now());
         } catch (RestClientException e) {
+            log.info("MAIL {} ERROR", details.id());
             return handleException(details.id(), user.map().getId(), e);
         }
     }

@@ -20,6 +20,6 @@ public class StubJWTConfiguration {
     }
 
     public AuthUserDetailService databaseUserDetailService() {
-        return configuration.databaseUserDetailService();
+        return configuration.authUserDetailService();
     }
 }

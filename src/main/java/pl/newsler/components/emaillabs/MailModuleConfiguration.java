@@ -20,13 +20,18 @@ class MailModuleConfiguration {
     private final IMailRepository mailRepository;
     private final NLIPasswordEncoder passwordEncoder;
 
+    @Bean(name = "restTemplate")
+    RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
     @Bean(name = "taskExecutor")
-    ELATaskExecutor taskExecutor() {
-        return new ELATaskExecutor(new ConcurrentLinkedQueue<>(), passwordEncoder, mailRepository, userRepository, new RestTemplate(), new ObjectMapper(), new Gson());
+    ELATaskExecutor taskExecutor(RestTemplate restTemplate) {
+        return new ELATaskExecutor(new ConcurrentLinkedQueue<>(), passwordEncoder, mailRepository, userRepository, restTemplate, new ObjectMapper(), new Gson());
     }
 
     @Bean(name = "mailService")
-    MailService mailService(ELATaskExecutor taskExecutor) {
+    IMailService mailService(ELATaskExecutor taskExecutor) {
         return new MailService(taskExecutor, userRepository, mailRepository);
     }
 }

@@ -33,7 +33,7 @@ class JWTModuleTest {
     private final JWTConfiguration configuration = new JWTConfiguration(userRepository, passwordEncoder, keyProvider);
     private final JWTUtility utility = configuration.jwtUtility();
     private final IJWTAuthService service = configuration.jwtAuthService(utility);
-    private final UserDetailsService userDetailsService = configuration.databaseUserDetailService();
+    private final UserDetailsService userDetailsService = configuration.authUserDetailService();
     private final IJWTAuthController controller = new JWTAuthController(service);
     private final TestUserFactory factory = new TestUserFactory();
     final JWTVerifier verifier = JWT.require(utility.hmac384()).build();

@@ -156,7 +156,8 @@ class NLModelsTest {
 
     @Test
     void shouldNotValidateNLId_NullType() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> NLId.of(UUID.randomUUID(), null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NLId.of(UUID.randomUUID(), (NLIdType) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NLId.of(UUID.randomUUID(), (NLUserType) null));
     }
 
     @Test

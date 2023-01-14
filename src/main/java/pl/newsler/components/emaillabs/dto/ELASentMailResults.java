@@ -1,4 +1,4 @@
-package pl.newsler.components.emaillabs;
+package pl.newsler.components.emaillabs.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Value;

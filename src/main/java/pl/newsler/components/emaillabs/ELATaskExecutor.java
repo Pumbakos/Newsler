@@ -1,5 +1,6 @@
 package pl.newsler.components.emaillabs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
@@ -23,6 +25,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import pl.newsler.commons.models.NLEmailStatus;
 import pl.newsler.commons.models.NLId;
 import pl.newsler.commons.models.NLStringValue;
+import pl.newsler.components.emaillabs.dto.ELASendMailResponse;
+import pl.newsler.components.emaillabs.dto.ELASentMailResults;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.security.NLIPasswordEncoder;
@@ -56,11 +60,11 @@ public class ELATaskExecutor extends ConcurrentTaskExecutor {
         queue.add(Pair.of(userId, details));
         if (!queueExecution) {
             queueExecution = true;
-            schedule();
+            executeQueue();
         }
     }
 
-    private void schedule() {
+    private void executeQueue() {
         try {
             super.execute(this::execute);
             log.info("Scheduled another task.");
@@ -69,8 +73,6 @@ public class ELATaskExecutor extends ConcurrentTaskExecutor {
         }
     }
 
-    //* FLOW: schedule task #execute at fixed rate -> if there is a dozen of mails (which means submitting did not stop) do not stop executor,
-    //* else wait for another invocation of scheduler and check if there are mails to send, send them if so, do nothing otherwise
     private void execute() {
         Pair<NLId, MailDetails> pair = queue.poll();
         if (pair == null) {
@@ -83,7 +85,7 @@ public class ELATaskExecutor extends ConcurrentTaskExecutor {
     }
 
     private void getAndExecute(Pair<NLId, MailDetails> pair) {
-        Optional<NLUser> optionalUser = userRepository.findById(pair.getLeft());
+        final Optional<NLUser> optionalUser = userRepository.findById(pair.getLeft());
         optionalUser.ifPresentOrElse(
                 nlUser -> execution(pair.getRight(), nlUser),
                 () -> log.debug("No more mail jobs, waiting...")
@@ -91,8 +93,8 @@ public class ELATaskExecutor extends ConcurrentTaskExecutor {
     }
 
     private void execution(MailDetails details, NLUser user) {
-        ELASentMailResults results = call(user, details);
-        Optional<NLUserMail> optionalUserMail = mailRepository.findById(results.getId());
+        final ELASentMailResults results = call(user, details);
+        final Optional<NLUserMail> optionalUserMail = mailRepository.findById(results.getId());
         optionalUserMail.ifPresent(m -> {
             m.setStatus(results.getStatus());
             m.setErrorMessage(NLStringValue.of(results.getMessage()));
@@ -127,16 +129,30 @@ public class ELATaskExecutor extends ConcurrentTaskExecutor {
                 .build();
 
         try {
-            restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, entity, String.class);
             log.info("MAIL {} SENT", details.id());
-            return ELASentMailResults.of(details.id(), user.map().getId(), NLEmailStatus.SENT, "Mail sent successfully", LocalDateTime.now());
+            return handleResponse(response, details, user.map().getId());
         } catch (RestClientException e) {
             log.info("MAIL {} ERROR", details.id());
             return handleException(details.id(), user.map().getId(), e);
         }
     }
 
-    @SneakyThrows
+    private ELASentMailResults handleResponse(ResponseEntity<String> response, MailDetails details, NLId userId) {
+        if (response.getStatusCode().is2xxSuccessful()) {
+            return ELASentMailResults.of(details.id(), userId, NLEmailStatus.SENT, "Mail sent successfully", LocalDateTime.now());
+        }
+        if (response.getStatusCode().is4xxClientError()) {
+            return ELASentMailResults.of(details.id(), userId, NLEmailStatus.ERROR, response.getBody(), LocalDateTime.now());
+        }
+        if (response.getStatusCode().is5xxServerError()) {
+            return ELASentMailResults.of(details.id(), userId, NLEmailStatus.ERROR, response.getBody(), LocalDateTime.now());
+        }
+
+        return ELASentMailResults.of(details.id(), userId, NLEmailStatus.ERROR, "General error. Check data, it is likely that SMTP, APP KEY or SECRET KEY are incorrect.", LocalDateTime.now());
+    }
+
+    @SneakyThrows(JsonProcessingException.class)
     private ELASentMailResults handleException(NLId id, NLId userId, RestClientException e) {
         ELASendMailResponse response = objectMapper.readValue(e.getMessage().substring(e.getMessage().indexOf("{") - 1).substring(1), ELASendMailResponse.class);
         if (e instanceof HttpClientErrorException) {

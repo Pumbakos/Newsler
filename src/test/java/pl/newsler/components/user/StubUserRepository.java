@@ -1,5 +1,6 @@
 package pl.newsler.components.user;
 
+import org.jetbrains.annotations.NotNull;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLId;
 import pl.newsler.testcommons.InMemoryJpaRepository;
@@ -14,12 +15,12 @@ public class StubUserRepository extends InMemoryJpaRepository<NLUser, NLId> impl
     }
 
     @Override
-    public <S extends NLUser> S save(S entity) {
+    public <S extends NLUser> @NotNull S save(S entity) {
         return super.save(entity);
     }
 
     @Override
-    public List<NLUser> findAll() {
+    public @NotNull List<NLUser> findAll() {
         return super.findAll();
     }
 
@@ -30,9 +31,6 @@ public class StubUserRepository extends InMemoryJpaRepository<NLUser, NLId> impl
                         .getEmail()
                         .equals(email))
                 .findFirst();
-        if (entry.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(entry.get().getValue());
+        return entry.map(Map.Entry::getValue);
     }
 }

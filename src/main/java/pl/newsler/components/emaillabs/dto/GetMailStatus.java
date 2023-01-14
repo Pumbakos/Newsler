@@ -1,6 +1,7 @@
-package pl.newsler.components.emaillabs;
+package pl.newsler.components.emaillabs.dto;
 
 import pl.newsler.commons.models.NLEmailStatus;
+import pl.newsler.components.emaillabs.NLUserMail;
 
 public record GetMailStatus(NLEmailStatus status, boolean error, String errorMessage) {
     public static GetMailStatus of(NLUserMail mail) {

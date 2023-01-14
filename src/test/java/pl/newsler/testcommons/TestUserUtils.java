@@ -3,6 +3,7 @@ package pl.newsler.testcommons;
 import com.github.javafaker.Faker;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import pl.newsler.commons.models.NLEmail;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestUserUtils {
@@ -38,6 +39,10 @@ public class TestUserUtils {
                 .replace(" ", ".")
                 .replace("'", ".")
                 .toLowerCase();
+    }
+
+    public static String email() {
+        return String.format("%s@%s.dev", firstName(), domain());
     }
 
     public static String secretOrAppKey() {

@@ -1,6 +1,8 @@
-package pl.newsler.components.emaillabs;
+package pl.newsler.components.emaillabs.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,7 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public final class ELASendMailResponse {
+@AllArgsConstructor(staticName = "of")
+public class ELASendMailResponse {
     private int code;
     private String status;
     private String message;

@@ -1,6 +1,7 @@
 package pl.newsler.devenv;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.h2.tools.Server;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,7 @@ import static pl.newsler.devenv.H2Util.secretOrAppKey;
 import static pl.newsler.devenv.H2Util.smtpAccount;
 import static pl.newsler.devenv.H2Util.username;
 
+@Slf4j
 @Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor
 class H2Configuration {
@@ -51,6 +53,11 @@ class H2Configuration {
             smtp.set(smtpAccount());
             email.set("newslerowsky@app.co.devenv");
         }
+
+        log.info("H2 APP KEY: " + appKey.get());
+        log.info("H2 SEC KEY: " + secretKey.get());
+        log.info("H2 SMTP AC: " + smtp.get());
+        log.info("H2 EMAIL: " + email.get());
 
         return args -> {
             NLId id1 = service.create(

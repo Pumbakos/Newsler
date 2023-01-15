@@ -37,28 +37,28 @@ class H2Configuration {
 
     @Bean
     CommandLineRunner saveUsers(IUserCrudService service) {
-        AtomicReference<String> appKey = new AtomicReference<>();
-        AtomicReference<String> secretKey = new AtomicReference<>();
-        AtomicReference<String> smtp = new AtomicReference<>();
-        AtomicReference<String> email = new AtomicReference<>();
-
-        try {
-            appKey.set(System.getenv("NEWSLER_APP_KEY"));
-            secretKey.set(System.getenv("NEWSLER_SECRET_KEY"));
-            smtp.set(System.getenv("NEWSLER_SMTP"));
-            email.set(System.getenv("NEWSLER_EMAIL"));
-        } catch (Exception e) {
-            appKey.set(secretOrAppKey());
-            secretKey.set(secretOrAppKey());
-            smtp.set(smtpAccount());
-            email.set("newslerowsky@app.co.devenv");
-        }
+//        AtomicReference<String> appKey = new AtomicReference<>();
+//        AtomicReference<String> secretKey = new AtomicReference<>();
+//        AtomicReference<String> smtp = new AtomicReference<>();
+//        AtomicReference<String> email = new AtomicReference<>();
+//
+//        try {
+//            appKey.set(System.getenv("NEWSLER_APP_KEY"));
+//            secretKey.set(System.getenv("NEWSLER_SECRET_KEY"));
+//            smtp.set(System.getenv("NEWSLER_SMTP"));
+//            email.set(System.getenv("NEWSLER_EMAIL"));
+//        } catch (Exception e) {
+//            appKey.set(secretOrAppKey());
+//            secretKey.set(secretOrAppKey());
+//            smtp.set(smtpAccount());
+//            email.set("newslerowsky@app.co.devenv");
+//        }
 
         return args -> {
             NLId id1 = service.create(
                     NLFirstName.of("Aizholat"),
                     NLLastName.of("Newsler"),
-                    NLEmail.of(email.get()),
+                    NLEmail.of("newslerowsky@app.co.devenv"),
                     NLPassword.of("Pa$$word7hat^match3$")
             );
 

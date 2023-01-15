@@ -1,5 +1,4 @@
 server:
-  port: 8443
   error:
     include-message: always
     include-binding-errors: always
@@ -52,7 +51,6 @@ spring:
 
 logging:
   level:
-#    root: debug
     org:
       springframework:
         web: trace

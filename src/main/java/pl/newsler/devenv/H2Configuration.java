@@ -36,6 +36,8 @@ class H2Configuration {
     }
 
     @Bean
+    //no need to define custom exception
+    @SuppressWarnings("java:S112")
     CommandLineRunner saveUsers(IUserCrudService service) {
         AtomicReference<String> appKey = new AtomicReference<>();
         AtomicReference<String> secretKey = new AtomicReference<>();
@@ -47,6 +49,10 @@ class H2Configuration {
             secretKey.set(System.getenv("NEWSLER_SECRET_KEY"));
             smtp.set(System.getenv("NEWSLER_SMTP"));
             email.set(System.getenv("NEWSLER_EMAIL"));
+
+            if (envVariablesNotNull(appKey, secretKey, smtp, email)) {
+                throw new Exception();
+            }
         } catch (Exception e) {
             appKey.set(secretOrAppKey());
             secretKey.set(secretOrAppKey());
@@ -90,11 +96,20 @@ class H2Configuration {
                     NLPassword.of("E#7r4)4$$$^P931p)a$*")
             );
 
-            service.update(id1, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
+            service.update(id1, NLAppKey.of(appKey.get()), NLSecretKey.of(secretKey.get()), NLSmtpAccount.of(smtp.get()));
             service.update(id2, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id3, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id4, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id5, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
         };
+    }
+
+    private boolean envVariablesNotNull(
+            AtomicReference<String> appKey,
+            AtomicReference<String> secretKey,
+            AtomicReference<String> smtp,
+            AtomicReference<String> email
+    ) {
+        return ((!appKey.get().isEmpty()) && (!secretKey.get().isEmpty()) && (!smtp.get().isEmpty()) && (!email.get().isEmpty()));
     }
 }

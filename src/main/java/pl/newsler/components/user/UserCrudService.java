@@ -40,14 +40,8 @@ class UserCrudService implements IUserCrudService {
             throw new UserDataNotFineException();
         }
 
-        if (!name.validate()) {
-            throw new UserDataNotFineException(String.format("name: %s, lastName: %s, email: %s, ", name, lastName, email));
-        }
-        if (!email.validate()) {
-            throw new UserDataNotFineException(String.format("name: %s, lastName: %s, email: %s, ", name, lastName, email));
-        }
-        if (!lastName.validate()) {
-            throw new UserDataNotFineException(String.format("name: %s, lastName: %s, email: %s, ", name, lastName, email));
+        if (!isDataOk(name, lastName, email)) {
+            throw new UserDataNotFineException(String.format("Either name: %s, lastName: %s or email: %s are not valid.", name.getValue(), lastName.getValue(), email.getValue()));
         }
 
         NLUser user = new NLUser();

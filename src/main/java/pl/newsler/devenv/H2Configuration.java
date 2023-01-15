@@ -72,7 +72,7 @@ class H2Configuration {
             NLId id3 = service.create(
                     NLFirstName.of(firstName()),
                     NLLastName.of(lastName()),
-                    NLEmail.of(String.format("%s@.newsler.pl", username())),
+                    NLEmail.of(String.format("%s@newsler.pl", username())),
                     NLPassword.of("^a1u3@tbZ0I0Cd0W")
             );
 

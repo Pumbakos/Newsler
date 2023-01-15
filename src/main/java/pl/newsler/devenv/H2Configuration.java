@@ -72,7 +72,7 @@ class H2Configuration {
             NLId id3 = service.create(
                     NLFirstName.of(firstName()),
                     NLLastName.of(lastName()),
-                    NLEmail.of(String.format("%s@%s.newsler.pl", username(), domain())),
+                    NLEmail.of(String.format("%s@.newsler.pl", username())),
                     NLPassword.of("^a1u3@tbZ0I0Cd0W")
             );
 
@@ -90,7 +90,7 @@ class H2Configuration {
                     NLPassword.of("E#7r4)4$$$^P931p)a$*")
             );
 
-            service.update(id1, NLAppKey.of(appKey.get()), NLSecretKey.of(secretKey.get()), NLSmtpAccount.of(smtp.get()));
+            service.update(id1, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id2, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id3, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id4, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));

@@ -1,15 +1,11 @@
 package pl.newsler.internal;
 
-import org.junit.ClassRule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import uk.org.webcompere.systemstubs.SystemStubs;
-import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 
 import java.util.Properties;
 
-@SpringBootTest()
 class SpringBootStartUpPropsResolverTest {
     @Test
     void shouldResolveCLIArgs() {

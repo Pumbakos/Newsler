@@ -6,7 +6,7 @@ import pl.newsler.commons.exceptions.NLError;
 import pl.newsler.commons.exceptions.NLException;
 
 public class UserDataNotFineException extends NLException {
-    public  UserDataNotFineException(String error, String errorMessage) {
+    public UserDataNotFineException(String error, String errorMessage) {
         super(error, errorMessage);
     }
 

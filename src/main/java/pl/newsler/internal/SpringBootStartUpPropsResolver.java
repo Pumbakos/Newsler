@@ -25,6 +25,7 @@ import static pl.newsler.internal.PropType.SERVER_SSL_PORT;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SpringBootStartUpPropsResolver {
     private static final Properties props = new Properties();
+
     public static Properties resolve(@NotNull final String[] args) {
         String ksSysEnv = getenv(NEWSLER_SSL_KEYSTORE_FILE);
         String kpSysEnv = getenv(NEWSLER_SSL_KEYSTORE_PASSWORD);

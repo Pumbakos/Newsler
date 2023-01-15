@@ -54,11 +54,6 @@ class H2Configuration {
             email.set("newslerowsky@app.co.devenv");
         }
 
-        log.info("H2 APP KEY: " + appKey.get());
-        log.info("H2 SEC KEY: " + secretKey.get());
-        log.info("H2 SMTP AC: " + smtp.get());
-        log.info("H2 EMAIL: " + email.get());
-
         return args -> {
             NLId id1 = service.create(
                     NLFirstName.of("Aizholat"),

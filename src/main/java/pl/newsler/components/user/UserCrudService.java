@@ -40,7 +40,13 @@ class UserCrudService implements IUserCrudService {
             throw new UserDataNotFineException();
         }
 
-        if (!isDataOk(name, lastName, email)) {
+        if (!name.validate()) {
+            throw new UserDataNotFineException(String.format("name: %s, lastName: %s, email: %s, ", name, lastName, email));
+        }
+        if (!email.validate()) {
+            throw new UserDataNotFineException(String.format("name: %s, lastName: %s, email: %s, ", name, lastName, email));
+        }
+        if (!lastName.validate()) {
             throw new UserDataNotFineException(String.format("name: %s, lastName: %s, email: %s, ", name, lastName, email));
         }
 

@@ -2,7 +2,6 @@ package pl.newsler.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import pl.newsler.api.exceptions.Advised;
 import pl.newsler.security.exception.AlgorithmInitializationException;
 
 import javax.crypto.Cipher;
@@ -15,7 +14,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
 
-@Advised
 @RequiredArgsConstructor
 class NLPasswordEncoder implements NLIPasswordEncoder {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;

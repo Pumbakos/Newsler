@@ -19,7 +19,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
-import pl.newsler.api.exceptions.Advised;
 import pl.newsler.api.exceptions.UnauthorizedException;
 import pl.newsler.auth.AuthUserDetailService;
 import pl.newsler.auth.JWTClaim;
@@ -36,7 +35,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
-@Advised
 public class JWTFilter extends OncePerRequestFilter {
     private static final String TOKEN = "Token";
     private final AuthenticationManager authenticationManager;
@@ -48,10 +46,10 @@ public class JWTFilter extends OncePerRequestFilter {
      * Creates a new instance with a default filterProcessesUrl and an
      * {@link AuthenticationManager}
      *
-     * @param filterNotProcessingUrl    the default value for <tt>filterProcessesUrl</tt>.
-     * @param authenticationManager     the {@link AuthenticationManager} used to authenticate
-     *                                  an {@link Authentication} object. Cannot be null.
-     * @param authUserDetailService {@link org.springframework.security.core.userdetails.UserDetailsService}
+     * @param filterNotProcessingUrl the default value for <tt>filterProcessesUrl</tt>.
+     * @param authenticationManager  the {@link AuthenticationManager} used to authenticate
+     *                               an {@link Authentication} object. Cannot be null.
+     * @param authUserDetailService  {@link org.springframework.security.core.userdetails.UserDetailsService}
      */
     public JWTFilter(@NotNull String filterNotProcessingUrl, AuthenticationManager authenticationManager, AuthUserDetailService authUserDetailService, @NotNull JWTUtility utility) {
         super();
@@ -62,14 +60,10 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain chain) {
+    protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain chain) throws ServletException, IOException {
         if (request.getRequestURI().contains(filterNotProcessingUrl)) {
-            try {
-                chain.doFilter(request, response);
-                return;
-            } catch (IOException | ServletException e) {
-                throw new UnauthorizedException(TOKEN, e.getMessage());
-            }
+            chain.doFilter(request, response);
+            return;
         }
 
         final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -82,11 +76,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         performAuthentication(authentication);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        try {
-            chain.doFilter(request, response);
-        } catch (IOException | ServletException e) {
-            throw new UnauthorizedException(TOKEN, e.getMessage());
-        }
+        chain.doFilter(request, response);
     }
 
     private void performAuthentication(NLAuthenticationToken authentication) {

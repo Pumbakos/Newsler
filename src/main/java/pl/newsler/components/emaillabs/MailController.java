@@ -9,15 +9,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.IMailController;
-import pl.newsler.api.exceptions.Advised;
+import pl.newsler.commons.exceptions.NLException;
 import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLIdType;
 import pl.newsler.components.emaillabs.dto.GetMailStatus;
 import pl.newsler.components.emaillabs.dto.MailSendRequest;
 import pl.newsler.components.user.UserDataNotFineException;
 
 import java.util.List;
 
-@Advised
 @RestController
 @RequiredArgsConstructor
 public class MailController implements IMailController {
@@ -32,28 +32,19 @@ public class MailController implements IMailController {
 
     @GetMapping("/{userId}")
     @Override
-    public ResponseEntity<List<NLUserMail>> fetchAllMails(@PathVariable("userId") String userId) {
-        NLId id = NLId.of(userId);
-        if (!id.validate()) {
-            throw new UserDataNotFineException("Invalid ID");
-        }
-
-        return ResponseEntity.ok(service.fetchAllMails(id));
+    public ResponseEntity<List<NLUserMail>> fetchAllMails(@PathVariable("userId") String userId) throws NLException {
+        return ResponseEntity.ok(service.fetchAllMails(NLId.of(userId)));
     }
 
     @GetMapping("/{mailId}/user/{userId}")
     @Override
-    public ResponseEntity<GetMailStatus> getMail(@PathVariable("mailId") String mailId, @PathVariable("userId") String userId) {
-        NLId mailID = NLId.of(mailId);
+    public ResponseEntity<GetMailStatus> getMailStatus(@PathVariable("mailId") String mailId, @PathVariable("userId") String userId) throws UserDataNotFineException {
+        NLId mailID = NLId.fromStringifyNLId(mailId, NLIdType.MAIL);
         NLId userID = NLId.of(userId);
         if (!mailID.validate()) {
             throw new UserDataNotFineException("Mail ID invalid.");
         }
-        if (!mailID.validate()) {
-            throw new UserDataNotFineException("Mail ID invalid.");
-        }
 
-        GetMailStatus mailStatus = service.getMailStatus(mailID, userID);
-        return new ResponseEntity<>(mailStatus, HttpStatus.OK);
+        return ResponseEntity.ok(service.getMailStatus(mailID, userID));
     }
 }

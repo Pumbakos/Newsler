@@ -5,13 +5,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.IUserController;
-import pl.newsler.api.exceptions.Advised;
 import pl.newsler.commons.models.NLId;
 import pl.newsler.components.user.dto.UserCreateRequest;
 import pl.newsler.components.user.dto.UserDeleteRequest;
 import pl.newsler.components.user.dto.UserUpdateRequest;
 
-@Advised
 @RestController
 @RequiredArgsConstructor
 class UserController implements IUserController {

@@ -20,7 +20,7 @@ class MailService implements IMailService {
     private final IMailRepository mailRepository;
 
     @Override
-    public void queue(MailSendRequest request) {
+    public void queue(MailSendRequest request) throws UserDataNotFineException {
         Optional<NLUser> optionalUser = userRepository.findByEmail(NLEmail.of(request.userMail()));
         if (optionalUser.isEmpty()) {
             throw new UserDataNotFineException();
@@ -31,11 +31,13 @@ class MailService implements IMailService {
 
     @Override
     public List<NLUserMail> fetchAllMails(NLId userId) {
-        return mailRepository.findAll();
+        userRepository.findById(userId).orElseThrow(UserDataNotFineException::new);
+
+        return mailRepository.findAllByUserId(userId);
     }
 
     @Override
-    public GetMailStatus getMailStatus(NLId mailId, NLId userId) {
+    public GetMailStatus getMailStatus(NLId mailId, NLId userId) throws UserDataNotFineException, ELAMailNotFoundException {
         Optional<NLUser> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
             throw new UserDataNotFineException("User not found.");

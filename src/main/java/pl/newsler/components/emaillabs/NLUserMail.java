@@ -82,11 +82,11 @@ public class NLUserMail implements Serializable {
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ERROR_MESSAGE")))
     private NLStringValue errorMessage;
 
-    public static NLUserMail of(NLId id, MailDetails details) {
+    public static NLUserMail of(NLId userId, MailDetails details) {
         return new NLUserMail(
                 details.id(),
                 MailRepository.version,
-                id,
+                userId,
                 NLStringValue.of(Arrays.toString(details.toAddresses().toArray())),
                 NLStringValue.of(Arrays.toString(details.cc() != null ? details.cc().toArray() : new String[0])),
                 NLStringValue.of(Arrays.toString(details.bcc() != null ? details.bcc().toArray() : new String[0])),

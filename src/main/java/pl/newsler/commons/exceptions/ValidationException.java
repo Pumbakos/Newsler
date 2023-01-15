@@ -1,14 +1,22 @@
 package pl.newsler.commons.exceptions;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "")
-@RequiredArgsConstructor
 public class ValidationException extends NLException {
+    public ValidationException(String error, String errorMessage) {
+        super(error, errorMessage);
+    }
+
+    public ValidationException(String errorMessage) {
+        super("Not provided", errorMessage);
+    }
+
+    public ValidationException() {
+        super("Not provided", "Not specified");
+    }
+
     public ResponseEntity<NLError> response() {
-        return new ResponseEntity<>(new NLError("", ""), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(NLError.of("", ""), HttpStatus.BAD_REQUEST);
     }
 }

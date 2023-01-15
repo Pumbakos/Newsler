@@ -23,6 +23,6 @@ public class StubMailRepository extends InMemoryJpaRepository<NLUserMail, NLId> 
 
     @Override
     public List<NLUserMail> findAllByUserId(@NotNull NLId userId) {
-        return super.database.values().stream().filter(mail -> mail.getUserId().equals(userId)).toList();
+        return super.database.values().stream().filter(m -> m.getUserId().equals(userId)).toList();
     }
 }

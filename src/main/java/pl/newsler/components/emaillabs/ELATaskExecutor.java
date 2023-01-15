@@ -122,7 +122,6 @@ public class ELATaskExecutor extends ConcurrentTaskExecutor {
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 
         HttpEntity<String> entity = new HttpEntity<>(ELAUrlParamBuilder.build(params), headers);
-        log.info(String.format("Entity: %s%n", gson.toJson(entity)));
 
         UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(BASE_URL)
                 .path(SEND_MAIL_URL)
@@ -139,6 +138,9 @@ public class ELATaskExecutor extends ConcurrentTaskExecutor {
     }
 
     private ELASentMailResults handleResponse(ResponseEntity<String> response, MailDetails details, NLId userId) {
+        if (response == null) {
+            return ELASentMailResults.of(details.id(), userId, NLEmailStatus.ERROR, "EmailLabs server did not respond", LocalDateTime.now());
+        }
         if (response.getStatusCode().is2xxSuccessful()) {
             return ELASentMailResults.of(details.id(), userId, NLEmailStatus.SENT, "Mail sent successfully", LocalDateTime.now());
         }

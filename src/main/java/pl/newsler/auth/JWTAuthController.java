@@ -5,10 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.IJWTAuthController;
-import pl.newsler.api.exceptions.Advised;
 import pl.newsler.components.user.UserDataNotFineException;
 
-@Advised
 @RestController
 @RequiredArgsConstructor
 class JWTAuthController implements IJWTAuthController {

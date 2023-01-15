@@ -73,7 +73,7 @@ final class NLKeyStore {
             KEYSTORE_PASSWORD = new String(triDES.decrypt(keystorePasswordBIS.readAllBytes()));
 
             if (!KEYSTORE_PASSWORD.matches("^[a-zA-Z0-9\"\\\\{},.><~|/\\[]*$")) {
-                throw new RegexNotMatchException("KeyStore password", "Password does not match regex");
+                throw new RegexNotMatchException("KS", "Incorrect password");
             }
 
             final Optional<InputStream> optionalStream = ResourceLoaderFactory.getKeystoreResource();

@@ -21,6 +21,7 @@ class ResourceLoaderFactory {
             return Optional.empty();
         }
     }
+
     public static Optional<InputStream> getKeystorePasswordResource() {
         try {
             return Optional.ofNullable(KEYSTORE_PASSWORD_LOADER.getResource());

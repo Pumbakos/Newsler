@@ -2,56 +2,47 @@ package pl.newsler.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import pl.newsler.auth.AuthUserDetailService;
 import pl.newsler.auth.JWTUtility;
-import pl.newsler.components.user.IUserCrudService;
-import pl.newsler.components.user.IUserRepository;
 import pl.newsler.security.filters.JWTFilter;
 
-import javax.annotation.Resource;
-
+@ComponentScan
 @Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
+@EnableGlobalAuthentication
 @RequiredArgsConstructor
-class SecurityConfiguration implements WebSecurityCustomizer {
-    private final AuthenticationConfiguration authenticationConfiguration;
-
-    @Resource(name = "bCryptPasswordEncoder")
-    private final BCryptPasswordEncoder passwordEncoder;
-    private final IUserRepository userRepository;
-
-    @Resource(name = "userService")
-    private final IUserCrudService userService;
+class SecurityConfiguration {
+    private final AuthUserDetailService userDetailService;
     private final JWTUtility jwtUtility;
 
-//    @Autowired
-//    void configure(AuthenticationManagerBuilder builder, DataSource dataSource) throws Exception {
-//        builder.jdbcAuthentication()
-//                .dataSource(dataSource)
-//                .usersByUsernameQuery("SELECT EMAIL, PASSWORD, ENABLED FROM USERS WHERE EMAIL=?")
-//                .passwordEncoder(new BCryptPasswordEncoder());
-//    }
-
     @Bean(name = "securityFilterChain")
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.authorizeRequests().anyRequest().authenticated()
-                .and()
-                .addFilter(new JWTFilter(authenticationConfiguration.getAuthenticationManager(), userRepository, jwtUtility));
+    SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+        AuthenticationManager manager = authenticationManagerBuilder.getObject();
+        http
+                .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll() // temporarily authenticated via JWT
+                )
+                .addFilterBefore(new JWTFilter("/v1/auth/jwt", manager, userDetailService, jwtUtility), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    @Override
-    public void customize(WebSecurity web) {
-        web.ignoring().antMatchers("/api/jwt"); //FIXME: use .authorizeRequests().antMatchers().permitAll() properly
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 }

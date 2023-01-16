@@ -1,3 +1,6 @@
+### For keys sec
+src/main/java/pl/newsler/devenv/H2Configuration.java
+
 HELP.md
 .gradle
 build/

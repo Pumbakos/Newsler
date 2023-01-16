@@ -23,7 +23,7 @@ public class InMemoryJpaRepository<T, ID> implements JpaRepository<T, ID> {
 
     @Override
     public List<T> findAll() {
-        throw new PleaseImplementMeException();
+        return database.values().stream().toList();
     }
 
     @Override

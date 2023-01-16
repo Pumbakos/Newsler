@@ -1,8 +1,13 @@
 server:
-  port: 8080
   error:
     include-message: always
     include-binding-errors: always
+    include-exception: true
+    whitelabel:
+      enabled: true
+  tomcat:
+    accesslog:
+      enabled: true
 
 spring:
   h2:
@@ -21,7 +26,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
-    show-sql: true
+  mvc:
+    throw-exception-if-no-handler-found: true
+  thymeleaf:
+    check-template-location: false
 
   mail:
     host: localhost
@@ -42,5 +50,13 @@ spring:
           writetimeout: 5000
 
 logging:
+  level:
+    org:
+      springframework:
+        web: trace
+        http: trace
+        security: trace
   pattern:
     dateformat: "dd/MM/yyyy HH:mm:ss"
+
+debug: true

@@ -1,8 +1,10 @@
 package pl.newsler.commons.exceptions;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
+@Getter
+@RequiredArgsConstructor(staticName = "of")
 public class NLError {
     private final String cause;
     private final String message;

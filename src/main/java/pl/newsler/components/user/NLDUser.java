@@ -12,7 +12,7 @@ import pl.newsler.commons.models.NLName;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.commons.models.NLType;
+import pl.newsler.commons.models.NLUserType;
 import pl.newsler.components.user.dto.UserGetRequest;
 
 @Value
@@ -27,7 +27,7 @@ public class NLDUser {
     NLSmtpAccount smtpAccount;
     NLSecretKey secretKey;
     NLAppKey appKey;
-    NLType role;
+    NLUserType role;
     boolean enabled;
     boolean credentialsNonExpired;
 

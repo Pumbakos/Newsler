@@ -3,7 +3,6 @@ package pl.newsler.security;
 import lombok.Getter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLPassword;
 
 import java.io.Serial;

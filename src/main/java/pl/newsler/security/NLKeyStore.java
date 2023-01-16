@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import pl.newsler.commons.exceptions.NoResourceFoundException;
 import pl.newsler.commons.exceptions.RegexNotMatchException;
-import pl.newsler.security.exception.AlgorithmInitializatoinException;
+import pl.newsler.security.exception.AlgorithmInitializationException;
 import pl.newsler.security.exception.DecryptionException;
 import pl.newsler.security.exception.EncryptionException;
 import pl.newsler.security.exception.KetStoreInitializationException;
@@ -73,7 +73,7 @@ final class NLKeyStore {
             KEYSTORE_PASSWORD = new String(triDES.decrypt(keystorePasswordBIS.readAllBytes()));
 
             if (!KEYSTORE_PASSWORD.matches("^[a-zA-Z0-9\"\\\\{},.><~|/\\[]*$")) {
-                throw new RegexNotMatchException("KeyStore password", "Password does not match regex");
+                throw new RegexNotMatchException("KS", "Incorrect password");
             }
 
             final Optional<InputStream> optionalStream = ResourceLoaderFactory.getKeystoreResource();
@@ -156,21 +156,22 @@ final class NLKeyStore {
         final Cipher cipher;
         final SecretKey key;
 
-        TriDES(byte[] encKey) throws AlgorithmInitializatoinException {
+        TriDES(byte[] encKey) throws AlgorithmInitializationException {
             try {
                 KeySpec keySpec = new DESedeKeySpec(encKey);
                 SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(AlgorithmType.TRIPLE_DES.toString());
                 cipher = Cipher.getInstance(AlgorithmType.TRIPLE_DES.toString());
                 key = keyFactory.generateSecret(keySpec);
-            } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeySpecException e) {
-                throw new AlgorithmInitializatoinException(e.getMessage(), e.getCause().toString());
+            } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException |
+                     InvalidKeySpecException e) {
+                throw new AlgorithmInitializationException(e.getMessage(), e.getCause().toString());
             }
         }
 
         byte[] encrypt(byte[] bytes) throws EncryptionException {
             try {
                 cipher.init(Cipher.ENCRYPT_MODE, key);
-                return Base64.encodeBase64(cipher.doFinal(bytes));
+                return Base64.encodeBase64(cipher.doFinal(bytes), false);
             } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
                 throw new EncryptionException("Error while encrypting key", e.getMessage());
             }
@@ -179,7 +180,7 @@ final class NLKeyStore {
         byte[] decrypt(byte[] bytes) throws DecryptionException {
             try {
                 cipher.init(Cipher.DECRYPT_MODE, key);
-                return cipher.doFinal(Base64.decodeBase64(bytes));
+                return cipher.doFinal(Base64.decodeBase64(bytes, 0, bytes.length));
             } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
                 throw new DecryptionException("Error while decrypting key", e.getMessage());
             }

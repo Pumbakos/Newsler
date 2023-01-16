@@ -1,5 +1,14 @@
 package pl.newsler.components.user;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,17 +27,9 @@ import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.commons.models.NLType;
+import pl.newsler.commons.models.NLUserType;
 import pl.newsler.commons.models.NLVersion;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
 import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
@@ -99,9 +100,9 @@ public class NLUser implements UserDetails {
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SMTP_ACCOUNT")))
     private NLSmtpAccount smtpAccount;
 
-    @Enumerated
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ROLE")))
-    private NLType role;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ROLE")
+    private NLUserType role;
 
     @Column(name = "ENABLED")
     private Boolean enabled = false;

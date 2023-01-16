@@ -1,5 +1,7 @@
 package pl.newsler.devenv;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.h2.tools.Server;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -12,9 +14,13 @@ import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
+import pl.newsler.components.emaillabs.IMailRepository;
+import pl.newsler.components.emaillabs.MailDetails;
+import pl.newsler.components.emaillabs.NLUserMail;
 import pl.newsler.components.user.IUserCrudService;
 
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static pl.newsler.devenv.H2Util.domain;
 import static pl.newsler.devenv.H2Util.firstName;
@@ -23,7 +29,9 @@ import static pl.newsler.devenv.H2Util.secretOrAppKey;
 import static pl.newsler.devenv.H2Util.smtpAccount;
 import static pl.newsler.devenv.H2Util.username;
 
+@Slf4j
 @Configuration(proxyBeanMethods = false)
+@RequiredArgsConstructor
 class H2Configuration {
     @Bean(initMethod = "start", destroyMethod = "stop")
     public Server h2Server() throws SQLException {
@@ -31,12 +39,35 @@ class H2Configuration {
     }
 
     @Bean
-    CommandLineRunner saveUsers(IUserCrudService service) {
+    @SuppressWarnings("java:S112")
+        //no need to define custom exception
+    CommandLineRunner saveUsers(IUserCrudService service, IMailRepository repository) {
+        final AtomicReference<String> appKey = new AtomicReference<>();
+        final AtomicReference<String> secretKey = new AtomicReference<>();
+        final AtomicReference<String> smtp = new AtomicReference<>();
+        final AtomicReference<String> email = new AtomicReference<>();
+
+        try {
+            appKey.set(System.getenv("NEWSLER_APP_KEY"));
+            secretKey.set(System.getenv("NEWSLER_SECRET_KEY"));
+            smtp.set(System.getenv("NEWSLER_SMTP"));
+            email.set(System.getenv("NEWSLER_EMAIL"));
+
+            if (envVariablesNotNull(appKey, secretKey, smtp, email)) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            appKey.set(secretOrAppKey());
+            secretKey.set(secretOrAppKey());
+            smtp.set(smtpAccount());
+            email.set("newslerowsky@app.co.devenv");
+        }
+
         return args -> {
             NLId id1 = service.create(
                     NLFirstName.of("Aizholat"),
                     NLLastName.of("Newsler"),
-                    NLEmail.of("newslerowsky@app.co.devenv"),
+                    NLEmail.of(email.get()),
                     NLPassword.of("Pa$$word7hat^match3$")
             );
 
@@ -50,7 +81,7 @@ class H2Configuration {
             NLId id3 = service.create(
                     NLFirstName.of(firstName()),
                     NLLastName.of(lastName()),
-                    NLEmail.of(String.format("%s@%s.newsler.pl", username(), domain())),
+                    NLEmail.of(String.format("%s@newsler.pl", username())),
                     NLPassword.of("^a1u3@tbZ0I0Cd0W")
             );
 
@@ -68,12 +99,36 @@ class H2Configuration {
                     NLPassword.of("E#7r4)4$$$^P931p)a$*")
             );
 
-            service.update(id1, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
+            service.update(id1, NLAppKey.of(appKey.get()), NLSecretKey.of(secretKey.get()), NLSmtpAccount.of(smtp.get()));
             service.update(id2, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id3, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id4, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id5, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
+
+            repository.save(NLUserMail.of(id1, MailDetails.of(H2Util.createMailSendRequest(service.getById(id1).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id1, MailDetails.of(H2Util.createMailSendRequest(service.getById(id1).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id1, MailDetails.of(H2Util.createMailSendRequest(service.getById(id1).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id2, MailDetails.of(H2Util.createMailSendRequest(service.getById(id2).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id2, MailDetails.of(H2Util.createMailSendRequest(service.getById(id2).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id2, MailDetails.of(H2Util.createMailSendRequest(service.getById(id2).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id3, MailDetails.of(H2Util.createMailSendRequest(service.getById(id3).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id3, MailDetails.of(H2Util.createMailSendRequest(service.getById(id3).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id3, MailDetails.of(H2Util.createMailSendRequest(service.getById(id3).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id4, MailDetails.of(H2Util.createMailSendRequest(service.getById(id4).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id4, MailDetails.of(H2Util.createMailSendRequest(service.getById(id4).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id4, MailDetails.of(H2Util.createMailSendRequest(service.getById(id4).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id5, MailDetails.of(H2Util.createMailSendRequest(service.getById(id5).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id5, MailDetails.of(H2Util.createMailSendRequest(service.getById(id5).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id5, MailDetails.of(H2Util.createMailSendRequest(service.getById(id5).getEmail().getValue()))));
         };
     }
 
+    private boolean envVariablesNotNull(
+            AtomicReference<String> appKey,
+            AtomicReference<String> secretKey,
+            AtomicReference<String> smtp,
+            AtomicReference<String> email
+    ) {
+        return ((!appKey.get().isEmpty()) && (!secretKey.get().isEmpty()) && (!smtp.get().isEmpty()) && (!email.get().isEmpty()));
+    }
 }

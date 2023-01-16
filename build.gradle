@@ -1,8 +1,8 @@
 plugins {
-    id 'org.springframework.boot' version '2.7.4'
-    id 'io.spring.dependency-management' version '1.0.14.RELEASE'
     id 'java'
     id 'jacoco'
+    id 'org.springframework.boot' version '3.0.1'
+    id 'io.spring.dependency-management' version '1.1.0'
 }
 
 group = 'pl.newsler'
@@ -26,28 +26,35 @@ repositories {
 
 jacoco {
     toolVersion = "0.8.8"
-    reportsDirectory = layout.buildDirectory.dir('test-coverage-results')
+    reportsDirectory = layout.buildDirectory.dir('test-coverage-results') as Directory
 }
 
 dependencies {
+    testImplementation 'junit:junit:4.13.1'
+    testImplementation 'junit:junit:4.13.1'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
-    implementation 'org.springframework.boot:spring-boot-starter-validation:2.7.5'
-    implementation 'org.springframework.boot:spring-boot-starter-data-rest:2.7.5'
-    implementation 'org.springframework.boot:spring-boot-starter-security:2.7.5'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.7.5'
-    implementation 'org.springframework.boot:spring-boot-starter-jersey:2.7.5'
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.7.5'
+    implementation 'org.springframework.boot:spring-boot-starter-validation:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-data-rest:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-jersey:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.0.1'
+
+    implementation 'org.springframework.boot:spring-boot-starter-security:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     implementation('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4.2'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'org.jetbrains:annotations:23.1.0'
     implementation 'com.auth0:java-jwt:4.2.1'
     implementation 'org.yaml:snakeyaml:1.33'
     implementation 'com.h2database:h2'
 
-    compileOnly 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
 
     runtimeOnly 'com.oracle.database.jdbc:ojdbc8'
     runtimeOnly 'com.h2database:h2'
@@ -60,7 +67,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.5'
     testImplementation 'org.springframework.security:spring-security-test:5.7.5'
     testImplementation 'com.squareup.retrofit2:converter-gson:2.1.0'
+    testImplementation 'uk.org.webcompere:system-stubs-core:2.0.1'
     testImplementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    testImplementation 'org.mockito:mockito-inline:3.12.4'
     testImplementation 'com.google.code.gson:gson:2.10'
     testImplementation 'org.projectlombok:lombok'
     testImplementation 'org.yaml:snakeyaml:1.33'

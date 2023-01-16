@@ -17,8 +17,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import pl.newsler.api.exceptions.UnauthorizedException;
 import pl.newsler.auth.IJWTAuthService;
 import pl.newsler.auth.JWTClaim;
-import pl.newsler.auth.JWTConfiguration;
 import pl.newsler.auth.JWTUtility;
+import pl.newsler.auth.StubJWTConfiguration;
 import pl.newsler.auth.UserAuthModel;
 import pl.newsler.commons.models.NLId;
 import pl.newsler.commons.models.NLPassword;
@@ -29,7 +29,7 @@ import pl.newsler.security.StubNLIKeyProvider;
 import pl.newsler.security.StubNLPasswordEncoder;
 import pl.newsler.security.NLPublicAlias;
 
-import javax.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.HttpHeaders;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -46,13 +46,13 @@ class JWTFilterTest {
     private final StubUserRepository userRepository = new StubUserRepository();
     private final StubNLIKeyProvider keyProvider = new StubNLIKeyProvider();
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
-    private final JWTConfiguration configuration = new JWTConfiguration(userRepository, passwordEncoder, keyProvider);
+    private final StubAuthenticationManager authenticationManager = new StubAuthenticationManager();
+    private final StubJWTConfiguration configuration = new StubJWTConfiguration(userRepository, keyProvider, passwordEncoder);
     private final JWTUtility utility = configuration.jwtUtility();
     private final IJWTAuthService service = configuration.jwtAuthService(utility);
     private final TestUserFactory factory = new TestUserFactory();
     private final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
-
-    private final JWTFilter filter = new JWTFilter(new StubAuthenticationManager(), userRepository, utility);
+    private final JWTFilter filter = new JWTFilter("/v1/auth/jwt", authenticationManager, configuration.databaseUserDetailService(), utility);
 
     @BeforeEach
     void beforeEach() {
@@ -148,6 +148,7 @@ class JWTFilterTest {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+        request.setRequestURI("/v1/auth/jwt");
         Assertions.assertDoesNotThrow(() -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
     }
 
@@ -203,14 +204,14 @@ class JWTFilterTest {
 
     private String generateToken(Instant now, String jwtId, String keyId, String issuer, String email, String name, String role) {
         return utility.builder()
-                .withJWTId(String.valueOf(JWTClaim.JWT_ID))
-                .withKeyId(utility.hmac384().getSigningKeyId())
-                .withIssuer("")
+                .withJWTId(jwtId)
+                .withKeyId(keyId)
+                .withIssuer(issuer)
                 .withIssuedAt(now)
                 .withExpiresAt(now.plus(60L, ChronoUnit.MINUTES))
-                .withClaim(JWTClaim.EMAIL, "")
-                .withClaim(JWTClaim.NAME, "")
-                .withClaim(JWTClaim.ROLE, "")
+                .withClaim(JWTClaim.EMAIL, email)
+                .withClaim(JWTClaim.NAME, name)
+                .withClaim(JWTClaim.ROLE, role)
                 .sign(utility.hmac384());
     }
 

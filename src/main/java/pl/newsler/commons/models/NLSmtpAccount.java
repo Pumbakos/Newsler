@@ -8,13 +8,12 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serial;
-import java.io.Serializable;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PACKAGE, force = true)
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC, staticName = "of")
 @EqualsAndHashCode
-public class NLSmtpAccount implements NLModel, Serializable {
+public class NLSmtpAccount implements NLModel {
     @Serial
     private static final long serialVersionUID = -8440638731256566536L;
 

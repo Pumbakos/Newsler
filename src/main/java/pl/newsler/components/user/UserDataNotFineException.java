@@ -1,23 +1,25 @@
 package pl.newsler.components.user;
 
-public class UserDataNotFineException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import pl.newsler.commons.exceptions.NLError;
+import pl.newsler.commons.exceptions.NLException;
+
+public class UserDataNotFineException extends NLException {
+    public UserDataNotFineException(String error, String errorMessage) {
+        super(error, errorMessage);
+    }
+
+    public UserDataNotFineException(String errorMessage) {
+        super("Not provided", errorMessage);
+    }
+
     public UserDataNotFineException() {
-        super();
+        super("Not provided", "Not specified");
     }
 
-    public UserDataNotFineException(String message) {
-        super(message);
-    }
-
-    public UserDataNotFineException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public UserDataNotFineException(Throwable cause) {
-        super(cause);
-    }
-
-    protected UserDataNotFineException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+    @Override
+    public ResponseEntity<NLError> response() {
+        return new ResponseEntity<>(NLError.of(super.error, super.errorMessage), HttpStatus.BAD_REQUEST);
     }
 }

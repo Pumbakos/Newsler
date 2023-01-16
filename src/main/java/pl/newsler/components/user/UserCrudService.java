@@ -1,8 +1,7 @@
 package pl.newsler.components.user;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
@@ -12,7 +11,7 @@ import pl.newsler.commons.models.NLModel;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.commons.models.NLType;
+import pl.newsler.commons.models.NLUserType;
 import pl.newsler.security.NLIPasswordEncoder;
 
 import java.util.Optional;
@@ -20,12 +19,12 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 class UserCrudService implements IUserCrudService {
-    private final UserRepository userRepository;
+    private final IUserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
 
     @Override
-    public NLDUser getById(NLId id) {
-        if (id == null) {
+    public @NotNull NLDUser getById(NLId id) {
+        if (id == null || !id.validate()) {
             throw new UserDataNotFineException();
         }
 
@@ -37,21 +36,21 @@ class UserCrudService implements IUserCrudService {
     }
 
     @Override
-    public NLId create(NLFirstName name, NLLastName lastName, NLEmail email, NLPassword password) {
+    public @NotNull NLId create(NLFirstName name, NLLastName lastName, NLEmail email, NLPassword password) {
         if (!isPasswordOk(password)) {
             throw new UserDataNotFineException();
         }
 
         if (!isDataOk(name, lastName, email)) {
-            throw new UserDataNotFineException(String.format("name: %s, lastName: %s, email: %s, ", name, lastName, email));
+            throw new UserDataNotFineException(String.format("Either name: %s, lastName: %s or email: %s are not valid.", name.getValue(), lastName.getValue(), email.getValue()));
         }
 
         NLUser user = new NLUser();
         user.setFirstName(name);
         user.setLastName(lastName);
         user.setEmail(email);
-        user.setPassword(NLPassword.of(hash(password.getValue())));
-        user.setRole(NLType.USER);
+        user.setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(password.getValue())));
+        user.setRole(NLUserType.USER);
         user.setId(NLId.of(UUID.randomUUID()));
         user.setVersion(UserRepository.version);
         user.setEnabled(true);
@@ -60,8 +59,12 @@ class UserCrudService implements IUserCrudService {
 
     @Override
     public void update(NLId id, NLAppKey appKey, NLSecretKey secretKey, NLSmtpAccount smtpAccount) {
+        if (id == null || !id.validate()) {
+            throw new UserDataNotFineException("ID", "Invalid");
+        }
+
         if (!isDataOk(appKey, secretKey, smtpAccount)) {
-            throw new UserDataNotFineException();
+            throw new UserDataNotFineException(String.format("Either appKey: %s, secretKey: %s or smtpAccount: %s are not valid.", appKey.getValue(), secretKey.getValue(), smtpAccount.getValue()));
         }
 
         Optional<NLUser> optionalNLUser = userRepository.findById(id);
@@ -78,6 +81,10 @@ class UserCrudService implements IUserCrudService {
 
     @Override
     public void delete(NLId id, NLPassword password) {
+        if (id == null || !id.validate()) {
+            throw new UserDataNotFineException("ID", "Invalid");
+        }
+
         if (!isPasswordOk(password)) {
             throw new UserDataNotFineException();
         }
@@ -88,38 +95,26 @@ class UserCrudService implements IUserCrudService {
         }
 
         final NLUser user = optionalNLUser.get();
-        final String encodedPassword = user.getPassword();
-        if (!passwordEncoder.bCrypt().matches(password.getValue(), encodedPassword)) {
+        if (!passwordEncoder.bCrypt().matches(password.getValue(), user.getPassword())) {
             throw new UserDataNotFineException();
         }
 
         userRepository.deleteById(user.getId());
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        NLEmail nlEmail = NLEmail.of(email);
-        if (!nlEmail.validate()) {
-            throw new UserDataNotFineException();
-        }
-
-        Optional<NLUser> optionalNLUser = userRepository.findByEmail(nlEmail);
-        if (optionalNLUser.isEmpty()) {
-            throw new UserDataNotFineException();
-        }
-
-        return optionalNLUser.get();
-    }
-
     private boolean isDataOk(NLModel first, NLModel second, NLModel third) {
+        if (first == null || second == null || third == null) {
+            return false;
+        }
+
         return first.validate() && second.validate() && third.validate();
     }
 
     private boolean isPasswordOk(NLPassword password) {
-        return password.validate();
+        return password != null && password.validate();
     }
 
-    private String hash(String password) {
-        return passwordEncoder.bCrypt().encode(password);
+    private @NotNull String hash(@NotNull String password) {
+        return passwordEncoder.encrypt(password);
     }
 }

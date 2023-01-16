@@ -13,7 +13,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-class JWTAuthService implements IJWTAuthService{
+class JWTAuthService implements IJWTAuthService {
     private final IUserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
     private final JWTUtility jwtUtility;
@@ -35,6 +35,7 @@ class JWTAuthService implements IJWTAuthService{
         if (!credentialsValid(user, userAuthModel)) {
             throw new UnauthorizedException("User's credentials invalid", "Token not generated");
         }
+
         return generateToken(user);
     }
 

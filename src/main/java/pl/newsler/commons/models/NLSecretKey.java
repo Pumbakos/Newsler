@@ -8,13 +8,12 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serial;
-import java.io.Serializable;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PACKAGE, force = true)
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC, staticName = "of")
 @EqualsAndHashCode
-public class NLSecretKey implements NLModel, Serializable {
+public class NLSecretKey implements NLModel {
     @Serial
     private static final long serialVersionUID = -2644062944440678684L;
 

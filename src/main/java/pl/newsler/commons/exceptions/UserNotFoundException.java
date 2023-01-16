@@ -1,14 +1,22 @@
 package pl.newsler.commons.exceptions;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "")
-@RequiredArgsConstructor
 public class UserNotFoundException extends NLException {
+    public UserNotFoundException(String error, String errorMessage) {
+        super(error, errorMessage);
+    }
+
+    public UserNotFoundException(String errorMessage) {
+        super("Not provided", errorMessage);
+    }
+
+    public UserNotFoundException() {
+        super("Not provided", "Not specified");
+    }
+
     public ResponseEntity<NLError> response() {
-        return new ResponseEntity<>(new NLError("", ""), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(NLError.of(error, errorMessage), HttpStatus.BAD_REQUEST);
     }
 }

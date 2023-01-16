@@ -4,7 +4,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class LoaderTest {
+class  LoaderTest {
     private final StubLoader stubLoader = new StubLoader();
 
     @Test

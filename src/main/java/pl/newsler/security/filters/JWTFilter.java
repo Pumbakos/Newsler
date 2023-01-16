@@ -47,11 +47,11 @@ public class JWTFilter extends OncePerRequestFilter {
      * {@link AuthenticationManager}
      *
      * @param filterNotProcessingUrl the default value for <tt>filterProcessesUrl</tt>.
-     * @param authenticationManager  the {@link AuthenticationManager} used to authenticate
-     *                               an {@link Authentication} object. Cannot be null.
+     * @param authenticationManager  the {@link AuthenticationManager} used to authenticate an {@link Authentication} object. Cannot be null.
      * @param authUserDetailService  {@link org.springframework.security.core.userdetails.UserDetailsService}
      */
-    public JWTFilter(@NotNull String filterNotProcessingUrl, AuthenticationManager authenticationManager, AuthUserDetailService authUserDetailService, @NotNull JWTUtility utility) {
+    public JWTFilter(@NotNull String filterNotProcessingUrl, @NotNull AuthenticationManager authenticationManager,
+                     @NotNull AuthUserDetailService authUserDetailService, @NotNull JWTUtility utility) {
         super();
         this.filterNotProcessingUrl = filterNotProcessingUrl;
         this.authenticationManager = authenticationManager;
@@ -79,7 +79,7 @@ public class JWTFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private void performAuthentication(NLAuthenticationToken authentication) {
+    private void performAuthentication(@NotNull NLAuthenticationToken authentication) {
         try {
             authenticationManager.authenticate(authentication);
         } catch (DisabledException | BadCredentialsException e) {
@@ -87,7 +87,7 @@ public class JWTFilter extends OncePerRequestFilter {
         }
     }
 
-    private NLAuthenticationToken getAuthentication(String authToken) {
+    private @NotNull NLAuthenticationToken getAuthentication(@NotNull String authToken) {
         final DecodedJWT jwt = verifyToken(authToken);
         final String email = jwt.getClaim(JWTClaim.EMAIL).asString();
         final NLEmail nlEmail = NLEmail.of(email);
@@ -113,7 +113,7 @@ public class JWTFilter extends OncePerRequestFilter {
         throw new UnauthorizedException(TOKEN, "Access denied.");
     }
 
-    private DecodedJWT verifyToken(String authToken) {
+    private @NotNull DecodedJWT verifyToken(@NotNull String authToken) {
         final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
         try {
             return verifier.verify(authToken);
@@ -122,11 +122,11 @@ public class JWTFilter extends OncePerRequestFilter {
         }
     }
 
-    private NLPrincipal createPrincipal(NLDUser user) {
+    private @NotNull NLPrincipal createPrincipal(@NotNull NLDUser user) {
         return new NLPrincipal(user.getId(), user.getEmail(), user.getName());
     }
 
-    private NLCredentials createCredentials(NLDUser user) {
+    private @NotNull NLCredentials createCredentials(@NotNull NLDUser user) {
         return new NLCredentials(user.getPassword());
     }
 }

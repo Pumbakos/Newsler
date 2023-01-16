@@ -1,5 +1,6 @@
 package pl.newsler.components.user;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
@@ -22,8 +23,8 @@ class UserCrudService implements IUserCrudService {
     private final NLIPasswordEncoder passwordEncoder;
 
     @Override
-    public NLDUser getById(NLId id) {
-        if (id == null) {
+    public @NotNull NLDUser getById(NLId id) {
+        if (id == null || !id.validate()) {
             throw new UserDataNotFineException();
         }
 
@@ -35,7 +36,7 @@ class UserCrudService implements IUserCrudService {
     }
 
     @Override
-    public NLId create(NLFirstName name, NLLastName lastName, NLEmail email, NLPassword password) {
+    public @NotNull NLId create(NLFirstName name, NLLastName lastName, NLEmail email, NLPassword password) {
         if (!isPasswordOk(password)) {
             throw new UserDataNotFineException();
         }
@@ -58,8 +59,12 @@ class UserCrudService implements IUserCrudService {
 
     @Override
     public void update(NLId id, NLAppKey appKey, NLSecretKey secretKey, NLSmtpAccount smtpAccount) {
+        if (id == null || !id.validate()) {
+            throw new UserDataNotFineException("ID", "Invalid");
+        }
+
         if (!isDataOk(appKey, secretKey, smtpAccount)) {
-            throw new UserDataNotFineException();
+            throw new UserDataNotFineException(String.format("Either appKey: %s, secretKey: %s or smtpAccount: %s are not valid.", appKey.getValue(), secretKey.getValue(), smtpAccount.getValue()));
         }
 
         Optional<NLUser> optionalNLUser = userRepository.findById(id);
@@ -76,6 +81,10 @@ class UserCrudService implements IUserCrudService {
 
     @Override
     public void delete(NLId id, NLPassword password) {
+        if (id == null || !id.validate()) {
+            throw new UserDataNotFineException("ID", "Invalid");
+        }
+
         if (!isPasswordOk(password)) {
             throw new UserDataNotFineException();
         }
@@ -94,14 +103,18 @@ class UserCrudService implements IUserCrudService {
     }
 
     private boolean isDataOk(NLModel first, NLModel second, NLModel third) {
+        if (first == null || second == null || third == null) {
+            return false;
+        }
+
         return first.validate() && second.validate() && third.validate();
     }
 
     private boolean isPasswordOk(NLPassword password) {
-        return password.validate();
+        return password != null && password.validate();
     }
 
-    private String hash(String password) {
+    private @NotNull String hash(@NotNull String password) {
         return passwordEncoder.encrypt(password);
     }
 }

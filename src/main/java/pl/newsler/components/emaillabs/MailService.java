@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 class MailService implements IMailService {
-    private final ELATaskExecutor executor;
+    private final IELATaskExecutor executor;
     private final IUserRepository userRepository;
     private final IMailRepository mailRepository;
 

@@ -12,7 +12,7 @@ import java.io.Serial;
 @NoArgsConstructor(access = AccessLevel.PACKAGE, force = true)
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC, staticName = "of")
 @EqualsAndHashCode
-public class NLMessage implements NLModel {
+public class NLEmailMessage implements NLModel {
     @Serial
     private static final long serialVersionUID = -2861005558700732717L;
 

@@ -5,7 +5,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.stereotype.Component;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.security.NLAuthenticationToken;
@@ -13,7 +12,6 @@ import pl.newsler.security.NLPrincipal;
 
 import java.util.Optional;
 
-@Component
 @RequiredArgsConstructor
 public class NLAuthenticationProvider implements AuthenticationProvider {
     private final IUserRepository userRepository;

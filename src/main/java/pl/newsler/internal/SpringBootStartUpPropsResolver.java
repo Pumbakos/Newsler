@@ -12,12 +12,12 @@ import static pl.newsler.internal.PropType.NEWSLER_SSL_KEYSTORE_ALIAS;
 import static pl.newsler.internal.PropType.NEWSLER_SSL_KEYSTORE_FILE;
 import static pl.newsler.internal.PropType.NEWSLER_SSL_KEYSTORE_PASSWORD;
 import static pl.newsler.internal.PropType.NEWSLER_SSL_KEYSTORE_TYPE;
+import static pl.newsler.internal.PropType.SERVER_PORT;
 import static pl.newsler.internal.PropType.SERVER_SSL_ENABLED;
 import static pl.newsler.internal.PropType.SERVER_SSL_KEYSTORE_ALIAS;
 import static pl.newsler.internal.PropType.SERVER_SSL_KEYSTORE_FILE;
 import static pl.newsler.internal.PropType.SERVER_SSL_KEYSTORE_PASSWORD;
 import static pl.newsler.internal.PropType.SERVER_SSL_KEYSTORE_TYPE;
-import static pl.newsler.internal.PropType.SERVER_SSL_PORT;
 
 /**
  * Set up security properties {@link PropType}. Promotes CLI args over system env ones
@@ -43,7 +43,7 @@ public class SpringBootStartUpPropsResolver {
             resolveProperties(props, ksSysEnv, kpSysEnv, ktSysEnv, kaSysEnv);
         } else {
             props.put(SERVER_SSL_ENABLED.value(), "false");
-            props.put(SERVER_SSL_PORT.value(), "8080");
+            props.put(SERVER_PORT.value(), "8080");
         }
 
         return props;
@@ -56,7 +56,7 @@ public class SpringBootStartUpPropsResolver {
         props.put(SERVER_SSL_KEYSTORE_TYPE.value(), keyStoreType);
         props.put(SERVER_SSL_KEYSTORE_ALIAS.value(), keyStoreAlias);
         props.put(SERVER_SSL_ENABLED.value(), "true");
-        props.put(SERVER_SSL_PORT.value(), "8443");
+        props.put(SERVER_PORT.value(), "8443");
     }
 
     private static String getenv(PropType prop) {

@@ -22,7 +22,7 @@ class SpringBootStartUpPropsResolverTest {
         Assertions.assertEquals("TYPE", props.get("server.ssl.key-store-type"));
         Assertions.assertEquals("ALIAS", props.get("server.ssl.key-alias"));
         Assertions.assertEquals("true", props.get("server.ssl.enabled"));
-        Assertions.assertEquals("8443", props.get("server.ssl.port"));
+        Assertions.assertEquals("8443", props.get("server.port"));
     }
 
     @Test
@@ -41,7 +41,7 @@ class SpringBootStartUpPropsResolverTest {
                     Assertions.assertEquals("TYPE", props.get("server.ssl.key-store-type"));
                     Assertions.assertEquals("ALIAS", props.get("server.ssl.key-alias"));
                     Assertions.assertEquals("true", props.get("server.ssl.enabled"));
-                    Assertions.assertEquals("8443", props.get("server.ssl.port"));
+                    Assertions.assertEquals("8443", props.get("server.port"));
                 });
     }
 
@@ -50,6 +50,6 @@ class SpringBootStartUpPropsResolverTest {
         final String[] args = new String[0];
         Properties props = SpringBootStartUpPropsResolver.resolve(args);
         Assertions.assertEquals("false", props.get("server.ssl.enabled"));
-        Assertions.assertEquals("8080", props.get("server.ssl.port"));
+        Assertions.assertEquals("8080", props.get("server.port"));
     }
 }

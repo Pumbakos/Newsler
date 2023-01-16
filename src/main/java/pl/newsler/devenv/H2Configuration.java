@@ -14,6 +14,9 @@ import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
+import pl.newsler.components.emaillabs.IMailRepository;
+import pl.newsler.components.emaillabs.MailDetails;
+import pl.newsler.components.emaillabs.NLUserMail;
 import pl.newsler.components.user.IUserCrudService;
 
 import java.sql.SQLException;
@@ -36,13 +39,13 @@ class H2Configuration {
     }
 
     @Bean
-    //no need to define custom exception
     @SuppressWarnings("java:S112")
-    CommandLineRunner saveUsers(IUserCrudService service) {
-        AtomicReference<String> appKey = new AtomicReference<>();
-        AtomicReference<String> secretKey = new AtomicReference<>();
-        AtomicReference<String> smtp = new AtomicReference<>();
-        AtomicReference<String> email = new AtomicReference<>();
+        //no need to define custom exception
+    CommandLineRunner saveUsers(IUserCrudService service, IMailRepository repository) {
+        final AtomicReference<String> appKey = new AtomicReference<>();
+        final AtomicReference<String> secretKey = new AtomicReference<>();
+        final AtomicReference<String> smtp = new AtomicReference<>();
+        final AtomicReference<String> email = new AtomicReference<>();
 
         try {
             appKey.set(System.getenv("NEWSLER_APP_KEY"));
@@ -101,6 +104,22 @@ class H2Configuration {
             service.update(id3, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id4, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
             service.update(id5, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
+
+            repository.save(NLUserMail.of(id1, MailDetails.of(H2Util.createMailSendRequest(service.getById(id1).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id1, MailDetails.of(H2Util.createMailSendRequest(service.getById(id1).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id1, MailDetails.of(H2Util.createMailSendRequest(service.getById(id1).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id2, MailDetails.of(H2Util.createMailSendRequest(service.getById(id2).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id2, MailDetails.of(H2Util.createMailSendRequest(service.getById(id2).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id2, MailDetails.of(H2Util.createMailSendRequest(service.getById(id2).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id3, MailDetails.of(H2Util.createMailSendRequest(service.getById(id3).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id3, MailDetails.of(H2Util.createMailSendRequest(service.getById(id3).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id3, MailDetails.of(H2Util.createMailSendRequest(service.getById(id3).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id4, MailDetails.of(H2Util.createMailSendRequest(service.getById(id4).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id4, MailDetails.of(H2Util.createMailSendRequest(service.getById(id4).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id4, MailDetails.of(H2Util.createMailSendRequest(service.getById(id4).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id5, MailDetails.of(H2Util.createMailSendRequest(service.getById(id5).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id5, MailDetails.of(H2Util.createMailSendRequest(service.getById(id5).getEmail().getValue()))));
+            repository.save(NLUserMail.of(id5, MailDetails.of(H2Util.createMailSendRequest(service.getById(id5).getEmail().getValue()))));
         };
     }
 

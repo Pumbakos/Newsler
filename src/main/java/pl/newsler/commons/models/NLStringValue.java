@@ -7,14 +7,13 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.Arrays;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PACKAGE, force = true)
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC)
 @EqualsAndHashCode
-public class NLStringValue implements Serializable {
+public class NLStringValue implements NLModel {
     @Serial
     private static final long serialVersionUID = -5017051407745618377L;
 
@@ -27,4 +26,9 @@ public class NLStringValue implements Serializable {
     }
 
     private final String value;
+
+    @Override
+    public boolean validate() {
+        return true;
+    }
 }

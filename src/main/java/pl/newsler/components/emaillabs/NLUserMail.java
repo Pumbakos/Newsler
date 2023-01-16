@@ -17,9 +17,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
+import pl.newsler.commons.models.NLEmailMessage;
 import pl.newsler.commons.models.NLEmailStatus;
 import pl.newsler.commons.models.NLId;
-import pl.newsler.commons.models.NLMessage;
 import pl.newsler.commons.models.NLStringValue;
 import pl.newsler.commons.models.NLSubject;
 import pl.newsler.commons.models.NLVersion;
@@ -67,19 +67,19 @@ public class NLUserMail implements Serializable {
     private NLStringValue bcc;
 
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SUBJECT")))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SUBJECT", length = 128)))
     private NLSubject subject;
 
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "MESSAGE")))
-    private NLMessage message;
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "MESSAGE", length = 5000)))
+    private NLEmailMessage message;
 
     @Column(name = "STATUS")
     @Enumerated(EnumType.STRING)
     private NLEmailStatus status;
 
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ERROR_MESSAGE")))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ERROR_MESSAGE", length = 512)))
     private NLStringValue errorMessage;
 
     public static NLUserMail of(NLId userId, MailDetails details) {
@@ -91,7 +91,7 @@ public class NLUserMail implements Serializable {
                 NLStringValue.of(Arrays.toString(details.cc() != null ? details.cc().toArray() : new String[0])),
                 NLStringValue.of(Arrays.toString(details.bcc() != null ? details.bcc().toArray() : new String[0])),
                 NLSubject.of(details.subject()),
-                NLMessage.of(details.message()),
+                NLEmailMessage.of(details.message()),
                 NLEmailStatus.QUEUED,
                 NLStringValue.of("")
         );

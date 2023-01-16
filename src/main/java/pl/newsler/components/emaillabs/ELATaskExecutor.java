@@ -43,7 +43,7 @@ import java.util.Queue;
 @Slf4j
 @RequiredArgsConstructor
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-public class ELATaskExecutor extends ConcurrentTaskExecutor {
+class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor {
     private static final String BASE_URL = "https://api.emaillabs.net.pl/api";
     private static final String SEND_MAIL_URL = "/new_sendmail";
     private final Queue<Pair<NLId, MailDetails>> queue;
@@ -55,7 +55,8 @@ public class ELATaskExecutor extends ConcurrentTaskExecutor {
     private final Gson gson;
     private boolean queueExecution = false;
 
-    void queue(NLId userId, MailDetails details) {
+    @Override
+    public void queue(NLId userId, MailDetails details) {
         mailRepository.save(NLUserMail.of(userId, details));
         queue.add(Pair.of(userId, details));
         if (!queueExecution) {

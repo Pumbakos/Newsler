@@ -1,6 +1,7 @@
 package pl.newsler.security;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import pl.newsler.security.exception.AlgorithmInitializationException;
 
@@ -27,7 +28,7 @@ class NLPasswordEncoder implements NLIPasswordEncoder {
     }
 
     @Override
-    public final String encrypt(String string) {
+    public final @NotNull String encrypt(@NotNull String string) {
         try {
             Cipher cipher = Cipher.getInstance(AlgorithmType.AES.toString());
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
@@ -39,7 +40,7 @@ class NLPasswordEncoder implements NLIPasswordEncoder {
     }
 
     @Override
-    public final String decrypt(String string) {
+    public final @NotNull String decrypt(@NotNull String string) {
         try {
             Cipher cipher = Cipher.getInstance(AlgorithmType.AES.toString());
             cipher.init(Cipher.DECRYPT_MODE, secretKey);

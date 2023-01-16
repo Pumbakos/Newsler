@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -99,8 +100,8 @@ public class NLUser implements UserDetails {
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SMTP_ACCOUNT")))
     private NLSmtpAccount smtpAccount;
 
-    @Enumerated
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ROLE")))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ROLE")
     private NLUserType role;
 
     @Column(name = "ENABLED")

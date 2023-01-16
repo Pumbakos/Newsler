@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.security.NLIKeyProvider;
 import pl.newsler.security.NLIPasswordEncoder;
@@ -24,6 +25,11 @@ class JWTConfiguration {
     @Bean(name = "jwtAuthService")
     IJWTAuthService jwtAuthService(JWTUtility utility) {
         return new JWTAuthService(userRepository, passwordEncoder, utility);
+    }
+
+    @Bean(name = "authenticationProvider")
+    AuthenticationProvider authenticationProvider() {
+        return new NLAuthenticationProvider(userRepository);
     }
 
     @Bean(name = "authUserDetailService")

@@ -25,13 +25,13 @@ class MailModuleConfiguration {
         return new RestTemplate();
     }
 
-    @Bean(name = "taskExecutor")
-    ELATaskExecutor taskExecutor(RestTemplate restTemplate) {
+    @Bean(name = "elaTaskExecutor")
+    IELATaskExecutor taskExecutor(RestTemplate restTemplate) {
         return new ELATaskExecutor(new ConcurrentLinkedQueue<>(), passwordEncoder, mailRepository, userRepository, restTemplate, new ObjectMapper(), new Gson());
     }
 
     @Bean(name = "mailService")
-    IMailService mailService(ELATaskExecutor taskExecutor) {
+    IMailService mailService(IELATaskExecutor taskExecutor) {
         return new MailService(taskExecutor, userRepository, mailRepository);
     }
 }

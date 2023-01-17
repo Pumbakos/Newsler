@@ -20,7 +20,7 @@ import pl.newsler.auth.JWTClaim;
 import pl.newsler.auth.JWTUtility;
 import pl.newsler.auth.StubJWTConfiguration;
 import pl.newsler.auth.UserAuthModel;
-import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.NLUser;
@@ -56,17 +56,17 @@ class JWTFilterTest {
 
     @BeforeEach
     void beforeEach() {
-        NLId standardId = NLId.of(UUID.randomUUID());
+        NLUuid standardId = NLUuid.of(UUID.randomUUID());
         factory.standard().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.standard_plainPassword())));
         factory.standard().setId(standardId);
         userRepository.save(factory.standard());
 
-        NLId dashedId = NLId.of(UUID.randomUUID());
+        NLUuid dashedId = NLUuid.of(UUID.randomUUID());
         factory.dashed().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dashed_plainPassword())));
         factory.dashed().setId(dashedId);
         userRepository.save(factory.dashed());
 
-        NLId dottedId = NLId.of(UUID.randomUUID());
+        NLUuid dottedId = NLUuid.of(UUID.randomUUID());
         factory.dotted().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dotted_plainPassword())));
         factory.dotted().setId(dottedId);
         userRepository.save(factory.dotted());

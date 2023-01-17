@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Value;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
-import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLName;
 import pl.newsler.commons.models.NLPassword;
@@ -19,7 +19,7 @@ import pl.newsler.components.user.dto.UserGetRequest;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class NLDUser {
-    NLId id;
+    NLUuid id;
     NLEmail email;
     NLName name;
     NLLastName lastName;
@@ -45,18 +45,5 @@ public class NLDUser {
                 .enabled(user.getEnabled())
                 .credentialsNonExpired(user.isCredentialsNonExpired())
                 .build();
-    }
-
-    public UserGetRequest toUserGetRequest() {
-        return new UserGetRequest(
-                this.getId(),
-                this.getEmail(),
-                this.getName(),
-                this.getLastName(),
-                this.getSmtpAccount(),
-                this.getSecretKey(),
-                this.getAppKey(),
-                this.getRole()
-        );
     }
 }

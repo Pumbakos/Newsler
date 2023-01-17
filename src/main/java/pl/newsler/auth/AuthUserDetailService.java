@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
-import pl.newsler.components.user.UserDataNotFineException;
+import pl.newsler.api.exceptions.UserDataNotFineException;
 
 import java.util.Optional;
 

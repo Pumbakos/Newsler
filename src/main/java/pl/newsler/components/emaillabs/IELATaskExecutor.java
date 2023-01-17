@@ -1,7 +1,7 @@
 package pl.newsler.components.emaillabs;
 
-import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLUuid;
 
 public interface IELATaskExecutor {
-    void queue(NLId userId, MailDetails details);
+    void queue(NLUuid userId, MailDetails details);
 }

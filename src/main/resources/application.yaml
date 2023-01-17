@@ -1,3 +1,8 @@
+newsler:
+  schema: https
+  port: 8443
+  domain-name: localhost
+
 server:
   error:
     include-message: always
@@ -48,6 +53,7 @@ spring:
           connectiontimeout: 5000
           timeout: 3000
           writetimeout: 5000
+    test-connection: true
 
 logging:
   level:

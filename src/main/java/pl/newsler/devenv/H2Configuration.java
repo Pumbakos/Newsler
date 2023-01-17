@@ -6,20 +6,20 @@ import org.h2.tools.Server;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import pl.newsler.commons.models.NLAppKey;
-import pl.newsler.commons.models.NLEmail;
-import pl.newsler.commons.models.NLFirstName;
-import pl.newsler.commons.models.NLId;
-import pl.newsler.commons.models.NLLastName;
-import pl.newsler.commons.models.NLPassword;
-import pl.newsler.commons.models.NLSecretKey;
-import pl.newsler.commons.models.NLSmtpAccount;
 import pl.newsler.components.emaillabs.IMailRepository;
 import pl.newsler.components.emaillabs.MailDetails;
 import pl.newsler.components.emaillabs.NLUserMail;
-import pl.newsler.components.user.IUserCrudService;
+import pl.newsler.components.signup.IConfirmationTokenRepository;
+import pl.newsler.components.signup.IUserSignupService;
+import pl.newsler.components.signup.dto.UserCreateRequest;
+import pl.newsler.components.user.IUserRepository;
+import pl.newsler.components.user.NLUser;
+import pl.newsler.security.NLIPasswordEncoder;
 
+import java.security.SecureRandom;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static pl.newsler.devenv.H2Util.domain;
@@ -33,6 +33,10 @@ import static pl.newsler.devenv.H2Util.username;
 @Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor
 class H2Configuration {
+    private static final Random random = new SecureRandom();
+    private final IMailRepository mailRepository;
+    private final NLIPasswordEncoder passwordEncoder;
+
     @Bean(initMethod = "start", destroyMethod = "stop")
     public Server h2Server() throws SQLException {
         return Server.createTcpServer("-tcp");
@@ -41,7 +45,7 @@ class H2Configuration {
     @Bean
     @SuppressWarnings("java:S112")
         //no need to define custom exception
-    CommandLineRunner saveUsers(IUserCrudService service, IMailRepository repository) {
+    CommandLineRunner saveUsers(IUserSignupService signupService, IUserRepository userRepository, IConfirmationTokenRepository tokenRepository) {
         final AtomicReference<String> appKey = new AtomicReference<>();
         final AtomicReference<String> secretKey = new AtomicReference<>();
         final AtomicReference<String> smtp = new AtomicReference<>();
@@ -64,63 +68,59 @@ class H2Configuration {
         }
 
         return args -> {
-            NLId id1 = service.create(
-                    NLFirstName.of("Aizholat"),
-                    NLLastName.of("Newsler"),
-                    NLEmail.of(email.get()),
-                    NLPassword.of("Pa$$word7hat^match3$")
+            signupService.singUp(decryptedUserCreateRequest(
+                            "Aizholat",
+                            "Newsler",
+                            email.get(),
+                            "Pa$$word7hat^match3$"
+                    )
             );
 
-            NLId id2 = service.create(
-                    NLFirstName.of(firstName()),
-                    NLLastName.of(lastName()),
-                    NLEmail.of(String.format("%s@%s.com", username(), domain())),
-                    NLPassword.of("op@Q7#9FtE$%0X^#UZ")
+            signupService.singUp(decryptedUserCreateRequest(
+                            firstName(),
+                            lastName(),
+                            String.format("%s@%s.com", username(), domain()),
+                            "op@Q7#9FtE$%0X^#UZ"
+                    )
             );
 
-            NLId id3 = service.create(
-                    NLFirstName.of(firstName()),
-                    NLLastName.of(lastName()),
-                    NLEmail.of(String.format("%s@newsler.pl", username())),
-                    NLPassword.of("^a1u3@tbZ0I0Cd0W")
+            signupService.singUp(decryptedUserCreateRequest(
+                            firstName(),
+                            lastName(),
+                            String.format("%s@newsler.pl", username()),
+                            "^a1u3@tbZ0I0Cd0W"
+                    )
             );
 
-            NLId id4 = service.create(
-                    NLFirstName.of(firstName()),
-                    NLLastName.of(lastName()),
-                    NLEmail.of(String.format("%s@%s.co", username(), domain())),
-                    NLPassword.of("$^P931p)a$*E#7r4)4$$")
+            signupService.singUp(decryptedUserCreateRequest(
+                            firstName(),
+                            lastName(),
+                            String.format("%s@%s.co", username(), domain()),
+                            "$^P931p)a$*E#7r4)4$$"
+                    )
             );
 
-            NLId id5 = service.create(
-                    NLFirstName.of(firstName()),
-                    NLLastName.of(lastName()),
-                    NLEmail.of(String.format("%s@%s.ai", username(), domain())),
-                    NLPassword.of("E#7r4)4$$$^P931p)a$*")
+            signupService.singUp(decryptedUserCreateRequest(
+                            firstName(),
+                            lastName(),
+                            String.format("%s@%s.ai", username(), domain()),
+                            "E#7r4)4$$$^P931p)a$*"
+                    )
             );
 
-            service.update(id1, NLAppKey.of(appKey.get()), NLSecretKey.of(secretKey.get()), NLSmtpAccount.of(smtp.get()));
-            service.update(id2, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
-            service.update(id3, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
-            service.update(id4, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
-            service.update(id5, NLAppKey.of(secretOrAppKey()), NLSecretKey.of(secretOrAppKey()), NLSmtpAccount.of(smtpAccount()));
 
-            repository.save(NLUserMail.of(id1, MailDetails.of(H2Util.createMailSendRequest(service.getById(id1).getEmail().getValue()))));
-            repository.save(NLUserMail.of(id1, MailDetails.of(H2Util.createMailSendRequest(service.getById(id1).getEmail().getValue()))));
-            repository.save(NLUserMail.of(id1, MailDetails.of(H2Util.createMailSendRequest(service.getById(id1).getEmail().getValue()))));
-            repository.save(NLUserMail.of(id2, MailDetails.of(H2Util.createMailSendRequest(service.getById(id2).getEmail().getValue()))));
-            repository.save(NLUserMail.of(id2, MailDetails.of(H2Util.createMailSendRequest(service.getById(id2).getEmail().getValue()))));
-            repository.save(NLUserMail.of(id2, MailDetails.of(H2Util.createMailSendRequest(service.getById(id2).getEmail().getValue()))));
-            repository.save(NLUserMail.of(id3, MailDetails.of(H2Util.createMailSendRequest(service.getById(id3).getEmail().getValue()))));
-            repository.save(NLUserMail.of(id3, MailDetails.of(H2Util.createMailSendRequest(service.getById(id3).getEmail().getValue()))));
-            repository.save(NLUserMail.of(id3, MailDetails.of(H2Util.createMailSendRequest(service.getById(id3).getEmail().getValue()))));
-            repository.save(NLUserMail.of(id4, MailDetails.of(H2Util.createMailSendRequest(service.getById(id4).getEmail().getValue()))));
-            repository.save(NLUserMail.of(id4, MailDetails.of(H2Util.createMailSendRequest(service.getById(id4).getEmail().getValue()))));
-            repository.save(NLUserMail.of(id4, MailDetails.of(H2Util.createMailSendRequest(service.getById(id4).getEmail().getValue()))));
-            repository.save(NLUserMail.of(id5, MailDetails.of(H2Util.createMailSendRequest(service.getById(id5).getEmail().getValue()))));
-            repository.save(NLUserMail.of(id5, MailDetails.of(H2Util.createMailSendRequest(service.getById(id5).getEmail().getValue()))));
-            repository.save(NLUserMail.of(id5, MailDetails.of(H2Util.createMailSendRequest(service.getById(id5).getEmail().getValue()))));
+            tokenRepository.findAll().forEach(token -> token.setConfirmationDate(LocalDateTime.now()));
+            userRepository.findAll().forEach(user -> {
+                user.setEnabled(true);
+                saveUserMails(user);
+            });
         };
+    }
+
+    private void saveUserMails(final NLUser user) {
+        for (int i = 0; i < random.nextInt(5); i++) {
+            mailRepository.save(NLUserMail.of(user.map().getId(), MailDetails.of(H2Util.createMailSendRequest(user.getEmail().getValue()))));
+        }
     }
 
     private boolean envVariablesNotNull(
@@ -130,5 +130,14 @@ class H2Configuration {
             AtomicReference<String> email
     ) {
         return ((!appKey.get().isEmpty()) && (!secretKey.get().isEmpty()) && (!smtp.get().isEmpty()) && (!email.get().isEmpty()));
+    }
+
+    private UserCreateRequest decryptedUserCreateRequest(final String name, final String lastName, final String email, final String password) {
+        return new UserCreateRequest(
+                passwordEncoder.encrypt(name),
+                passwordEncoder.encrypt(lastName),
+                passwordEncoder.encrypt(email),
+                passwordEncoder.encrypt(password)
+        );
     }
 }

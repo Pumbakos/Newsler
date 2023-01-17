@@ -1,4 +1,4 @@
-package pl.newsler.components.user;
+package pl.newsler.api.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

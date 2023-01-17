@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.IMailController;
 import pl.newsler.commons.exceptions.NLException;
-import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLIdType;
 import pl.newsler.components.emaillabs.dto.GetMailStatus;
 import pl.newsler.components.emaillabs.dto.MailSendRequest;
-import pl.newsler.components.user.UserDataNotFineException;
+import pl.newsler.api.exceptions.UserDataNotFineException;
 
 import java.util.List;
 
@@ -33,14 +33,14 @@ public class MailController implements IMailController {
     @GetMapping("/{userId}")
     @Override
     public ResponseEntity<List<NLUserMail>> fetchAllMails(@PathVariable("userId") String userId) throws NLException {
-        return ResponseEntity.ok(service.fetchAllMails(NLId.of(userId)));
+        return ResponseEntity.ok(service.fetchAllMails(NLUuid.of(userId)));
     }
 
     @GetMapping("/{mailId}/user/{userId}")
     @Override
     public ResponseEntity<GetMailStatus> getMailStatus(@PathVariable("mailId") String mailId, @PathVariable("userId") String userId) throws UserDataNotFineException {
-        NLId mailID = NLId.fromStringifyNLId(mailId, NLIdType.MAIL);
-        NLId userID = NLId.of(userId);
+        NLUuid mailID = NLUuid.fromStringifyNLId(mailId, NLIdType.MAIL);
+        NLUuid userID = NLUuid.of(userId);
         if (!mailID.validate()) {
             throw new UserDataNotFineException("Mail ID invalid.");
         }

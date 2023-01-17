@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.IJWTAuthController;
-import pl.newsler.components.user.UserDataNotFineException;
+import pl.newsler.api.exceptions.UserDataNotFineException;
 
 @RestController
 @RequiredArgsConstructor

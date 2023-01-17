@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import pl.newsler.api.exceptions.UserDataNotFineException;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
-import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
@@ -20,7 +20,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static pl.newsler.testcommons.TestUserUtils.secretOrAppKey;
-import static pl.newsler.testcommons.TestUserUtils.smtpAccount;
 
 @SuppressWarnings("java:S5778")// none of `of()` methods listed below throws any Exception
 class UserModuleTest {
@@ -68,16 +67,16 @@ class UserModuleTest {
     /* ------------------ GET USER ----------------- */
     @Test
     void shouldGetUserById() {
-        Assertions.assertNotNull(service.getById(factory.standard().getId()));
-        Assertions.assertNotNull(service.getById(factory.dashed().getId()));
-        Assertions.assertNotNull(service.getById(factory.dotted().getId()));
-        Assertions.assertDoesNotThrow(() -> service.getById(factory.standard().getId()));
-        Assertions.assertDoesNotThrow(() -> service.getById(factory.dashed().getId()));
-        Assertions.assertDoesNotThrow(() -> service.getById(factory.dotted().getId()));
+        Assertions.assertNotNull(service.get(factory.standard().getId()));
+        Assertions.assertNotNull(service.get(factory.dashed().getId()));
+        Assertions.assertNotNull(service.get(factory.dotted().getId()));
+        Assertions.assertDoesNotThrow(() -> service.get(factory.standard().getId()));
+        Assertions.assertDoesNotThrow(() -> service.get(factory.dashed().getId()));
+        Assertions.assertDoesNotThrow(() -> service.get(factory.dotted().getId()));
 
-        NLDUser standard = service.getById(factory.standard().getId());
-        NLDUser dashed = service.getById(factory.dashed().getId());
-        NLDUser dotted = service.getById(factory.dotted().getId());
+        NLDUser standard = service.get(factory.standard().getId());
+        NLDUser dashed = service.get(factory.dashed().getId());
+        NLDUser dotted = service.get(factory.dotted().getId());
         Assertions.assertTrue(standard.isEnabled());
         Assertions.assertTrue(dashed.isEnabled());
         Assertions.assertTrue(dotted.isEnabled());
@@ -85,21 +84,21 @@ class UserModuleTest {
 
     @Test
     void shouldNotGetUserById_ThrowUserDataNotFineException() {
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.getById(null));
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.getById(NLId.of(UUID.randomUUID())));
+        Assertions.assertThrows(UserDataNotFineException.class, () -> service.get(null));
+        Assertions.assertThrows(UserDataNotFineException.class, () -> service.get(NLUuid.of(UUID.randomUUID())));
     }
 
     /* ---------------- CREATE USER ---------------- */
     @Test
     void shouldCreateNewUser() {
-        NLId first = service.create(
+        NLUuid first = service.create(
                 NLFirstName.of("meal"),
                 NLLastName.of("serve"),
                 NLEmail.of("organ@person.dev"),
                 NLPassword.of("Pa$$word7hat^match3$")
         );
 
-        NLId second = service.create(
+        NLUuid second = service.create(
                 NLFirstName.of("ruin"),
                 NLLastName.of("whistle"),
                 NLEmail.of("fence.actual@person.dev.ai"),
@@ -184,16 +183,13 @@ class UserModuleTest {
     /* ---------------- UPDATE USER ---------------- */
     @Test
     void shouldUpdateExistingUser_CorrectData() {
-        final NLId standardId = factory.standard().getId();
+        final NLUuid standardId = factory.standard().getId();
         final String appKey = secretOrAppKey();
         final String secretKey = secretOrAppKey();
 
         Assertions.assertDoesNotThrow(
                 () -> service.update(
-                        standardId,
-                        NLAppKey.of(appKey),
-                        NLSecretKey.of(secretKey),
-                        NLSmtpAccount.of(smtpAccount())
+                        standardId
                 ));
 
         final Optional<NLUser> optionalNLUser = userRepositoryMock.findById(standardId);
@@ -208,89 +204,59 @@ class UserModuleTest {
     @Test
     void shouldNotUpdateExistingUser_BlankData() {
         Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
-                factory.standard().getId(),
-                NLAppKey.of(""),
-                NLSecretKey.of(""),
-                NLSmtpAccount.of("")
+                factory.standard().getId()
         ));
 
         Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
-                factory.dotted().getId(),
-                NLAppKey.of(null),
-                NLSecretKey.of(null),
-                NLSmtpAccount.of(null)
+                factory.dotted().getId()
         ));
     }
 
     @Test
     void shouldNotUpdateExistingUser_RegexesDoNotMatches() {
-        final NLId standardUserId = factory.standard().getId();
+        final NLUuid standardUserId = factory.standard().getId();
         Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
-                standardUserId,
-                NLAppKey.of("Da8ce3Yh42605144J38d2b73a4c6Baa89Ool31cc21kd"),
-                NLSecretKey.of("Da8ce3Yh42605144J38d2b73a4c6Baa89Ool31cc21kd"),
-                NLSmtpAccount.of("0.9wN.com")
+                standardUserId
         ));
 
         Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
-                standardUserId,
-                NLAppKey.of("Da8ce3Yh42605144J38d2b73a4c6Baa89Ool31c"),
-                NLSecretKey.of("Da8ce3Yh42605144J38d2b73a4c6Baa89Ool31c"),
-                NLSmtpAccount.of("99.sma.smtp")
+                standardUserId
         ));
 
-        final NLId dotedUserId = factory.dotted().getId();
+        final NLUuid dotedUserId = factory.dotted().getId();
         Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
-                dotedUserId,
-                NLAppKey.of("dd7402d3-d538-486d-955c-2ac8a2ae482d-dgt"),
-                NLSecretKey.of("ef855cca-8ce7-4494-a8f7-9050aa9757e0-psa"),
-                NLSmtpAccount.of("-1.sma.smtp")
+                dotedUserId
         ));
 
         Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
-                dotedUserId,
-                NLAppKey.of("                 TRUE                   "),
-                NLSecretKey.of("                 FALSE                  "),
-                NLSmtpAccount.of("-1.DEV12.smtp")
+                dotedUserId
         ));
 
-        final NLId dashedUserId = factory.dashed().getId();
+        final NLUuid dashedUserId = factory.dashed().getId();
         Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
-                dashedUserId,
-                NLAppKey.of(secretOrAppKey()),
-                NLSecretKey.of("Da8ce3Yh42605144J38d2b73a4c6Baa89Ool31cc2a"),
-                NLSmtpAccount.of("13.account.smtp")
+                dashedUserId
         ));
 
         Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
-                dashedUserId,
-                NLAppKey.of("Da8ce3Yh42605144J38d2b73a4c6Baa89Ool31cc2a"),
-                NLSecretKey.of(secretOrAppKey()),
-                NLSmtpAccount.of("13.account.smtp")
+                dashedUserId
         ));
 
         Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
-                dashedUserId,
-                NLAppKey.of("Da8ce3Yh42605144J38d2b73a4c6Baa89Ool31cc2a"),
-                NLSecretKey.of("Da8ce3Yh42605144J38d2b73a4c6Baa89Ool31cc2a"),
-                NLSmtpAccount.of(smtpAccount())
+                dashedUserId
         ));
     }
 
     @Test
     void shouldNotUpdate_NonExistingUser_ValidData() {
         Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
-                NLId.of(UUID.randomUUID()),
-                NLAppKey.of(secretOrAppKey()),
-                NLSecretKey.of(secretOrAppKey()),
-                NLSmtpAccount.of(smtpAccount())
+                NLUuid.of(UUID.randomUUID())
         ));
     }
 
     /* ---------------- DELETE USER ---------------- */
     @Test
     void shouldDeleteUser_CorrectIdAndPassword() {
-        final NLId standardUserId = factory.standard().getId();
+        final NLUuid standardUserId = factory.standard().getId();
         final Optional<NLUser> optionalNLUser = userRepositoryMock.findById(standardUserId);
         if (optionalNLUser.isEmpty()) {
             Assertions.fail();
@@ -301,7 +267,7 @@ class UserModuleTest {
 
     @Test
     void shouldNotDeleteUser_IncorrectId_CorrectPassword() {
-        final NLId standardUserId = factory.standard().getId();
+        final NLUuid standardUserId = factory.standard().getId();
         final Optional<NLUser> optionalNLUser = userRepositoryMock.findById(standardUserId);
         if (optionalNLUser.isEmpty()) {
             Assertions.fail();
@@ -310,13 +276,13 @@ class UserModuleTest {
 
         Assertions.assertEquals(standardUserId, user.getId());
         Assertions.assertThrows(UserDataNotFineException.class, () -> service.delete(null, NLPassword.of(user.getPassword())));
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.delete(NLId.of(UUID.randomUUID()), factory.standard().getNLPassword()));
+        Assertions.assertThrows(UserDataNotFineException.class, () -> service.delete(NLUuid.of(UUID.randomUUID()), factory.standard().getNLPassword()));
         Assertions.assertEquals(optionalNLUser, userRepositoryMock.findById(standardUserId));
     }
 
     @Test
     void shouldNotDeleteUser_CorrectId_IncorrectPassword() {
-        final NLId standardUserId = factory.standard().getId();
+        final NLUuid standardUserId = factory.standard().getId();
         final Optional<NLUser> optionalNLUser = userRepositoryMock.findById(standardUserId);
         if (optionalNLUser.isEmpty()) {
             Assertions.fail();

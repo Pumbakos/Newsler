@@ -26,7 +26,7 @@ import pl.newsler.auth.JWTUtility;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.NLUser;
-import pl.newsler.components.user.UserDataNotFineException;
+import pl.newsler.api.exceptions.UserDataNotFineException;
 import pl.newsler.security.NLAuthenticationToken;
 import pl.newsler.security.NLCredentials;
 import pl.newsler.security.NLPrincipal;

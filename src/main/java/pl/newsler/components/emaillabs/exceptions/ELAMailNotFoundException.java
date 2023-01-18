@@ -3,8 +3,8 @@ package pl.newsler.components.emaillabs.exceptions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import pl.newsler.commons.exceptions.NLError;
-import pl.newsler.commons.exceptions.NLException;
+import pl.newsler.commons.exception.NLError;
+import pl.newsler.commons.exception.NLException;
 
 @RequiredArgsConstructor
 public class ELAMailNotFoundException extends NLException {

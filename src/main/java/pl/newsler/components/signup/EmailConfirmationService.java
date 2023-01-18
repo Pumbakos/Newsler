@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
+import pl.newsler.commons.exception.EmailCouldNotSentException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -16,7 +17,7 @@ class EmailConfirmationService implements IEmailConfirmationService {
 
     @Async
     @Override
-    public void send(String to, String email) {
+    public void send(String to, String email) throws EmailCouldNotSentException {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
@@ -28,7 +29,7 @@ class EmailConfirmationService implements IEmailConfirmationService {
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
             log.error(MSG, e.getMessage());
-            throw new IllegalStateException(MSG);
+            throw new EmailCouldNotSentException("Sign-up confirmation message", e.getMessage());
         }
     }
 }

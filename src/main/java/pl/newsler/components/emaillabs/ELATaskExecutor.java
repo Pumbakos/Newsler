@@ -2,7 +2,6 @@ package pl.newsler.components.emaillabs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import jakarta.ws.rs.core.HttpHeaders;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -52,7 +51,6 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
     private final IUserRepository userRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    private final Gson gson;
     private boolean queueExecution = false;
 
     @Override

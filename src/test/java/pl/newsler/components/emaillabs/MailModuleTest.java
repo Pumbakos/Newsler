@@ -20,9 +20,9 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestTemplate;
 import pl.newsler.api.IMailController;
-import pl.newsler.api.exceptions.GlobalRestExceptionHandler;
-import pl.newsler.commons.exceptions.NLError;
-import pl.newsler.commons.exceptions.NLException;
+import pl.newsler.commons.exception.GlobalRestExceptionHandler;
+import pl.newsler.commons.exception.NLError;
+import pl.newsler.commons.exception.NLException;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmailStatus;
 import pl.newsler.commons.models.NLUuid;
@@ -37,7 +37,7 @@ import pl.newsler.components.emaillabs.exceptions.ELAMailNotFoundException;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.TestUserFactory;
-import pl.newsler.api.exceptions.UserDataNotFineException;
+import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.security.StubNLPasswordEncoder;
 import pl.newsler.testcommons.TestUserUtils;
 import pl.newsler.testcommons.TestUtils;
@@ -245,8 +245,8 @@ class MailModuleTest {
     @Test
     void shouldNotGetMailStatus_UserIdInvalid() {
         final NLUuid id = NLUuid.of(UUID.randomUUID());
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.getMailStatus(id, id));
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.getMailStatus(id, id));
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.getMailStatus(id, id));
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.getMailStatus(id, id));
     }
 
     @Test
@@ -292,7 +292,7 @@ class MailModuleTest {
                 "MOCK TEST MESSAGE"
         );
 
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.queue(request));
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.queue(request));
     }
 
     @Test

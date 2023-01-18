@@ -19,14 +19,15 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
-import pl.newsler.api.exceptions.UnauthorizedException;
+import pl.newsler.commons.exception.InvalidTokenException;
+import pl.newsler.commons.exception.UnauthorizedException;
 import pl.newsler.auth.AuthUserDetailService;
 import pl.newsler.auth.JWTClaim;
 import pl.newsler.auth.JWTUtility;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.NLUser;
-import pl.newsler.api.exceptions.UserDataNotFineException;
+import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.security.NLAuthenticationToken;
 import pl.newsler.security.NLCredentials;
 import pl.newsler.security.NLPrincipal;
@@ -68,7 +69,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.isBlank(header)) {
-            throw new UnauthorizedException("Nullable or empty auth header", "Not authorized");
+            throw new InvalidTokenException("Nullable or empty auth header", "Not authorized");
         }
 
         final String bearer = header.replace("Bearer ", "");
@@ -98,7 +99,7 @@ public class JWTFilter extends OncePerRequestFilter {
         final NLUser user;
         try {
             user = (NLUser) authUserDetailService.loadUserByUsername(email);
-        } catch (UsernameNotFoundException | UserDataNotFineException e) {
+        } catch (UsernameNotFoundException | InvalidUserDataException e) {
             throw new UnauthorizedException(TOKEN, "Incorrect credentials.");
         }
 

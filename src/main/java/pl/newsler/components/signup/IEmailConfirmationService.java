@@ -1,7 +1,9 @@
 package pl.newsler.components.signup;
 
+import pl.newsler.commons.exception.EmailCouldNotSentException;
+
 interface IEmailConfirmationService {
-    void send(String to, String email);
+    void send(String to, String email) throws EmailCouldNotSentException;
 
     default String confirmationEmailBuilder(String name, String link) {
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +

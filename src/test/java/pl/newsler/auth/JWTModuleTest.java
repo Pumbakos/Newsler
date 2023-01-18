@@ -12,13 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import pl.newsler.api.IJWTAuthController;
-import pl.newsler.api.exceptions.UnauthorizedException;
+import pl.newsler.commons.exception.UnauthorizedException;
 import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.TestUserFactory;
-import pl.newsler.api.exceptions.UserDataNotFineException;
+import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.security.StubNLIKeyProvider;
 import pl.newsler.security.StubNLPasswordEncoder;
 import pl.newsler.security.filters.JWTTestResolver;
@@ -162,12 +162,12 @@ class JWTModuleTest {
 
     @Test
     void shouldNotLoadUserByUsername_InvalidEmail() {
-        Assertions.assertThrows(UserDataNotFineException.class, () -> userDetailsService.loadUserByUsername("user.d'amora@person.dev"));
+        Assertions.assertThrows(InvalidUserDataException.class, () -> userDetailsService.loadUserByUsername("user.d'amora@person.dev"));
     }
 
     @Test
     void shouldNotLoadUserByUsername_ValidEmail_NonExistingUser() {
-        Assertions.assertThrows(UserDataNotFineException.class, () -> userDetailsService.loadUserByUsername("user.d-amora@person.dev"));
+        Assertions.assertThrows(InvalidUserDataException.class, () -> userDetailsService.loadUserByUsername("user.d-amora@person.dev"));
     }
 
     private DecodedJWT verify(String token) {

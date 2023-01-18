@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import pl.newsler.api.exceptions.UnauthorizedException;
+import pl.newsler.commons.exception.UnauthorizedException;
 import pl.newsler.auth.IJWTAuthService;
 import pl.newsler.auth.JWTClaim;
 import pl.newsler.auth.JWTUtility;
@@ -52,7 +52,7 @@ class JWTFilterTest {
     private final IJWTAuthService service = configuration.jwtAuthService(utility);
     private final TestUserFactory factory = new TestUserFactory();
     private final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
-    private final JWTFilter filter = new JWTFilter("/v1/auth/jwt", authenticationManager, configuration.databaseUserDetailService(), utility);
+    private final JWTFilter filter = new JWTFilter("/v1/api/auth/jwt", authenticationManager, configuration.databaseUserDetailService(), utility);
 
     @BeforeEach
     void beforeEach() {
@@ -148,7 +148,7 @@ class JWTFilterTest {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-        request.setRequestURI("/v1/auth/jwt");
+        request.setRequestURI("/v1/api/auth/jwt");
         Assertions.assertDoesNotThrow(() -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
     }
 

@@ -1,10 +1,8 @@
-package pl.newsler.api.exceptions;
+package pl.newsler.commons.exception;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import pl.newsler.commons.exceptions.NLError;
-import pl.newsler.commons.exceptions.NLException;
 
 @RequiredArgsConstructor
 public class UnauthorizedException extends NLException {

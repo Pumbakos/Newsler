@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import pl.newsler.api.exceptions.UserDataNotFineException;
+import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
@@ -84,8 +84,8 @@ class UserModuleTest {
 
     @Test
     void shouldNotGetUserById_ThrowUserDataNotFineException() {
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.get(null));
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.get(NLUuid.of(UUID.randomUUID())));
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.get(null));
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.get(NLUuid.of(UUID.randomUUID())));
     }
 
     /* ---------------- CREATE USER ---------------- */
@@ -127,14 +127,14 @@ class UserModuleTest {
 
     @Test
     void shouldNotCreateNewUser_BlankData() {
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.create(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.create(
                 NLFirstName.of(""),
                 NLLastName.of(""),
                 NLEmail.of(""),
                 NLPassword.of("")
         ));
 
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.create(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.create(
                 NLFirstName.of(null),
                 NLLastName.of(null),
                 NLEmail.of(null),
@@ -144,35 +144,35 @@ class UserModuleTest {
 
     @Test
     void shouldNotCreateNewUser_PasswordDoesNotMatchRegex() {
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.create(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.create(
                 NLFirstName.of("meal"),
                 NLLastName.of("serve-hesitate"),
                 NLEmail.of("organ@person.dev"),
                 NLPassword.of(null)
         ));
 
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.create(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.create(
                 NLFirstName.of("meal"),
                 NLLastName.of("serve-hesitate"),
                 NLEmail.of("organ@person.dev"),
                 NLPassword.of("")
         ));
 
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.create(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.create(
                 NLFirstName.of("meal"),
                 NLLastName.of("serve-hesitate"),
                 NLEmail.of("organ@person.dev"),
                 NLPassword.of("abd123idasmdaw")
         ));
 
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.create(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.create(
                 NLFirstName.of("meal"),
                 NLLastName.of("serve-hesitate"),
                 NLEmail.of("organ@person.dev"),
                 NLPassword.of("c8c498fd-8b88-4aac-a9d5-8eab3353e93e")
         ));
 
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.create(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.create(
                 NLFirstName.of("meal"),
                 NLLastName.of("serve-hesitate"),
                 NLEmail.of("organ@person.dev"),
@@ -203,11 +203,11 @@ class UserModuleTest {
 
     @Test
     void shouldNotUpdateExistingUser_BlankData() {
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.update(
                 factory.standard().getId()
         ));
 
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.update(
                 factory.dotted().getId()
         ));
     }
@@ -215,40 +215,40 @@ class UserModuleTest {
     @Test
     void shouldNotUpdateExistingUser_RegexesDoNotMatches() {
         final NLUuid standardUserId = factory.standard().getId();
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.update(
                 standardUserId
         ));
 
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.update(
                 standardUserId
         ));
 
         final NLUuid dotedUserId = factory.dotted().getId();
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.update(
                 dotedUserId
         ));
 
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.update(
                 dotedUserId
         ));
 
         final NLUuid dashedUserId = factory.dashed().getId();
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.update(
                 dashedUserId
         ));
 
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.update(
                 dashedUserId
         ));
 
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.update(
                 dashedUserId
         ));
     }
 
     @Test
     void shouldNotUpdate_NonExistingUser_ValidData() {
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.update(
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.update(
                 NLUuid.of(UUID.randomUUID())
         ));
     }
@@ -275,8 +275,8 @@ class UserModuleTest {
         final NLUser user = optionalNLUser.get();
 
         Assertions.assertEquals(standardUserId, user.getId());
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.delete(null, NLPassword.of(user.getPassword())));
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.delete(NLUuid.of(UUID.randomUUID()), factory.standard().getNLPassword()));
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.delete(null, NLPassword.of(user.getPassword())));
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.delete(NLUuid.of(UUID.randomUUID()), factory.standard().getNLPassword()));
         Assertions.assertEquals(optionalNLUser, userRepositoryMock.findById(standardUserId));
     }
 
@@ -290,7 +290,7 @@ class UserModuleTest {
         final NLUser user = optionalNLUser.get();
 
         Assertions.assertEquals(standardUserId, user.getId());
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.delete(user.getId(), NLPassword.of(factory.standard_plainPassword())));
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.delete(user.getId(), NLPassword.of(factory.standard_plainPassword())));
         Assertions.assertEquals(optionalNLUser, userRepositoryMock.findById(standardUserId));
     }
 

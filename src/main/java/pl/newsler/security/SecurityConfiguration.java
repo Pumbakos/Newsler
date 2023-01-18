@@ -36,7 +36,7 @@ class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() // temporarily authenticated via JWT
                 )
-                .addFilterBefore(new JWTFilter("/v1/auth/", manager, userDetailService, jwtUtility), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JWTFilter("/v1/api/auth/", manager, userDetailService, jwtUtility), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

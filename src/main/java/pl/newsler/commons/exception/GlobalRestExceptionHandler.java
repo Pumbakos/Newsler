@@ -1,4 +1,4 @@
-package pl.newsler.api.exceptions;
+package pl.newsler.commons.exception;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import pl.newsler.commons.exceptions.NLError;
-import pl.newsler.commons.exceptions.NLException;
 
 @Slf4j(topic = "GLOBAL_REST_EXCEPTION_HANDLER")
 @ControllerAdvice

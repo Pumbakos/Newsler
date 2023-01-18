@@ -1,7 +1,7 @@
 package pl.newsler.auth;
 
-import pl.newsler.api.exceptions.UserDataNotFineException;
+import pl.newsler.commons.exception.InvalidUserDataException;
 
 public interface IJWTAuthService {
-    String generateJWT(UserAuthModel userAuthModel) throws IllegalArgumentException, UserDataNotFineException;
+    String generateJWT(UserAuthModel userAuthModel) throws IllegalArgumentException, InvalidUserDataException;
 }

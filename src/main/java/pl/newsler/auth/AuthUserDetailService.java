@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
-import pl.newsler.api.exceptions.UserDataNotFineException;
+import pl.newsler.commons.exception.InvalidUserDataException;
 
 import java.util.Optional;
 
@@ -19,12 +19,12 @@ public class AuthUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         NLEmail nlEmail = NLEmail.of(email);
         if (!nlEmail.validate()) {
-            throw new UserDataNotFineException();
+            throw new InvalidUserDataException();
         }
 
         Optional<NLUser> optionalUser = userRepository.findByEmail(nlEmail);
         if (optionalUser.isEmpty()) {
-            throw new UserDataNotFineException();
+            throw new InvalidUserDataException();
         }
 
         return optionalUser.get();

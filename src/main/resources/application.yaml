@@ -5,13 +5,11 @@ newsler:
 
 server:
   error:
-    include-message: always
     include-binding-errors: always
+    include-stacktrace: always
+    include-message: always
     include-exception: true
     whitelabel:
-      enabled: true
-  tomcat:
-    accesslog:
       enabled: true
 
 spring:
@@ -31,6 +29,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
+    show-sql: false
   mvc:
     throw-exception-if-no-handler-found: true
   thymeleaf:
@@ -61,7 +60,6 @@ logging:
       springframework:
         web: trace
         http: trace
-        security: trace
   pattern:
     dateformat: "dd/MM/yyyy HH:mm:ss"
 

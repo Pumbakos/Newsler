@@ -2,7 +2,8 @@ package pl.newsler.components.user;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import pl.newsler.api.exceptions.UserDataNotFineException;
+import pl.newsler.commons.exception.InvalidUserDataException;
+import pl.newsler.commons.exception.UserAlreadyExistsException;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
@@ -32,25 +33,29 @@ class UserCrudService implements IUserCrudService {
 
         Optional<NLUser> optionalNLUser = userRepository.findByEmail(email);
         if (optionalNLUser.isEmpty()) {
-            throw new UserDataNotFineException("Either email or password is incorrect");
+            throw new InvalidUserDataException("Either email or password is incorrect");
         }
         NLUser user = optionalNLUser.get();
 
         if (!passwordEncoder.bCrypt().matches(password.getValue(), user.getPassword())) {
-            throw new UserDataNotFineException("Either email or password is incorrect");
+            throw new InvalidUserDataException("Either email or password is incorrect");
         }
         return user.map();
     }
 
     @Override
-    public @NotNull NLUuid create(final NLFirstName name, final NLLastName lastName, final NLEmail email, final NLPassword password) {
+    public @NotNull NLUuid create(final NLFirstName name, final NLLastName lastName, final NLEmail email, final NLPassword password) throws UserAlreadyExistsException {
         if (!isPasswordOk(password)) {
-            throw new UserDataNotFineException();
+            throw new InvalidUserDataException();
         }
 
         if (!isDataOk(name, lastName, email)) {
-            throw new UserDataNotFineException(String.format("Either name: %s, lastName: %s or email: %s are not valid.", name.getValue(), lastName.getValue(), email.getValue()));
+            throw new InvalidUserDataException(String.format("Either name: %s, lastName: %s or email: %s are not valid.", name.getValue(), lastName.getValue(), email.getValue()));
         }
+
+        userRepository.findByEmail(email).ifPresent(ignored -> {
+            throw new UserAlreadyExistsException("Email", String.format("User with email %s already exists", email.getValue()));
+        });
 
         NLUser user = new NLUser();
         user.setFirstName(name);
@@ -70,16 +75,16 @@ class UserCrudService implements IUserCrudService {
         NLSmtpAccount smtpAccount = NLSmtpAccount.of(passwordEncoder.decrypt(request.smtpAccount()));
 
         if (!uuid.validate()) {
-            throw new UserDataNotFineException("ID", "Invalid");
+            throw new InvalidUserDataException("ID", "Invalid");
         }
 
         if (!isDataOk(appKey, secretKey, smtpAccount)) {
-            throw new UserDataNotFineException(String.format("Either appKey: %s, secretKey: %s or smtpAccount: %s are not valid.", appKey.getValue(), secretKey.getValue(), smtpAccount.getValue()));
+            throw new InvalidUserDataException(String.format("Either appKey: %s, secretKey: %s or smtpAccount: %s are not valid.", appKey.getValue(), secretKey.getValue(), smtpAccount.getValue()));
         }
 
         Optional<NLUser> optionalNLUser = userRepository.findById(uuid);
         if (optionalNLUser.isEmpty()) {
-            throw new UserDataNotFineException();
+            throw new InvalidUserDataException();
         }
 
         NLUser nlUser = optionalNLUser.get();
@@ -92,21 +97,21 @@ class UserCrudService implements IUserCrudService {
     @Override
     public void delete(final NLUuid id, final NLPassword password) {
         if (id == null || !id.validate()) {
-            throw new UserDataNotFineException("ID", "Invalid");
+            throw new InvalidUserDataException("ID", "Invalid");
         }
 
         if (!isPasswordOk(password)) {
-            throw new UserDataNotFineException();
+            throw new InvalidUserDataException();
         }
 
         final Optional<NLUser> optionalNLUser = userRepository.findById(id);
         if ((optionalNLUser.isEmpty())) {
-            throw new UserDataNotFineException();
+            throw new InvalidUserDataException();
         }
 
         final NLUser user = optionalNLUser.get();
         if (!passwordEncoder.bCrypt().matches(password.getValue(), user.getPassword())) {
-            throw new UserDataNotFineException();
+            throw new InvalidUserDataException();
         }
 
         userRepository.deleteById(user.getId());

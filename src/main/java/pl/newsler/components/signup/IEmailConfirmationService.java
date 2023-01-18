@@ -1,6 +1,6 @@
 package pl.newsler.components.signup;
 
-public interface IEmailConfirmationService {
+interface IEmailConfirmationService {
     void send(String to, String email);
 
     default String confirmationEmailBuilder(String name, String link) {

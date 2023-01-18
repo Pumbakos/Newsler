@@ -14,7 +14,7 @@ import pl.newsler.components.user.ValueProvider;
 
 @RestController
 @RequiredArgsConstructor
-public class UserSignupController implements IUserSignupController {
+class UserSignupController implements IUserSignupController {
     private final IUserSignupService signUpService;
 
     @Override

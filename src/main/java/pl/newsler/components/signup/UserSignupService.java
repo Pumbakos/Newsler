@@ -1,5 +1,7 @@
 package pl.newsler.components.signup;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import pl.newsler.api.exceptions.UserDataNotFineException;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
@@ -21,28 +23,19 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+@RequiredArgsConstructor
 class UserSignupService implements IUserSignupService {
-    private final DomainProperties.Schema schema;
-    private final String homeDomain;
-    private final int port;
     private final ConfirmationTokenService confirmationTokenService;
     private final IEmailConfirmationService emailConfirmationSender;
     private final NLIPasswordEncoder passwordEncoder;
     private final IUserRepository userRepository;
     private final IUserCrudService crudService;
-
-    UserSignupService(final DomainProperties properties, final ConfirmationTokenService confirmationTokenService,
-                      final IEmailConfirmationService emailConfirmationSender, final NLIPasswordEncoder passwordEncoder,
-                      final IUserRepository userRepository, final IUserCrudService crudService) {
-        this.schema = properties.getSchema();
-        this.homeDomain = properties.getDomainName();
-        this.port = properties.getPort();
-        this.confirmationTokenService = confirmationTokenService;
-        this.emailConfirmationSender = emailConfirmationSender;
-        this.passwordEncoder = passwordEncoder;
-        this.userRepository = userRepository;
-        this.crudService = crudService;
-    }
+    @Value("${newsler.schema}")
+    private DomainProperties.Schema schema;
+    @Value("${newsler.domain-name}")
+    private String homeDomain;
+    @Value("${newsler.port}")
+    private int port;
 
     @Override
     public ValueProvider singUp(UserCreateRequest request) {
@@ -55,8 +48,8 @@ class UserSignupService implements IUserSignupService {
         final NLPassword password = NLPassword.of(passwordEncoder.decrypt(request.password()));
         final NLLastName lastName = NLLastName.of(passwordEncoder.decrypt(request.lastName()));
         final NLConfirmationToken token = create(firstName, lastName, email, password);
-
         final String link = createLink(token.getToken().getValue());
+
         emailConfirmationSender.send(
                 email.getValue(),
                 emailConfirmationSender.confirmationEmailBuilder(createReceiverName(firstName, lastName), link)
@@ -74,6 +67,7 @@ class UserSignupService implements IUserSignupService {
         if (confirmationToken.getConfirmationDate() != null) {
             throw new IllegalStateException("Email already confirmed");
         }
+
         final LocalDateTime expirationDate = confirmationToken.getExpirationDate();
         if (expirationDate.isBefore(LocalDateTime.now())) {
             throw new IllegalStateException("Token expired");
@@ -83,30 +77,6 @@ class UserSignupService implements IUserSignupService {
         enableUser(confirmationToken.getUserId());
 
         return ValueProvider.CONFIRMED;
-    }
-
-    NLConfirmationToken create(NLFirstName name, NLLastName lastName, NLEmail email, NLPassword password) {
-        final NLUuid uuid = crudService.create(name, lastName, email, password);
-        final NLConfirmationToken token = getConfirmationToken(uuid, generateToken());
-
-        return confirmationTokenService.save(token);
-    }
-
-    NLConfirmationToken getConfirmationToken(NLUuid userId, NLToken token) {
-        return new NLConfirmationToken(
-                token,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15L),
-                userId
-        );
-    }
-
-    void enableUser(NLUuid uuid) {
-        userRepository.enableUser(uuid);
-    }
-
-    static NLToken generateToken() {
-        return NLToken.of(UUID.randomUUID().toString());
     }
 
     @Override
@@ -135,11 +105,35 @@ class UserSignupService implements IUserSignupService {
         return value.get();
     }
 
-    private static String createReceiverName(final NLName name, final NLLastName lastName) {
+    private NLConfirmationToken create(NLFirstName name, NLLastName lastName, NLEmail email, NLPassword password) {
+        final NLUuid uuid = crudService.create(name, lastName, email, password);
+        final NLConfirmationToken token = getConfirmationToken(uuid, generateToken());
+
+        return confirmationTokenService.save(token);
+    }
+
+    private NLConfirmationToken getConfirmationToken(NLUuid userId, NLToken token) {
+        return new NLConfirmationToken(
+                token,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(15L),
+                userId
+        );
+    }
+
+    private void enableUser(NLUuid uuid) {
+        userRepository.enableUser(uuid);
+    }
+
+    private static NLToken generateToken() {
+        return NLToken.of(UUID.randomUUID().toString());
+    }
+
+    private String createReceiverName(final NLName name, final NLLastName lastName) {
         return String.format("%s %s", name.getValue(), lastName);
     }
 
     private String createLink(String token) {
-        return String.format("%s://%s:%d/v1/auth/sign-up/confirm?token=%s", schema.name().toLowerCase(Locale.ROOT), homeDomain, port, token);
+        return String.format("%s://%s:%d/v1/auth/sign-up/confirm?token=%s", schema.getName().toLowerCase(Locale.ROOT), homeDomain, port, token);
     }
 }

@@ -52,7 +52,7 @@ public class NLUser implements UserDetails {
     @Getter(AccessLevel.PACKAGE)
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "VERSION")))
-    private NLVersion version;
+    private NLVersion version = UserRepository.version;
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "EMAIL")))

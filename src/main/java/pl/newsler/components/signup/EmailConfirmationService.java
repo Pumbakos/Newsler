@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Async;
 
 @Slf4j
 @RequiredArgsConstructor
-public class EmailConfirmationService implements IEmailConfirmationService {
+class EmailConfirmationService implements IEmailConfirmationService {
     private static final String MSG = "Error while sending email\n {}";
     private final JavaMailSender mailSender;
 

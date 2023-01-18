@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RequiredArgsConstructor
-public class ConfirmationTokenService {
+class ConfirmationTokenService {
     //! TODO: Use DB sequence
     private static final AtomicLong sequence = new AtomicLong(0);
     private final IConfirmationTokenRepository confirmationTokenRepository;

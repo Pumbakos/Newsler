@@ -59,14 +59,12 @@ class UserCrudService implements IUserCrudService {
         user.setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(password.getValue())));
         user.setRole(NLUserType.USER);
         user.setId(NLUuid.of(UUID.randomUUID()));
-        user.setVersion(UserRepository.version);
-        user.setEnabled(false);
         return userRepository.save(user).getId();
     }
 
     @Override
     public void update(final UserUpdateRequest request) {
-        NLUuid uuid = NLUuid.of(passwordEncoder.decrypt(request.id()));
+        NLUuid uuid = NLUuid.of(passwordEncoder.decrypt(request.email()));
         NLAppKey appKey = NLAppKey.of(passwordEncoder.decrypt(request.appKey()));
         NLSecretKey secretKey = NLSecretKey.of(passwordEncoder.decrypt(request.secretKey()));
         NLSmtpAccount smtpAccount = NLSmtpAccount.of(passwordEncoder.decrypt(request.smtpAccount()));

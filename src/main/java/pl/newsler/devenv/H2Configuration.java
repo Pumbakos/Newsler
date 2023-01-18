@@ -2,10 +2,14 @@ package pl.newsler.devenv;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.h2.tools.Server;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import pl.newsler.commons.models.NLAppKey;
+import pl.newsler.commons.models.NLSecretKey;
+import pl.newsler.commons.models.NLSmtpAccount;
 import pl.newsler.components.emaillabs.IMailRepository;
 import pl.newsler.components.emaillabs.MailDetails;
 import pl.newsler.components.emaillabs.NLUserMail;
@@ -84,41 +88,26 @@ class H2Configuration {
                     )
             );
 
-            signupService.singUp(decryptedUserCreateRequest(
-                            firstName(),
-                            lastName(),
-                            String.format("%s@newsler.pl", username()),
-                            "^a1u3@tbZ0I0Cd0W"
-                    )
-            );
-
-            signupService.singUp(decryptedUserCreateRequest(
-                            firstName(),
-                            lastName(),
-                            String.format("%s@%s.co", username(), domain()),
-                            "$^P931p)a$*E#7r4)4$$"
-                    )
-            );
-
-            signupService.singUp(decryptedUserCreateRequest(
-                            firstName(),
-                            lastName(),
-                            String.format("%s@%s.ai", username(), domain()),
-                            "E#7r4)4$$$^P931p)a$*"
-                    )
-            );
-
-
             tokenRepository.findAll().forEach(token -> token.setConfirmationDate(LocalDateTime.now()));
             userRepository.findAll().forEach(user -> {
                 user.setEnabled(true);
                 saveUserMails(user);
+
+                if (user.getEmail().getValue().equals(email.get())) {
+                    user.setAppKey(NLAppKey.of(appKey.get()));
+                    user.setSecretKey(NLSecretKey.of(secretKey.get()));
+                    user.setSmtpAccount(NLSmtpAccount.of(smtp.get()));
+                } else {
+                    user.setAppKey(NLAppKey.of(secretOrAppKey()));
+                    user.setSecretKey(NLSecretKey.of(secretOrAppKey()));
+                    user.setSmtpAccount(NLSmtpAccount.of(smtpAccount()));
+                }
             });
         };
     }
 
     private void saveUserMails(final NLUser user) {
-        for (int i = 0; i < random.nextInt(5); i++) {
+        for (int i = 0; i < random.nextInt(5) + 3; i++) {
             mailRepository.save(NLUserMail.of(user.map().getId(), MailDetails.of(H2Util.createMailSendRequest(user.getEmail().getValue()))));
         }
     }
@@ -129,7 +118,12 @@ class H2Configuration {
             AtomicReference<String> smtp,
             AtomicReference<String> email
     ) {
-        return ((!appKey.get().isEmpty()) && (!secretKey.get().isEmpty()) && (!smtp.get().isEmpty()) && (!email.get().isEmpty()));
+        return (
+                StringUtils.isBlank(appKey.get())
+                || StringUtils.isBlank(secretKey.get())
+                || StringUtils.isBlank(smtp.get())
+                || StringUtils.isBlank(email.get())
+        );
     }
 
     private UserCreateRequest decryptedUserCreateRequest(final String name, final String lastName, final String email, final String password) {

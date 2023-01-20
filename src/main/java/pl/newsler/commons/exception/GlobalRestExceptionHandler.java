@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Slf4j(topic = "GLOBAL_REST_EXCEPTION_HANDLER")
-@ControllerAdvice
+@ControllerAdvice //? RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalRestExceptionHandler {
     @ExceptionHandler(value = {NLException.class})

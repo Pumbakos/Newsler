@@ -13,7 +13,6 @@ import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
 import pl.newsler.commons.models.NLUserType;
-import pl.newsler.components.user.dto.UserGetRequest;
 
 @Value
 @Builder

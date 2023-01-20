@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.IUserController;
-import pl.newsler.components.user.dto.GetUserRequest;
+import pl.newsler.components.user.dto.UserGetRequest;
 import pl.newsler.components.user.dto.UserDeleteRequest;
 import pl.newsler.components.user.dto.UserUpdateRequest;
 
@@ -15,7 +15,7 @@ class UserController implements IUserController {
     private final IUserCrudService userService;
 
     @Override
-    public ResponseEntity<NLDUser> getByEmail(GetUserRequest request) {
+    public ResponseEntity<NLDUser> get(UserGetRequest request) {
         NLDUser user = userService.get(request);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
@@ -28,7 +28,7 @@ class UserController implements IUserController {
 
     @Override
     public ResponseEntity<HttpStatus> delete(UserDeleteRequest request) {
-        userService.delete(request.id(), request.password());
+        userService.delete(request);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

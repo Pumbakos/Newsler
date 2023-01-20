@@ -14,7 +14,9 @@ import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
 import pl.newsler.commons.models.NLUserType;
 import pl.newsler.commons.models.NLUuid;
-import pl.newsler.components.user.dto.GetUserRequest;
+import pl.newsler.commons.utillity.ObjectUtils;
+import pl.newsler.components.user.dto.UserDeleteRequest;
+import pl.newsler.components.user.dto.UserGetRequest;
 import pl.newsler.components.user.dto.UserUpdateRequest;
 import pl.newsler.security.NLIPasswordEncoder;
 
@@ -27,25 +29,34 @@ class UserCrudService implements IUserCrudService {
     private final NLIPasswordEncoder passwordEncoder;
 
     @Override
-    public @NotNull NLDUser get(final GetUserRequest request) {
-        NLEmail email = NLEmail.of(passwordEncoder.decrypt(request.email()));
-        NLPassword password = NLPassword.of(passwordEncoder.decrypt(request.password()));
+    public @NotNull NLDUser get(final UserGetRequest request) {
+        if (ObjectUtils.isBlank(request)) {
+            throw new InvalidUserDataException("Data", "Invalid email or password");
+        }
 
-        Optional<NLUser> optionalNLUser = userRepository.findByEmail(email);
+        final NLEmail email = NLEmail.of(request.email());
+        final NLPassword password = NLPassword.of(request.password());
+
+        if (!email.validate() || !password.validate()) {
+            throw new InvalidUserDataException("Data", "Invalid email or password");
+        }
+
+        final Optional<NLUser> optionalNLUser = userRepository.findByEmail(email);
         if (optionalNLUser.isEmpty()) {
             throw new InvalidUserDataException("Either email or password is incorrect");
         }
-        NLUser user = optionalNLUser.get();
 
+        final NLUser user = optionalNLUser.get();
         if (!passwordEncoder.bCrypt().matches(password.getValue(), user.getPassword())) {
             throw new InvalidUserDataException("Either email or password is incorrect");
         }
+
         return user.map();
     }
 
     @Override
     public @NotNull NLUuid create(final NLFirstName name, final NLLastName lastName, final NLEmail email, final NLPassword password) throws UserAlreadyExistsException {
-        if (!isPasswordOk(password)) {
+        if (!password.validate()) {
             throw new InvalidUserDataException();
         }
 
@@ -57,7 +68,7 @@ class UserCrudService implements IUserCrudService {
             throw new UserAlreadyExistsException("Email", String.format("User with email %s already exists", email.getValue()));
         });
 
-        NLUser user = new NLUser();
+        final NLUser user = new NLUser();
         user.setFirstName(name);
         user.setLastName(lastName);
         user.setEmail(email);
@@ -69,25 +80,29 @@ class UserCrudService implements IUserCrudService {
 
     @Override
     public void update(final UserUpdateRequest request) {
-        NLUuid uuid = NLUuid.of(passwordEncoder.decrypt(request.email()));
-        NLAppKey appKey = NLAppKey.of(passwordEncoder.decrypt(request.appKey()));
-        NLSecretKey secretKey = NLSecretKey.of(passwordEncoder.decrypt(request.secretKey()));
-        NLSmtpAccount smtpAccount = NLSmtpAccount.of(passwordEncoder.decrypt(request.smtpAccount()));
+        if (ObjectUtils.isBlank(request)) {
+            throw new InvalidUserDataException("Data", "Invalid email appKey secretKey or smtpAccount");
+        }
 
-        if (!uuid.validate()) {
+        final NLEmail email = NLEmail.of(request.email());
+        final NLAppKey appKey = NLAppKey.of(request.appKey());
+        final NLSecretKey secretKey = NLSecretKey.of(request.secretKey());
+        final NLSmtpAccount smtpAccount = NLSmtpAccount.of(request.smtpAccount());
+
+        if (!email.validate()) {
             throw new InvalidUserDataException("ID", "Invalid");
         }
 
         if (!isDataOk(appKey, secretKey, smtpAccount)) {
-            throw new InvalidUserDataException(String.format("Either appKey: %s, secretKey: %s or smtpAccount: %s are not valid.", appKey.getValue(), secretKey.getValue(), smtpAccount.getValue()));
+            throw new InvalidUserDataException(String.format("Either appKey: %s, secretKey: %s or smtpAccount: %s could not be validated.", appKey.getValue(), secretKey.getValue(), smtpAccount.getValue()));
         }
 
-        Optional<NLUser> optionalNLUser = userRepository.findById(uuid);
+        final Optional<NLUser> optionalNLUser = userRepository.findByEmail(email);
         if (optionalNLUser.isEmpty()) {
             throw new InvalidUserDataException();
         }
 
-        NLUser nlUser = optionalNLUser.get();
+        final NLUser nlUser = optionalNLUser.get();
         nlUser.setAppKey(NLAppKey.of(hash(appKey.getValue())));
         nlUser.setSecretKey(NLSecretKey.of(hash(secretKey.getValue())));
         nlUser.setSmtpAccount(NLSmtpAccount.of(hash(smtpAccount.getValue())));
@@ -95,22 +110,23 @@ class UserCrudService implements IUserCrudService {
     }
 
     @Override
-    public void delete(final NLUuid id, final NLPassword password) {
-        if (id == null || !id.validate()) {
-            throw new InvalidUserDataException("ID", "Invalid");
+    public void delete(final UserDeleteRequest request) {
+        if (ObjectUtils.isBlank(request)) {
+            throw new InvalidUserDataException("Data", "Invalid data");
         }
 
-        if (!isPasswordOk(password)) {
+        final NLUuid uuid = NLUuid.of(request.id());
+        if (!uuid.validate() || !(NLPassword.of(request.password())).validate()) {
             throw new InvalidUserDataException();
         }
 
-        final Optional<NLUser> optionalNLUser = userRepository.findById(id);
+        final Optional<NLUser> optionalNLUser = userRepository.findById(uuid);
         if ((optionalNLUser.isEmpty())) {
             throw new InvalidUserDataException();
         }
 
         final NLUser user = optionalNLUser.get();
-        if (!passwordEncoder.bCrypt().matches(password.getValue(), user.getPassword())) {
+        if (!passwordEncoder.bCrypt().matches(request.password(), user.getPassword())) {
             throw new InvalidUserDataException();
         }
 
@@ -118,15 +134,7 @@ class UserCrudService implements IUserCrudService {
     }
 
     private boolean isDataOk(final NLModel first, final NLModel second, final NLModel third) {
-        if (first == null || second == null || third == null) {
-            return false;
-        }
-
         return first.validate() && second.validate() && third.validate();
-    }
-
-    private boolean isPasswordOk(final NLPassword password) {
-        return password != null && password.validate();
     }
 
     private @NotNull String hash(@NotNull final String password) {

@@ -29,6 +29,6 @@ class SignupModuleConfiguration {
 
     @Bean(name = "userSignupService")
     IUserSignupService userSignupService(ConfirmationTokenService confirmationTokenService, IEmailConfirmationService emailConfirmationService) {
-        return new UserSignupService(confirmationTokenService, emailConfirmationService, passwordEncoder, userRepository, crudService);
+        return new UserSignupService(confirmationTokenService, emailConfirmationService, userRepository, crudService);
     }
 }

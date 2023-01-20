@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import pl.newsler.components.user.NLDUser;
-import pl.newsler.components.user.dto.GetUserRequest;
+import pl.newsler.components.user.dto.UserGetRequest;
 import pl.newsler.components.user.dto.UserDeleteRequest;
 import pl.newsler.components.user.dto.UserUpdateRequest;
 
@@ -17,7 +17,7 @@ import pl.newsler.components.user.dto.UserUpdateRequest;
 @RequestMapping(NLApi.V1 + "/api/users")
 public interface IUserController {
     @GetMapping("/{userId}")
-    ResponseEntity<NLDUser> getByEmail(@RequestBody GetUserRequest request);
+    ResponseEntity<NLDUser> get(@RequestBody UserGetRequest request);
 
     @PutMapping
     ResponseEntity<HttpStatus> update(@RequestBody UserUpdateRequest request);

@@ -15,7 +15,7 @@ import pl.newsler.components.signup.dto.UserCreateRequest;
 import pl.newsler.components.signup.dto.UserResendTokenRequest;
 
 @CrossOrigin(origins = "*")
-@RequestMapping(NLApi.V1 + "/auth/sign-up")
+@RequestMapping(NLApi.V1 + "/api/auth/sign-up")
 public interface IUserSignupController {
     @PostMapping
     ResponseEntity<String> signup(@RequestBody UserCreateRequest request) throws InvalidUserDataException;

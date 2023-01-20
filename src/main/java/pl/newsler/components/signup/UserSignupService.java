@@ -21,7 +21,6 @@ import pl.newsler.components.signup.dto.UserResendTokenRequest;
 import pl.newsler.components.user.IUserCrudService;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.internal.DomainProperties;
-import pl.newsler.security.NLIPasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.Locale;
@@ -31,7 +30,6 @@ import java.util.UUID;
 class UserSignupService implements IUserSignupService {
     private final ConfirmationTokenService confirmationTokenService;
     private final IEmailConfirmationService emailConfirmationSender;
-    private final NLIPasswordEncoder passwordEncoder;
     private final IUserRepository userRepository;
     private final IUserCrudService crudService;
     @Value("${newsler.schema}")
@@ -43,14 +41,14 @@ class UserSignupService implements IUserSignupService {
 
     @Override
     public @NotNull NLStringValue singUp(UserCreateRequest request) throws InvalidUserDataException, UserAlreadyExistsException {
-        final NLEmail email = NLEmail.of(passwordEncoder.decrypt(request.email()));
+        final NLEmail email = NLEmail.of(request.email());
         if (!email.validate()) {
             throw new InvalidUserDataException("Email is invalid");
         }
 
-        final NLFirstName firstName = NLFirstName.of(passwordEncoder.decrypt(request.name()));
-        final NLPassword password = NLPassword.of(passwordEncoder.decrypt(request.password()));
-        final NLLastName lastName = NLLastName.of(passwordEncoder.decrypt(request.lastName()));
+        final NLFirstName firstName = NLFirstName.of(request.name());
+        final NLPassword password = NLPassword.of(request.password());
+        final NLLastName lastName = NLLastName.of(request.lastName());
         final NLConfirmationToken token = create(firstName, lastName, email, password);
         final String link = createLink(token.getToken().getValue());
 
@@ -89,7 +87,7 @@ class UserSignupService implements IUserSignupService {
 
     @Override
     public @NotNull NLStringValue resendConfirmationToken(@NotNull UserResendTokenRequest request) throws InvalidUserDataException {
-        final NLEmail email = NLEmail.of(passwordEncoder.decrypt(request.email()));
+        final NLEmail email = NLEmail.of(request.email());
         if (!email.validate()) {
             throw new InvalidUserDataException("Email invalid");
         }

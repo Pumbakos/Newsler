@@ -93,14 +93,14 @@ public class JWTFilter extends OncePerRequestFilter {
         final String email = jwt.getClaim(JWTClaim.EMAIL).asString();
         final NLEmail nlEmail = NLEmail.of(email);
         if (!nlEmail.validate()) {
-            throw new UnauthorizedException("Email", "Invalid email");
+            throw new InvalidTokenException("Email", "Invalid email");
         }
 
         final NLUser user;
         try {
             user = (NLUser) authUserDetailService.loadUserByUsername(email);
         } catch (UsernameNotFoundException | InvalidUserDataException e) {
-            throw new UnauthorizedException(TOKEN, "Incorrect credentials.");
+            throw new InvalidTokenException(TOKEN, "Incorrect credentials.");
         }
 
         if (JWTResolver.resolveJWT(jwt)) {
@@ -111,7 +111,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
             return new NLAuthenticationToken(principal, credentials, roles);
         }
-        throw new UnauthorizedException(TOKEN, "Access denied.");
+        throw new InvalidTokenException(TOKEN, "Access denied.");
     }
 
     private @NotNull DecodedJWT verifyToken(@NotNull String authToken) {
@@ -119,7 +119,7 @@ public class JWTFilter extends OncePerRequestFilter {
         try {
             return verifier.verify(authToken);
         } catch (JWTVerificationException e) {
-            throw new UnauthorizedException(TOKEN, "Invalid token");
+            throw new InvalidTokenException(TOKEN, "Invalid token");
         }
     }
 

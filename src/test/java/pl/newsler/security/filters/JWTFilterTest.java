@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import pl.newsler.commons.exception.InvalidTokenException;
 import pl.newsler.commons.exception.UnauthorizedException;
 import pl.newsler.auth.IJWTAuthService;
 import pl.newsler.auth.JWTClaim;
@@ -116,7 +117,7 @@ class JWTFilterTest {
 
         Instant after = Instant.now(Clock.offset(Clock.system(ZoneId.systemDefault()), Duration.of(-61L, ChronoUnit.MINUTES)));
         Assertions.assertThrows(
-                UnauthorizedException.class,
+                InvalidTokenException.class,
                 () -> JWTResolver.resolveJWT(
                         verify(generateToken(after, "test", "test", "test", "test", "test", "test"))
                 )
@@ -157,7 +158,7 @@ class JWTFilterTest {
     void shouldNotDoFilterInternal_BlankTokens(String token) {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.AUTHORIZATION, token);
-        Assertions.assertThrows(UnauthorizedException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
+        Assertions.assertThrows(InvalidTokenException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
     }
 
     @Test
@@ -165,7 +166,7 @@ class JWTFilterTest {
         String token = generateToken(JWTClaim.ISSUER, "test.d'amaro@.com.dev", firstName(), "USER");
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.AUTHORIZATION, token);
-        Assertions.assertThrows(UnauthorizedException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
+        Assertions.assertThrows(InvalidTokenException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
     }
 
     @Test
@@ -173,7 +174,7 @@ class JWTFilterTest {
         String token = generateToken(JWTClaim.ISSUER, String.format("%s@%s.dev", username(), domain()), firstName(), "USER");
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.AUTHORIZATION, token);
-        Assertions.assertThrows(UnauthorizedException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
+        Assertions.assertThrows(InvalidTokenException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
     }
 
     @Test
@@ -187,14 +188,14 @@ class JWTFilterTest {
         );
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.AUTHORIZATION, token);
-        Assertions.assertThrows(UnauthorizedException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
+        Assertions.assertThrows(InvalidTokenException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
     }
 
     private DecodedJWT verify(String token) {
         try {
             return verifier.verify(token);
         } catch (JWTVerificationException e) {
-            throw new UnauthorizedException("Token", "Invalid token");
+            throw new InvalidTokenException("Token", "Invalid token");
         }
     }
 

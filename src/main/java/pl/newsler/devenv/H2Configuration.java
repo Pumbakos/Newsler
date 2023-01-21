@@ -72,16 +72,16 @@ class H2Configuration {
         }
 
         return args -> {
-            signupService.singUp(decryptedUserCreateRequest(
-                            "Aizholat",
+            signupService.singUp(
+                    new UserCreateRequest("Aizholat",
                             "Newsler",
                             email.get(),
                             "Pa$$word7hat^match3$"
                     )
             );
 
-            signupService.singUp(decryptedUserCreateRequest(
-                            firstName(),
+            signupService.singUp(
+                    new UserCreateRequest(firstName(),
                             lastName(),
                             String.format("%s@%s.com", username(), domain()),
                             "op@Q7#9FtE$%0X^#UZ"
@@ -120,18 +120,9 @@ class H2Configuration {
     ) {
         return (
                 StringUtils.isBlank(appKey.get())
-                || StringUtils.isBlank(secretKey.get())
-                || StringUtils.isBlank(smtp.get())
-                || StringUtils.isBlank(email.get())
-        );
-    }
-
-    private UserCreateRequest decryptedUserCreateRequest(final String name, final String lastName, final String email, final String password) {
-        return new UserCreateRequest(
-                passwordEncoder.encrypt(name),
-                passwordEncoder.encrypt(lastName),
-                passwordEncoder.encrypt(email),
-                passwordEncoder.encrypt(password)
+                        || StringUtils.isBlank(secretKey.get())
+                        || StringUtils.isBlank(smtp.get())
+                        || StringUtils.isBlank(email.get())
         );
     }
 }

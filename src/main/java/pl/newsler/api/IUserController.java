@@ -1,6 +1,5 @@
 package pl.newsler.api;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,8 +19,8 @@ public interface IUserController {
     ResponseEntity<NLDUser> get(@RequestBody UserGetRequest request);
 
     @PutMapping
-    ResponseEntity<HttpStatus> update(@RequestBody UserUpdateRequest request);
+    ResponseEntity<String> update(@RequestBody UserUpdateRequest request);
 
     @DeleteMapping
-    ResponseEntity<HttpStatus> delete(@RequestBody UserDeleteRequest request);
+    ResponseEntity<String> delete(@RequestBody UserDeleteRequest request);
 }

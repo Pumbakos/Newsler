@@ -27,7 +27,7 @@ import static pl.newsler.testcommons.TestUserUtils.lastName;
 import static pl.newsler.testcommons.TestUserUtils.secretOrAppKey;
 import static pl.newsler.testcommons.TestUserUtils.smtpAccount;
 
-public class UserCrudServiceTest {
+class UserCrudServiceTest {
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final StubUserRepository userRepositoryMock = new StubUserRepository();
     private final UserModuleConfiguration configuration = new UserModuleConfiguration(

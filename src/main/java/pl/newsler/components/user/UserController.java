@@ -21,14 +21,14 @@ class UserController implements IUserController {
     }
 
     @Override
-    public ResponseEntity<HttpStatus> update(UserUpdateRequest request) {
+    public ResponseEntity<String> update(UserUpdateRequest request) {
         userService.update(request);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("User updated", HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<HttpStatus> delete(UserDeleteRequest request) {
+    public ResponseEntity<String> delete(UserDeleteRequest request) {
         userService.delete(request);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("User deleted", HttpStatus.OK);
     }
 }

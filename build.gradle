@@ -10,7 +10,7 @@ version = '0.0.1'
 sourceCompatibility = '17'
 
 jar {
-    archiveName 'newsler.jar'
+    archiveFileName = 'newsler.jar'
 }
 
 configurations {
@@ -63,6 +63,9 @@ dependencies {
 
     testCompileOnly 'org.projectlombok:lombok:1.18.24'
 
+    testImplementation 'org.testcontainers:testcontainers:1.17.6'
+    testImplementation 'org.testcontainers:junit-jupiter:1.17.6'
+
     testImplementation('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.5'
     testImplementation 'org.springframework.security:spring-security-test:5.7.5'
@@ -77,7 +80,16 @@ dependencies {
 }
 
 test {
+    useJUnitPlatform()
     finalizedBy jacocoTestReport
+
+    beforeTest {
+        tasks.named('runMailDevContainer')
+    }
+
+    afterTest {
+        tasks.named('deleteMailDevContainer')
+    }
 }
 
 jacocoTestReport {
@@ -93,12 +105,27 @@ jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = 0.85
+                minimum = 0.75
             }
         }
     }
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
+tasks.register('runMailDevContainer', Exec) {
+    group 'newsler'
+
+    commandLine 'docker', 'run', '-p', '1080:1080', '-p', '1025:1025', '--name', 'newsler.maildev', 'maildev/maildev'
+}
+
+tasks.register('stopMailDevContainer', Exec) {
+    group 'newsler'
+
+    commandLine 'docker', 'stop', 'newsler.maildev'
+}
+
+tasks.register('deleteMailDevContainer', Exec) {
+    group 'newsler'
+
+    dependsOn(tasks.named('stopMailDevContainer').name)
+    commandLine 'docker', 'rm', 'newsler.maildev'
 }

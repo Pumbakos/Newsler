@@ -30,7 +30,16 @@ jobs:
           distribution: 'temurin'
           java-package: 'jdk'
           cache: 'gradle'
+      - name: Install Node modules
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+      - name: Run maildev container
+        run: ./gradlew runMailDevContainer
       - name: Build with Gradle
         run: ./gradlew build
+      - name: Stop and delete maildev container
+        run: ./gradlew deleteMailDevContainer

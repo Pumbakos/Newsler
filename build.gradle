@@ -9,6 +9,10 @@ group = 'pl.newsler'
 version = '0.0.1'
 sourceCompatibility = '17'
 
+ext {
+    maildevContainerName = 'newsler.maildev'
+}
+
 jar {
     archiveFileName = 'newsler.jar'
 }
@@ -82,14 +86,6 @@ dependencies {
 test {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
-
-    beforeTest {
-        tasks.named('runMailDevContainer')
-    }
-
-    afterTest {
-        tasks.named('deleteMailDevContainer')
-    }
 }
 
 jacocoTestReport {
@@ -102,6 +98,7 @@ jacocoTestReport {
 }
 
 jacocoTestCoverageVerification {
+    dependsOn('jacocoTestReport')
     violationRules {
         rule {
             limit {
@@ -113,19 +110,16 @@ jacocoTestCoverageVerification {
 
 tasks.register('runMailDevContainer', Exec) {
     group 'newsler'
-
-    commandLine 'docker', 'run', '-p', '1080:1080', '-p', '1025:1025', '--name', 'newsler.maildev', 'maildev/maildev'
+    commandLine 'docker', 'run', '-p', '1080:1080', '-p', '1025:1025', '--name', project.ext.maildevContainerName, 'maildev/maildev'
 }
 
 tasks.register('stopMailDevContainer', Exec) {
     group 'newsler'
-
     commandLine 'docker', 'stop', 'newsler.maildev'
 }
 
 tasks.register('deleteMailDevContainer', Exec) {
     group 'newsler'
-
     dependsOn(tasks.named('stopMailDevContainer').name)
     commandLine 'docker', 'rm', 'newsler.maildev'
 }

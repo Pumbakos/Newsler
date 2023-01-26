@@ -11,6 +11,8 @@ sourceCompatibility = '17'
 
 ext {
     maildevContainerName = 'newsler.maildev'
+    smtpMailDevPort = '1025:1025'
+    browserMailDevPort = '1080:1080'
 }
 
 jar {
@@ -91,7 +93,7 @@ jacocoTestReport {
         csv.required = false
         html.outputLocation = layout.buildDirectory.dir('test-coverage-results/html')
     }
-    dependsOn test
+    finalizedBy jacocoTestCoverageVerification
 }
 
 jacocoTestCoverageVerification {
@@ -107,7 +109,8 @@ jacocoTestCoverageVerification {
 
 tasks.register('runMailDevContainer', Exec) {
     group 'newsler'
-    commandLine 'docker', 'run', '-p', '1080:1080', '-p', '1025:1025', '--name', project.ext.maildevContainerName, 'maildev/maildev'
+    commandLine 'docker', 'run', '-p', project.ext.browserMailDevPort, '-p', project.ext.smtpMailDevPort,
+            '--name', project.ext.maildevContainerName, 'maildev/maildev'
 }
 
 tasks.register('stopMailDevContainer', Exec) {

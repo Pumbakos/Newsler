@@ -6,7 +6,7 @@
 #
 # For java see: https://github.com/actions/setup-java
 
-name: Newsler CI with Gradle on Windows
+name: Newsler CI with Gradle on Ubuntu
 
 on:
   pull_request:
@@ -17,14 +17,13 @@ on:
   schedule:
     - cron: '0 12 * * 5' # Runs at 12:00 UTC on Fri.
 
-permissions:
-  contents: read
-
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
@@ -32,17 +31,26 @@ jobs:
           distribution: 'temurin'
           java-package: 'jdk'
           cache: 'gradle'
+
       - name: Install Node modules
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Run maildev container
         run: ./gradlew runMailDevContainer
-      - run: ./gradlew build --no-daemon
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+
       - name: Build with Gradle
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
           arguments: build
+
       - name: Stop and delete maildev container
         run: ./gradlew deleteMailDevContainer

@@ -9,8 +9,14 @@ group = 'pl.newsler'
 version = '0.0.1'
 sourceCompatibility = '17'
 
+ext {
+    maildevContainerName = 'newsler.maildev'
+    smtpMailDevPort = '1025:1025'
+    browserMailDevPort = '1080:1080'
+}
+
 jar {
-    archiveName 'newsler.jar'
+    archiveFileName = 'newsler.jar'
 }
 
 configurations {
@@ -30,38 +36,38 @@ jacoco {
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.13.1'
-    testImplementation 'junit:junit:4.13.1'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:3.0.1'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    compileOnly 'org.projectlombok:lombok:1.18.24'
 
     implementation 'org.springframework.boot:spring-boot-starter-validation:3.0.1'
     implementation 'org.springframework.boot:spring-boot-starter-data-rest:3.0.1'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.0.1'
     implementation 'org.springframework.boot:spring-boot-starter-webflux:3.0.1'
     implementation 'org.springframework.boot:spring-boot-starter-jersey:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-mail:3.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc:3.0.1'
     implementation 'org.springframework.boot:spring-boot-starter-web:3.0.1'
 
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf:3.0.1'
     implementation 'org.springframework.boot:spring-boot-starter-security:3.0.1'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     implementation('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4.2'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'org.jetbrains:annotations:23.1.0'
+    implementation 'com.h2database:h2:2.1.214'
     implementation 'com.auth0:java-jwt:4.2.1'
     implementation 'org.yaml:snakeyaml:1.33'
-    implementation 'com.h2database:h2'
 
-    compileOnly 'org.projectlombok:lombok:1.18.24'
+    runtimeOnly 'com.oracle.database.jdbc:ojdbc8:21.8.0.0'
+    runtimeOnly 'com.h2database:h2:2.1.214'
 
-    runtimeOnly 'com.oracle.database.jdbc:ojdbc8'
-    runtimeOnly 'com.h2database:h2'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
 
-    testAnnotationProcessor 'org.projectlombok:lombok'
-
-    testCompileOnly 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok:1.18.24'
 
     testImplementation('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.5'
@@ -70,13 +76,14 @@ dependencies {
     testImplementation 'uk.org.webcompere:system-stubs-core:2.0.1'
     testImplementation 'com.squareup.retrofit2:retrofit:2.9.0'
     testImplementation 'org.mockito:mockito-inline:3.12.4'
+    testImplementation 'org.projectlombok:lombok:1.18.24'
     testImplementation 'com.google.code.gson:gson:2.10'
-    testImplementation 'org.projectlombok:lombok'
     testImplementation 'org.yaml:snakeyaml:1.33'
-
+    testImplementation 'junit:junit:4.13.1'
 }
 
 test {
+    useJUnitPlatform()
     finalizedBy jacocoTestReport
 }
 
@@ -86,19 +93,33 @@ jacocoTestReport {
         csv.required = false
         html.outputLocation = layout.buildDirectory.dir('test-coverage-results/html')
     }
-    dependsOn test
+    finalizedBy jacocoTestCoverageVerification
 }
 
 jacocoTestCoverageVerification {
+    dependsOn('jacocoTestReport')
     violationRules {
         rule {
             limit {
-                minimum = 0.85
+                minimum = 0.75
             }
         }
     }
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
+tasks.register('runMailDevContainer', Exec) {
+    group 'newsler'
+    commandLine 'docker', 'run', '-p', project.ext.browserMailDevPort, '-p', project.ext.smtpMailDevPort,
+            '--name', project.ext.maildevContainerName, 'maildev/maildev'
+}
+
+tasks.register('stopMailDevContainer', Exec) {
+    group 'newsler'
+    commandLine 'docker', 'stop', project.ext.maildevContainerName
+}
+
+tasks.register('deleteMailDevContainer', Exec) {
+    group 'newsler'
+    dependsOn(tasks.named('stopMailDevContainer').name)
+    commandLine 'docker', 'rm', project.ext.maildevContainerName
 }

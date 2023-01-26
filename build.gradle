@@ -67,9 +67,6 @@ dependencies {
 
     testCompileOnly 'org.projectlombok:lombok:1.18.24'
 
-    testImplementation 'org.testcontainers:testcontainers:1.17.6'
-    testImplementation 'org.testcontainers:junit-jupiter:1.17.6'
-
     testImplementation('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.5'
     testImplementation 'org.springframework.security:spring-security-test:5.7.5'
@@ -115,11 +112,11 @@ tasks.register('runMailDevContainer', Exec) {
 
 tasks.register('stopMailDevContainer', Exec) {
     group 'newsler'
-    commandLine 'docker', 'stop', 'newsler.maildev'
+    commandLine 'docker', 'stop', project.ext.maildevContainerName
 }
 
 tasks.register('deleteMailDevContainer', Exec) {
     group 'newsler'
     dependsOn(tasks.named('stopMailDevContainer').name)
-    commandLine 'docker', 'rm', 'newsler.maildev'
+    commandLine 'docker', 'rm', project.ext.maildevContainerName
 }

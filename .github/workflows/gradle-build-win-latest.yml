@@ -11,9 +11,8 @@ name: Newsler CI with Gradle on Windows
 on:
   pull_request:
     branches:
-    - master
-    - develop
-    - release/*
+      - master
+      - develop
   schedule:
     - cron: '0 12 * * 5' # Runs at 12:00 UTC on Fri.
 
@@ -21,8 +20,20 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  MailDev-Start:
+    timeout-minutes: 30
     runs-on: windows-latest
+    steps:
+      - name: Run maildev container
+        run: ./gradlew runMailDevContainer
+
+  Gradle-Build-Ubuntu:
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        node: [16, 18]
+    runs-on: windows-latest
+    needs: [MailDev-Start]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -38,11 +49,8 @@ jobs:
       - name: Install Node modules
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: ${{ matrix.node }}
           cache: 'npm'
-
-      - name: Run maildev container
-        run: ./gradlew runMailDevContainer
 
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
@@ -54,3 +62,10 @@ jobs:
 
       - name: Stop and delete maildev container
         run: ./gradlew deleteMailDevContainer
+
+  MailDev-Stop:
+    timeout-minutes: 30
+    needs: [MailDev-Start]
+    steps:
+      - name: Run maildev container
+        run: ./gradlew runMailDevContainer

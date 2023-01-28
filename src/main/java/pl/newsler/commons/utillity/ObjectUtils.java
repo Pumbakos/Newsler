@@ -32,7 +32,7 @@ public final class ObjectUtils {
     }
 
     public static boolean isBlank(UserUpdateRequest request) {
-        return ((request == null) || (isValueBlank(request.appKey()) || isValueBlank(request.secretKey()) || isValueBlank(request.email())));
+        return ((request == null) || (isValueBlank(request.appKey()) || isValueBlank(request.secretKey()) || isValueBlank(request.email())) || (isValueBlank(request.smtpAccount())));
     }
 
     public static boolean isNotBlank(UserDeleteRequest request) {

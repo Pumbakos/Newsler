@@ -120,6 +120,7 @@ tasks.register('stopMailDevContainer', Exec) {
 
 tasks.register('deleteMailDevContainer', Exec) {
     group 'newsler'
+
     dependsOn(tasks.named('stopMailDevContainer').name)
     commandLine 'docker', 'rm', project.ext.maildevContainerName
 }

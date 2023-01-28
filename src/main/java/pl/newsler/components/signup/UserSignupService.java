@@ -1,37 +1,42 @@
 package pl.newsler.components.signup;
 
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
-import pl.newsler.commons.exception.EmailAlreadyConfirmedException;
-import pl.newsler.commons.exception.InvalidTokenException;
-import pl.newsler.commons.exception.InvalidUserDataException;
-import pl.newsler.commons.exception.TokenExpiredException;
-import pl.newsler.commons.exception.UserAlreadyExistsException;
-import pl.newsler.commons.models.NLEmail;
-import pl.newsler.commons.models.NLFirstName;
-import pl.newsler.commons.models.NLLastName;
-import pl.newsler.commons.models.NLName;
-import pl.newsler.commons.models.NLPassword;
-import pl.newsler.commons.models.NLStringValue;
-import pl.newsler.commons.models.NLToken;
-import pl.newsler.commons.models.NLUuid;
-import pl.newsler.components.signup.dto.UserCreateRequest;
-import pl.newsler.components.signup.dto.UserResendTokenRequest;
-import pl.newsler.components.user.IUserCrudService;
-import pl.newsler.components.user.IUserRepository;
-import pl.newsler.internal.DomainProperties;
+        import org.jetbrains.annotations.NotNull;
+        import org.springframework.beans.factory.annotation.Value;
+        import pl.newsler.commons.exception.EmailAlreadyConfirmedException;
+        import pl.newsler.commons.exception.InvalidTokenException;
+        import pl.newsler.commons.exception.InvalidUserDataException;
+        import pl.newsler.commons.exception.TokenExpiredException;
+        import pl.newsler.commons.exception.UserAlreadyExistsException;
+        import pl.newsler.commons.models.NLEmail;
+        import pl.newsler.commons.models.NLFirstName;
+        import pl.newsler.commons.models.NLId;
+        import pl.newsler.commons.models.NLLastName;
+        import pl.newsler.commons.models.NLName;
+        import pl.newsler.commons.models.NLPassword;
+        import pl.newsler.commons.models.NLStringValue;
+        import pl.newsler.commons.models.NLToken;
+        import pl.newsler.commons.models.NLUuid;
+        import pl.newsler.components.signup.dto.UserCreateRequest;
+        import pl.newsler.components.signup.dto.UserResendTokenRequest;
+        import pl.newsler.components.user.IUserCrudService;
+        import pl.newsler.components.user.IUserRepository;
+        import pl.newsler.internal.DomainProperties;
+        import pl.newsler.security.NLIPasswordEncoder;
 
-import java.time.LocalDateTime;
-import java.util.Locale;
-import java.util.UUID;
+        import java.time.LocalDateTime;
+        import java.util.Locale;
+        import java.util.Random;
+        import java.util.UUID;
 
 @RequiredArgsConstructor
 class UserSignupService implements IUserSignupService {
     private final ConfirmationTokenService confirmationTokenService;
     private final IEmailConfirmationService emailConfirmationSender;
+    private final NLIPasswordEncoder passwordEncoder;
     private final IUserRepository userRepository;
     private final IUserCrudService crudService;
+    private final Random random;
     @Value("${newsler.schema}")
     private DomainProperties.Schema schema;
     @Value("${newsler.domain-name}")
@@ -42,10 +47,6 @@ class UserSignupService implements IUserSignupService {
     @Override
     public @NotNull NLStringValue singUp(UserCreateRequest request) throws InvalidUserDataException, UserAlreadyExistsException {
         final NLEmail email = NLEmail.of(request.email());
-        if (!email.validate()) {
-            throw new InvalidUserDataException("Email is invalid");
-        }
-
         final NLFirstName firstName = NLFirstName.of(request.name());
         final NLPassword password = NLPassword.of(request.password());
         final NLLastName lastName = NLLastName.of(request.lastName());
@@ -87,26 +88,34 @@ class UserSignupService implements IUserSignupService {
 
     @Override
     public @NotNull NLStringValue resendConfirmationToken(@NotNull UserResendTokenRequest request) throws InvalidUserDataException {
+        final String errorMessage = "Either email or password is incorrect";
         final NLEmail email = NLEmail.of(request.email());
-        if (!email.validate()) {
-            throw new InvalidUserDataException("Email invalid");
+        final NLPassword password = NLPassword.of(request.password());
+        if (!email.validate() || !password.validate()) {
+            throw new InvalidUserDataException(errorMessage);
         }
 
         userRepository.findByEmail(email).ifPresentOrElse(
                 user -> {
+                    if (!passwordEncoder.bCrypt().matches(request.password(), user.getPassword())) {
+                        throw new InvalidUserDataException(errorMessage);
+                    }
+
                     if (confirmationTokenService.setTokenExpired(user.map().getId())) {
                         final NLToken token = generateToken();
-                        getConfirmationToken(user.map().getId(), token);
+                        createConfirmationToken(user.map().getId(), token);
                         final String link = createLink(token.getValue());
 
                         emailConfirmationSender.send(
                                 user.getEmail().getValue(),
                                 emailConfirmationSender.confirmationEmailBuilder(createReceiverName(user.getFirstName(), user.getLastName()), link)
                         );
+                    } else {
+                        throw new InvalidUserDataException("Could not confirm token");
                     }
                 },
                 () -> {
-                    throw new InvalidUserDataException();
+                    throw new InvalidUserDataException(errorMessage);
                 }
         );
 
@@ -119,15 +128,14 @@ class UserSignupService implements IUserSignupService {
 
     private NLConfirmationToken create(NLFirstName name, NLLastName lastName, NLEmail email, NLPassword password) {
         final NLUuid uuid = crudService.create(name, lastName, email, password);
-        final NLConfirmationToken token = getConfirmationToken(uuid, generateToken());
+        final NLConfirmationToken token = createConfirmationToken(uuid, generateToken());
         return confirmationTokenService.save(token);
     }
 
-    private NLConfirmationToken getConfirmationToken(NLUuid userId, NLToken token) {
+    private NLConfirmationToken createConfirmationToken(NLUuid userId, NLToken token) {
         return new NLConfirmationToken(
+                NLId.of(random.nextLong()),
                 token,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15L),
                 userId
         );
     }

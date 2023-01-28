@@ -46,16 +46,16 @@ public class TestUserFactory {
         return "U$Ad3na923mas$dmi";
     }
 
-    private void createUserDottedEmail() {
+    private void createUserStandardEmail() {
         final NLUser user = new NLUser();
         user.setFirstName(NLFirstName.of(firstName()));
         user.setLastName(NLLastName.of(lastName()));
-        user.setEmail(NLEmail.of(String.format("%s@%s.dev", username(), username())));
+        user.setEmail(NLEmail.of(String.format("%s@%s.dev", firstName(), domain())));
         user.setPassword(NLPassword.of("Pa$$word7hat^match3$"));
         user.setEnabled(true);
         user.setLocked(false);
         user.setRole(NLUserType.USER);
-        dotted = user;
+        standard = user;
     }
 
     private void createUserDashedEmail() {
@@ -70,15 +70,15 @@ public class TestUserFactory {
         dashed = user;
     }
 
-    private void createUserStandardEmail() {
+    private void createUserDottedEmail() {
         final NLUser user = new NLUser();
         user.setFirstName(NLFirstName.of(firstName()));
         user.setLastName(NLLastName.of(lastName()));
-        user.setEmail(NLEmail.of(String.format("%s@%s.dev", firstName(), domain())));
+        user.setEmail(NLEmail.of(String.format("%s@%s.dev", username(), username())));
         user.setPassword(NLPassword.of("U$Ad3na923mas$dmi"));
         user.setEnabled(true);
         user.setLocked(false);
         user.setRole(NLUserType.USER);
-        standard = user;
+        dotted = user;
     }
 }

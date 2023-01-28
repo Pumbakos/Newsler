@@ -297,7 +297,7 @@ class UserCrudServiceTest {
         final UserDeleteRequest nullPasswordRequest = new UserDeleteRequest(standardUserId.getValue(), null);
         final UserDeleteRequest blankPasswordRequest = new UserDeleteRequest(standardUserId.getValue(), "  ");
         final UserDeleteRequest invalidPasswordRequest = new UserDeleteRequest(standardUserId.getValue(), "}#$$&643V8@");
-        final UserDeleteRequest incorrectPasswordRequest = new UserDeleteRequest(standardUserId.getValue(), "Pa$$word7hat^match3$");
+        final UserDeleteRequest incorrectPasswordRequest = new UserDeleteRequest(standardUserId.getValue(), factory.dotted_plainPassword());
 
         Assertions.assertThrows(InvalidUserDataException.class, () -> service.delete(nullPasswordRequest));
         Assertions.assertThrows(InvalidUserDataException.class, () -> service.delete(blankPasswordRequest));

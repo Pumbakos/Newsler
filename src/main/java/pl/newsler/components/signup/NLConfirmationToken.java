@@ -59,10 +59,11 @@ public class NLConfirmationToken {
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "USER_ID", nullable = false)))
     private NLUuid userId;
 
-    NLConfirmationToken(final NLToken token, final LocalDateTime creationDate, final LocalDateTime expirationDate, final NLUuid userId) {
+    NLConfirmationToken(final NLId id, final NLToken token, final NLUuid userId) {
+        this.id = id;
         this.token = token;
-        this.creationDate = creationDate;
-        this.expirationDate = expirationDate;
+        this.creationDate = LocalDateTime.now();
+        this.expirationDate = creationDate.plusMinutes(15L);
         this.userId = userId;
     }
 }

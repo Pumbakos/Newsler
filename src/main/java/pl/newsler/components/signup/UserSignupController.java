@@ -14,33 +14,42 @@ import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.exception.TokenExpiredException;
 import pl.newsler.commons.models.NLStringValue;
 import pl.newsler.commons.models.NLToken;
+import pl.newsler.commons.utillity.ObjectUtils;
 import pl.newsler.components.signup.dto.UserCreateRequest;
 import pl.newsler.components.signup.dto.UserResendTokenRequest;
 
 @RestController
 @RequiredArgsConstructor
 class UserSignupController implements IUserSignupController {
-    private final IUserSignupService signUpService;
+    private final IUserSignupService service;
 
     @Override
     public ResponseEntity<String> signup(UserCreateRequest request) throws InvalidUserDataException {
-        NLStringValue value = signUpService.singUp(request);
+        if (ObjectUtils.isBlank(request)) {
+            throw new InvalidUserDataException("Blank or empty data");
+        }
+
+        NLStringValue value = service.singUp(request);
         return new ResponseEntity<>(value.getValue(), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<String> confirm(@RequestParam("token") String token) throws InvalidTokenException, EmailAlreadyConfirmedException, TokenExpiredException {
         if (StringUtils.isBlank(token)) {
-            throw new InvalidTokenException("");
+            throw new InvalidTokenException("Blank or empty data");
         }
 
-        NLStringValue value = signUpService.confirmToken(NLToken.of(token));
+        NLStringValue value = service.confirmToken(NLToken.of(token));
         return new ResponseEntity<>(value.getValue(), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<String> resendToken(@RequestBody UserResendTokenRequest request) throws InvalidUserDataException {
-        NLStringValue value = signUpService.resendConfirmationToken(request);
+        if (ObjectUtils.isBlank(request)) {
+            throw new InvalidUserDataException("Blank or empty data");
+        }
+
+        NLStringValue value = service.resendConfirmationToken(request);
         return new ResponseEntity<>(value.getValue(), HttpStatus.OK);
     }
 }

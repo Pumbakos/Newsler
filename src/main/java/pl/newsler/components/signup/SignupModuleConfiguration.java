@@ -6,14 +6,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 import pl.newsler.components.user.IUserCrudService;
 import pl.newsler.components.user.IUserRepository;
+import pl.newsler.security.NLIPasswordEncoder;
+
+import java.security.SecureRandom;
 
 @RequiredArgsConstructor
 @Configuration(proxyBeanMethods = false)
 class SignupModuleConfiguration {
-    private final IUserCrudService crudService;
-    private final IUserRepository userRepository;
     private final IConfirmationTokenRepository confirmationTokenRepository;
+    private final NLIPasswordEncoder passwordEncoder;
+    private final IUserRepository userRepository;
     private final JavaMailSender javaMailSender;
+    private final IUserCrudService crudService;
 
     @Bean(name = "confirmationTokenService")
     ConfirmationTokenService confirmationTokenService() {
@@ -27,6 +31,6 @@ class SignupModuleConfiguration {
 
     @Bean(name = "userSignupService")
     IUserSignupService userSignupService(ConfirmationTokenService confirmationTokenService, IEmailConfirmationService emailConfirmationService) {
-        return new UserSignupService(confirmationTokenService, emailConfirmationService, userRepository, crudService);
+        return new UserSignupService(confirmationTokenService, emailConfirmationService, passwordEncoder, userRepository, crudService, new SecureRandom());
     }
 }

@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import pl.newsler.components.signup.dto.UserCreateRequest;
+import pl.newsler.components.signup.dto.UserResendTokenRequest;
 import pl.newsler.components.user.dto.UserDeleteRequest;
 import pl.newsler.components.user.dto.UserGetRequest;
 import pl.newsler.components.user.dto.UserUpdateRequest;
@@ -41,6 +42,16 @@ public final class ObjectUtils {
     public static boolean isBlank(UserDeleteRequest request) {
         return ((request == null) || (isValueBlank(request.id()) || isValueBlank(request.password())));
     }
+
+    public static boolean isNotBlank(UserResendTokenRequest request) {
+        return !isBlank(request);
+    }
+
+    public static boolean isBlank(UserResendTokenRequest request) {
+        return ((request == null) || (isValueBlank(request.email()) || isValueBlank(request.password())));
+    }
+
+
 
     private static boolean isValueBlank(String value) {
         return StringUtils.isBlank(value);

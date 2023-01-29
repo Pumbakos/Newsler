@@ -61,10 +61,3 @@ jobs:
 
       - name: Stop and delete maildev container
         run: ./gradlew deleteMailDevContainer
-
-  MailDev-Stop:
-    timeout-minutes: 30
-    needs: [Gradle-Build-Win]
-    steps:
-      - name: Run maildev container
-        run: ./gradlew runMailDevContainer

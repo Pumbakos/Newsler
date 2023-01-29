@@ -11,14 +11,27 @@ name: Newsler CI with Gradle on Ubuntu
 on:
   pull_request:
     branches:
-    - master
-    - develop
-    - release/*
+      - master
+      - develop
   schedule:
     - cron: '0 12 * * 5' # Runs at 12:00 UTC on Fri.
 
+permissions:
+  contents: read
+
 jobs:
-  build:
+  MailDev-Start:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run maildev container
+        run: ./gradlew runMailDevContainer
+
+  Gradle-Build-Ubuntu:
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        node: [16, 18]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,22 +48,24 @@ jobs:
       - name: Install Node modules
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: ${{ matrix.node }}
           cache: 'npm'
-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
-      - name: Run maildev container
-        run: ./gradlew runMailDevContainer
 
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-        with:
-          arguments: build
+        run: ./gradlew build
 
       - name: Stop and delete maildev container
         run: ./gradlew deleteMailDevContainer
+
+  MailDev-Stop:
+    timeout-minutes: 30
+    needs: [Gradle-Build-Ubuntu]
+    steps:
+      - name: Run maildev container
+        run: ./gradlew runMailDevContainer

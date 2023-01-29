@@ -4,11 +4,11 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
-import pl.newsler.commons.exceptions.NoResourceFoundException;
-import pl.newsler.commons.exceptions.RegexNotMatchException;
+import pl.newsler.commons.exception.NoResourceFoundException;
+import pl.newsler.commons.exception.RegexNotMatchException;
 import pl.newsler.security.exception.AlgorithmInitializationException;
-import pl.newsler.security.exception.DecryptionException;
-import pl.newsler.security.exception.EncryptionException;
+import pl.newsler.commons.exception.DecryptionException;
+import pl.newsler.commons.exception.EncryptionException;
 import pl.newsler.security.exception.KetStoreInitializationException;
 
 import javax.crypto.BadPaddingException;

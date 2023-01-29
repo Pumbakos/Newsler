@@ -3,7 +3,9 @@ package pl.newsler.security;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import pl.newsler.commons.exception.EncryptionException;
 import pl.newsler.security.exception.AlgorithmInitializationException;
+import pl.newsler.commons.exception.DecryptionException;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -35,7 +37,7 @@ class NLPasswordEncoder implements NLIPasswordEncoder {
             byte[] cipherText = cipher.doFinal(string.getBytes());
             return Base64.getEncoder().encodeToString(cipherText);
         } catch (Exception e) {
-            throw new IllegalArgumentException();
+            throw new EncryptionException();
         }
     }
 
@@ -47,7 +49,7 @@ class NLPasswordEncoder implements NLIPasswordEncoder {
             byte[] plainText = cipher.doFinal(Base64.getDecoder().decode(string));
             return new String(plainText);
         } catch (Exception e) {
-            throw new IllegalArgumentException();
+            throw new DecryptionException();
         }
     }
 

@@ -5,8 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.IUserController;
-import pl.newsler.commons.models.NLId;
-import pl.newsler.components.user.dto.UserCreateRequest;
+import pl.newsler.components.user.dto.UserGetRequest;
 import pl.newsler.components.user.dto.UserDeleteRequest;
 import pl.newsler.components.user.dto.UserUpdateRequest;
 
@@ -16,26 +15,20 @@ class UserController implements IUserController {
     private final IUserCrudService userService;
 
     @Override
-    public ResponseEntity<NLDUser> getById(String id) {
-        NLDUser user = userService.getById(NLId.of(id));
+    public ResponseEntity<NLDUser> get(UserGetRequest request) {
+        NLDUser user = userService.get(request);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<NLId> create(UserCreateRequest request) {
-        NLId nlId = userService.create(request.name(), request.lastName(), request.email(), request.password());
-        return new ResponseEntity<>(nlId, HttpStatus.OK);
+    public ResponseEntity<String> update(UserUpdateRequest request) {
+        userService.update(request);
+        return new ResponseEntity<>("User updated", HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<HttpStatus> update(UserUpdateRequest request) {
-        userService.update(request.id(), request.appKey(), request.secretKey(), request.smtpAccount());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<HttpStatus> delete(UserDeleteRequest request) {
-        userService.delete(request.id(), request.password());
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<String> delete(UserDeleteRequest request) {
+        userService.delete(request);
+        return new ResponseEntity<>("User deleted", HttpStatus.OK);
     }
 }

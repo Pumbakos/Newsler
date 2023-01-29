@@ -20,12 +20,12 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestTemplate;
 import pl.newsler.api.IMailController;
-import pl.newsler.api.exceptions.GlobalRestExceptionHandler;
-import pl.newsler.commons.exceptions.NLError;
-import pl.newsler.commons.exceptions.NLException;
+import pl.newsler.commons.exception.GlobalRestExceptionHandler;
+import pl.newsler.commons.exception.NLError;
+import pl.newsler.commons.exception.NLException;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmailStatus;
-import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLIdType;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
@@ -37,7 +37,7 @@ import pl.newsler.components.emaillabs.exceptions.ELAMailNotFoundException;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.TestUserFactory;
-import pl.newsler.components.user.UserDataNotFineException;
+import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.security.StubNLPasswordEncoder;
 import pl.newsler.testcommons.TestUserUtils;
 import pl.newsler.testcommons.TestUtils;
@@ -73,7 +73,7 @@ class MailModuleTest {
         mockServer = MockRestServiceServer.createServer(restTemplate);
         controller = new MailController(service);
 
-        NLId standardId = NLId.of(UUID.randomUUID());
+        NLUuid standardId = NLUuid.of(UUID.randomUUID());
         factory.standard().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.standard_plainPassword())));
         factory.standard().setId(standardId);
         factory.standard().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
@@ -81,7 +81,7 @@ class MailModuleTest {
         factory.standard().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
         userRepository.save(factory.standard());
 
-        NLId dashedId = NLId.of(UUID.randomUUID());
+        NLUuid dashedId = NLUuid.of(UUID.randomUUID());
         factory.dashed().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dashed_plainPassword())));
         factory.dashed().setId(dashedId);
         factory.dashed().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
@@ -89,7 +89,7 @@ class MailModuleTest {
         factory.dashed().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
         userRepository.save(factory.dashed());
 
-        NLId dottedId = NLId.of(UUID.randomUUID());
+        NLUuid dottedId = NLUuid.of(UUID.randomUUID());
         factory.dotted().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dotted_plainPassword())));
         factory.dotted().setId(dottedId);
         factory.dotted().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
@@ -175,7 +175,7 @@ class MailModuleTest {
     @SuppressWarnings({"java:S5778"})
     void shouldNotFetchAllMailsAndReturn400_BadRequestWhenUserIdInvalid() {
         try {
-            controller.fetchAllMails(NLId.of(UUID.randomUUID()).getValue());
+            controller.fetchAllMails(NLUuid.of(UUID.randomUUID()).getValue());
             Assertions.fail();
         } catch (NLException e) {
             ResponseEntity<NLError> response = handler.handleException(e);
@@ -234,19 +234,19 @@ class MailModuleTest {
     /* ------------- GET & FETCH MAILS ------------ */
     @Test
     void shouldNotGetMailStatus_UserIdValid_MailIdInvalid() {
-        final NLId userId = factory.dashed().map().getId();
-        final NLId userTypeId = NLId.of(UUID.randomUUID());
+        final NLUuid userId = factory.dashed().map().getId();
+        final NLUuid userTypeId = NLUuid.of(UUID.randomUUID());
         Assertions.assertThrows(ELAMailNotFoundException.class, () -> service.getMailStatus(userTypeId, userId));
 
-        final NLId mailTypeId = NLId.of(UUID.randomUUID(), NLIdType.MAIL);
+        final NLUuid mailTypeId = NLUuid.of(UUID.randomUUID(), NLIdType.MAIL);
         Assertions.assertThrows(ELAMailNotFoundException.class, () -> service.getMailStatus(mailTypeId, userId));
     }
 
     @Test
     void shouldNotGetMailStatus_UserIdInvalid() {
-        final NLId id = NLId.of(UUID.randomUUID());
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.getMailStatus(id, id));
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.getMailStatus(id, id));
+        final NLUuid id = NLUuid.of(UUID.randomUUID());
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.getMailStatus(id, id));
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.getMailStatus(id, id));
     }
 
     @Test
@@ -292,7 +292,7 @@ class MailModuleTest {
                 "MOCK TEST MESSAGE"
         );
 
-        Assertions.assertThrows(UserDataNotFineException.class, () -> service.queue(request));
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.queue(request));
     }
 
     @Test
@@ -387,8 +387,8 @@ class MailModuleTest {
                 "MOCK TEST",
                 "MOCK TEST MESSAGE"
         );
-        final NLUserMail first = NLUserMail.of(NLId.of(UUID.randomUUID(), NLIdType.MAIL), MailDetails.of(requestForFirst));
-        final NLUserMail second = NLUserMail.of(NLId.of(UUID.randomUUID(), NLIdType.MAIL), MailDetails.of(requestForSecond));
+        final NLUserMail first = NLUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), MailDetails.of(requestForFirst));
+        final NLUserMail second = NLUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), MailDetails.of(requestForSecond));
 
         Assertions.assertEquals(first, first);
         Assertions.assertEquals(first.toString(), first.toString());
@@ -407,7 +407,7 @@ class MailModuleTest {
         }
         final NLUser user = users.get(0);
         final MailSendRequest request = createMailRequest(users, user);
-        final NLUserMail first = NLUserMail.of(NLId.of(UUID.randomUUID(), NLIdType.MAIL), MailDetails.of(request));
+        final NLUserMail first = NLUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), MailDetails.of(request));
 
         Assertions.assertNotNull(first);
         Assertions.assertNotNull(first.getId());

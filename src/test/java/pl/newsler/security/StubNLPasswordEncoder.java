@@ -9,10 +9,6 @@ public class StubNLPasswordEncoder implements NLIPasswordEncoder {
         this.configuration = new NLPasswordEncoderConfiguration();
     }
 
-    public NLPasswordEncoder passwordEncoder() {
-        return configuration.passwordEncoder(configuration.bCryptPasswordEncoder());
-    }
-
     @Override
     public BCryptPasswordEncoder bCrypt() {
         return configuration.bCryptPasswordEncoder();

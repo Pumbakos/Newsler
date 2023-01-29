@@ -2,6 +2,7 @@ package pl.newsler.security;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import pl.newsler.commons.exception.EncryptionException;
 
 class NLIPasswordEncoderTest {
     private final NLPasswordEncoderConfiguration configuration = new NLPasswordEncoderConfiguration();
@@ -27,8 +28,8 @@ class NLIPasswordEncoderTest {
     }
 
     @Test
-    void shouldNotEncrypt_ThrowIllegalArgumentException() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> passwordEncoder.encrypt(null));
+    void shouldNotEncryptWhenStringIsNullAndThrowEncryptionException() {
+        Assertions.assertThrows(EncryptionException.class, () -> passwordEncoder.encrypt(null));
     }
 
     @Test

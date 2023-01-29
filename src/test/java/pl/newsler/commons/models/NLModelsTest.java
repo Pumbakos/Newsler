@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import pl.newsler.commons.exceptions.RegexNotMatchException;
+import pl.newsler.commons.exception.RegexNotMatchException;
 import pl.newsler.testcommons.TestUserUtils;
 
 import java.util.UUID;
@@ -129,15 +129,15 @@ class NLModelsTest {
     //* ---------- NLId ---------- *//
     @Test
     void shouldCreatePackagePrivateNLId() {
-        Assertions.assertDoesNotThrow(NLId::new);
-        Assertions.assertDoesNotThrow(NLId::new);
-        Assertions.assertDoesNotThrow(NLId::new);
+        Assertions.assertDoesNotThrow(NLUuid::new);
+        Assertions.assertDoesNotThrow(NLUuid::new);
+        Assertions.assertDoesNotThrow(NLUuid::new);
     }
 
     @Test
     void shouldValidateNLId() {
         UUID uuid = UUID.randomUUID();
-        NLId first = NLId.of(uuid);
+        NLUuid first = NLUuid.of(uuid);
 
         Assertions.assertTrue(first.validate());
         Assertions.assertEquals(uuid.toString(), first.getValue().substring(4));
@@ -148,7 +148,7 @@ class NLModelsTest {
     @EnumSource(value = NLUserType.class)
     void shouldValidateNLIdByNLType(NLUserType type) {
         UUID uuid = UUID.randomUUID();
-        NLId id = NLId.of(uuid, type);
+        NLUuid id = NLUuid.of(uuid, type);
         Assertions.assertTrue(id.validate());
         Assertions.assertTrue(id.getValue().startsWith(type.getPrefix()));
         Assertions.assertEquals(uuid.toString(), id.getValue().substring(4));
@@ -156,8 +156,8 @@ class NLModelsTest {
 
     @Test
     void shouldNotValidateNLId_NullType() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> NLId.of(UUID.randomUUID(), (NLIdType) null));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> NLId.of(UUID.randomUUID(), (NLUserType) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NLUuid.of(UUID.randomUUID(), (NLIdType) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NLUuid.of(UUID.randomUUID(), (NLUserType) null));
     }
 
     @Test
@@ -165,25 +165,25 @@ class NLModelsTest {
         UUID first = UUID.randomUUID();
         UUID second = UUID.randomUUID();
 
-        NLId id = NLId.of(first);
+        NLUuid id = NLUuid.of(first);
         Assertions.assertTrue(id.canEqual(id));
         Assertions.assertFalse(id.canEqual(first));
-        Assertions.assertEquals(id, NLId.of(first));
+        Assertions.assertEquals(id, NLUuid.of(first));
         Assertions.assertEquals(id.toString(), id.toString());
         Assertions.assertEquals(id.hashCode(), id.hashCode());
-        Assertions.assertNotEquals(id, NLId.of(second));
+        Assertions.assertNotEquals(id, NLUuid.of(second));
         Assertions.assertNotEquals(id, null);
         Assertions.assertNotEquals(id, "");
-        Assertions.assertNotEquals(id.toString(), NLId.of(second).toString());
-        Assertions.assertNotEquals(id.hashCode(), NLId.of(second).hashCode());
-        Assertions.assertNotEquals(NLId.of(UUID.randomUUID()), NLId.of(UUID.randomUUID()));
+        Assertions.assertNotEquals(id.toString(), NLUuid.of(second).toString());
+        Assertions.assertNotEquals(id.hashCode(), NLUuid.of(second).hashCode());
+        Assertions.assertNotEquals(NLUuid.of(UUID.randomUUID()), NLUuid.of(UUID.randomUUID()));
     }
 
     @Test
     void shouldThrowIllegalArgumentException() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> NLId.of(UUID.randomUUID(), NLUserType.valueOf("TEST_USER")));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> NLId.of(UUID.fromString("")));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> NLId.of(UUID.fromString("user")));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NLUuid.of(UUID.randomUUID(), NLUserType.valueOf("TEST_USER")));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NLUuid.of(UUID.fromString("")));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NLUuid.of(UUID.fromString("user")));
     }
 
     //* ---------- NLPassword ---------- *//

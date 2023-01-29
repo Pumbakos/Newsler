@@ -19,7 +19,7 @@ import lombok.ToString;
 import org.hibernate.Hibernate;
 import pl.newsler.commons.models.NLEmailMessage;
 import pl.newsler.commons.models.NLEmailStatus;
-import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLStringValue;
 import pl.newsler.commons.models.NLSubject;
 import pl.newsler.commons.models.NLVersion;
@@ -43,7 +43,7 @@ public class NLUserMail implements Serializable {
     @Getter(AccessLevel.PACKAGE)
     @EmbeddedId
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ID")))
-    private NLId id;
+    private NLUuid id;
 
     @Getter(AccessLevel.PACKAGE)
     @Embedded
@@ -52,7 +52,7 @@ public class NLUserMail implements Serializable {
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "USER_ID")))
-    private NLId userId;
+    private NLUuid userId;
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "TO_ADDRESSES")))
@@ -82,7 +82,7 @@ public class NLUserMail implements Serializable {
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ERROR_MESSAGE", length = 512)))
     private NLStringValue errorMessage;
 
-    public static NLUserMail of(NLId userId, MailDetails details) {
+    public static NLUserMail of(NLUuid userId, MailDetails details) {
         return new NLUserMail(
                 details.id(),
                 MailRepository.version,

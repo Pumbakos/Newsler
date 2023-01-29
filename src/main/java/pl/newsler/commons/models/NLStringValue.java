@@ -16,6 +16,7 @@ import java.util.Arrays;
 public class NLStringValue implements NLModel {
     @Serial
     private static final long serialVersionUID = -5017051407745618377L;
+    private final String value;
 
     public static NLStringValue of(String value) {
         return new NLStringValue(value);
@@ -24,8 +25,6 @@ public class NLStringValue implements NLModel {
     public static NLStringValue of(String[] values) {
         return of(Arrays.toString(values));
     }
-
-    private final String value;
 
     @Override
     public boolean validate() {

@@ -3,7 +3,7 @@ package pl.newsler.security;
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.TestUserFactory;
 
@@ -18,9 +18,9 @@ class SecurityModelsTest {
     @Test
     void shouldCreateAndCompareNLPrincipal() {
         NLUser dotted = factory.dotted();
-        dotted.setId(NLId.of(UUID.randomUUID()));
+        dotted.setId(NLUuid.of(UUID.randomUUID()));
         NLUser dashed = factory.dashed();
-        dashed.setId(NLId.of(UUID.randomUUID()));
+        dashed.setId(NLUuid.of(UUID.randomUUID()));
         NLPrincipal dashedPrincipal = new NLPrincipal(dotted.map().getId(), dotted.getEmail(), dotted.getFirstName());
         NLPrincipal dottedPrincipal = new NLPrincipal(dashed.map().getId(), dashed.getEmail(), dashed.getFirstName());
 
@@ -43,9 +43,9 @@ class SecurityModelsTest {
     @Test
     void shouldCreateAndCompareNLCredentials() {
         NLUser dotted = factory.dotted();
-        dotted.setId(NLId.of(UUID.randomUUID()));
+        dotted.setId(NLUuid.of(UUID.randomUUID()));
         NLUser dashed = factory.dashed();
-        dashed.setId(NLId.of(UUID.randomUUID()));
+        dashed.setId(NLUuid.of(UUID.randomUUID()));
         NLCredentials dashedCredentials = new NLCredentials(dashed.getNLPassword());
         NLCredentials dottedCredentials = new NLCredentials(dotted.getNLPassword());
 

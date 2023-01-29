@@ -1,20 +1,18 @@
-package pl.newsler.components.user;
+package pl.newsler.commons.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import pl.newsler.commons.exceptions.NLError;
-import pl.newsler.commons.exceptions.NLException;
 
-public class UserDataNotFineException extends NLException {
-    public UserDataNotFineException(String error, String errorMessage) {
+public class InvalidUserDataException extends NLException {
+    public InvalidUserDataException(String error, String errorMessage) {
         super(error, errorMessage);
     }
 
-    public UserDataNotFineException(String errorMessage) {
+    public InvalidUserDataException(String errorMessage) {
         super("Not provided", errorMessage);
     }
 
-    public UserDataNotFineException() {
+    public InvalidUserDataException() {
         super("Not provided", "Not specified");
     }
 

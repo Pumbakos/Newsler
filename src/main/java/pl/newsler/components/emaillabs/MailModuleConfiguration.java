@@ -1,7 +1,6 @@
 package pl.newsler.components.emaillabs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -27,7 +26,7 @@ class MailModuleConfiguration {
 
     @Bean(name = "elaTaskExecutor")
     IELATaskExecutor taskExecutor(RestTemplate restTemplate) {
-        return new ELATaskExecutor(new ConcurrentLinkedQueue<>(), passwordEncoder, mailRepository, userRepository, restTemplate, new ObjectMapper(), new Gson());
+        return new ELATaskExecutor(new ConcurrentLinkedQueue<>(), passwordEncoder, mailRepository, userRepository, restTemplate, new ObjectMapper());
     }
 
     @Bean(name = "mailService")

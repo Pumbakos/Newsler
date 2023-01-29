@@ -27,13 +27,12 @@ jobs:
       - name: Run maildev container
         run: ./gradlew runMailDevContainer
 
-  Gradle-Build-Ubuntu:
+  Gradle-Build-Win:
     timeout-minutes: 30
     strategy:
       matrix:
         node: [16, 18]
     runs-on: windows-latest
-    needs: [MailDev-Start]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -65,7 +64,7 @@ jobs:
 
   MailDev-Stop:
     timeout-minutes: 30
-    needs: [MailDev-Start]
+    needs: [Gradle-Build-Win]
     steps:
       - name: Run maildev container
         run: ./gradlew runMailDevContainer

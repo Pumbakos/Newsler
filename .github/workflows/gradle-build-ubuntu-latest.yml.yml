@@ -33,7 +33,6 @@ jobs:
       matrix:
         node: [16, 18]
     runs-on: ubuntu-latest
-    needs: [MailDev-Start]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -55,17 +54,18 @@ jobs:
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-        with:
-          arguments: build
+        run: ./gradlew build
 
       - name: Stop and delete maildev container
         run: ./gradlew deleteMailDevContainer
 
   MailDev-Stop:
     timeout-minutes: 30
-    needs: [MailDev-Start]
+    needs: [Gradle-Build-Ubuntu]
     steps:
       - name: Run maildev container
         run: ./gradlew runMailDevContainer

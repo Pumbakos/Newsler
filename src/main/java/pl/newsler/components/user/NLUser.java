@@ -22,7 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
-import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
@@ -47,12 +47,12 @@ public class NLUser implements UserDetails {
     @Getter(AccessLevel.PACKAGE)
     @EmbeddedId
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ID")))
-    private NLId id;
+    private NLUuid id;
 
     @Getter(AccessLevel.PACKAGE)
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "VERSION")))
-    private NLVersion version;
+    private NLVersion version = UserRepository.version;
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "EMAIL")))

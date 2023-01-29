@@ -1,20 +1,23 @@
 package pl.newsler.components.user;
 
-import pl.newsler.commons.models.NLAppKey;
+import jakarta.validation.constraints.NotNull;
+import pl.newsler.commons.exception.InvalidUserDataException;
+import pl.newsler.commons.exception.UserAlreadyExistsException;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
-import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
-import pl.newsler.commons.models.NLSecretKey;
-import pl.newsler.commons.models.NLSmtpAccount;
+import pl.newsler.components.user.dto.UserDeleteRequest;
+import pl.newsler.components.user.dto.UserGetRequest;
+import pl.newsler.components.user.dto.UserUpdateRequest;
 
 public interface IUserCrudService {
-    NLDUser getById(NLId id) throws UserDataNotFineException;
+    NLDUser get(UserGetRequest request) throws InvalidUserDataException;
 
-    NLId create(NLFirstName name, NLLastName lastName, NLEmail email, NLPassword password) throws UserDataNotFineException;
+    void update(final UserUpdateRequest request) throws InvalidUserDataException;
 
-    void update(NLId id, NLAppKey appKey, NLSecretKey secretKey, NLSmtpAccount smtpAccount) throws UserDataNotFineException;
+    @NotNull NLUuid create(NLFirstName name, NLLastName lastName, NLEmail email, NLPassword password) throws UserAlreadyExistsException;
 
-    void delete(NLId id, NLPassword password) throws UserDataNotFineException;
+    void delete(UserDeleteRequest request) throws InvalidUserDataException;
 }

@@ -14,13 +14,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import pl.newsler.api.exceptions.UnauthorizedException;
+import pl.newsler.commons.exception.InvalidTokenException;
+import pl.newsler.commons.exception.UnauthorizedException;
 import pl.newsler.auth.IJWTAuthService;
 import pl.newsler.auth.JWTClaim;
 import pl.newsler.auth.JWTUtility;
 import pl.newsler.auth.StubJWTConfiguration;
 import pl.newsler.auth.UserAuthModel;
-import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.NLUser;
@@ -52,21 +53,21 @@ class JWTFilterTest {
     private final IJWTAuthService service = configuration.jwtAuthService(utility);
     private final TestUserFactory factory = new TestUserFactory();
     private final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
-    private final JWTFilter filter = new JWTFilter("/v1/auth/jwt", authenticationManager, configuration.databaseUserDetailService(), utility);
+    private final JWTFilter filter = new JWTFilter("/v1/api/auth/jwt", authenticationManager, configuration.databaseUserDetailService(), utility);
 
     @BeforeEach
     void beforeEach() {
-        NLId standardId = NLId.of(UUID.randomUUID());
+        NLUuid standardId = NLUuid.of(UUID.randomUUID());
         factory.standard().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.standard_plainPassword())));
         factory.standard().setId(standardId);
         userRepository.save(factory.standard());
 
-        NLId dashedId = NLId.of(UUID.randomUUID());
+        NLUuid dashedId = NLUuid.of(UUID.randomUUID());
         factory.dashed().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dashed_plainPassword())));
         factory.dashed().setId(dashedId);
         userRepository.save(factory.dashed());
 
-        NLId dottedId = NLId.of(UUID.randomUUID());
+        NLUuid dottedId = NLUuid.of(UUID.randomUUID());
         factory.dotted().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dotted_plainPassword())));
         factory.dotted().setId(dottedId);
         userRepository.save(factory.dotted());
@@ -116,7 +117,7 @@ class JWTFilterTest {
 
         Instant after = Instant.now(Clock.offset(Clock.system(ZoneId.systemDefault()), Duration.of(-61L, ChronoUnit.MINUTES)));
         Assertions.assertThrows(
-                UnauthorizedException.class,
+                InvalidTokenException.class,
                 () -> JWTResolver.resolveJWT(
                         verify(generateToken(after, "test", "test", "test", "test", "test", "test"))
                 )
@@ -148,7 +149,7 @@ class JWTFilterTest {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-        request.setRequestURI("/v1/auth/jwt");
+        request.setRequestURI("/v1/api/auth/jwt");
         Assertions.assertDoesNotThrow(() -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
     }
 
@@ -157,7 +158,7 @@ class JWTFilterTest {
     void shouldNotDoFilterInternal_BlankTokens(String token) {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.AUTHORIZATION, token);
-        Assertions.assertThrows(UnauthorizedException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
+        Assertions.assertThrows(InvalidTokenException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
     }
 
     @Test
@@ -165,7 +166,7 @@ class JWTFilterTest {
         String token = generateToken(JWTClaim.ISSUER, "test.d'amaro@.com.dev", firstName(), "USER");
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.AUTHORIZATION, token);
-        Assertions.assertThrows(UnauthorizedException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
+        Assertions.assertThrows(InvalidTokenException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
     }
 
     @Test
@@ -173,7 +174,7 @@ class JWTFilterTest {
         String token = generateToken(JWTClaim.ISSUER, String.format("%s@%s.dev", username(), domain()), firstName(), "USER");
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.AUTHORIZATION, token);
-        Assertions.assertThrows(UnauthorizedException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
+        Assertions.assertThrows(InvalidTokenException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
     }
 
     @Test
@@ -187,14 +188,14 @@ class JWTFilterTest {
         );
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(HttpHeaders.AUTHORIZATION, token);
-        Assertions.assertThrows(UnauthorizedException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
+        Assertions.assertThrows(InvalidTokenException.class, () -> filter.doFilterInternal(request, new MockHttpServletResponse(), new MockFilterChain()));
     }
 
     private DecodedJWT verify(String token) {
         try {
             return verifier.verify(token);
         } catch (JWTVerificationException e) {
-            throw new UnauthorizedException("Token", "Invalid token");
+            throw new InvalidTokenException("Token", "Invalid token");
         }
     }
 

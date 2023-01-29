@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import pl.newsler.commons.models.NLEmail;
-import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLName;
 
 import javax.security.auth.Subject;
@@ -14,13 +14,13 @@ import java.util.Objects;
 
 public class NLPrincipal implements Principal, Serializable {
     @Getter
-    private final NLId id;
+    private final NLUuid id;
     @Getter
     private final NLEmail email;
 
     private final NLName name;
 
-    public NLPrincipal(NLId id, NLEmail email, NLName name) {
+    public NLPrincipal(NLUuid id, NLEmail email, NLName name) {
         this.id = id;
         this.email = email;
         this.name = name;

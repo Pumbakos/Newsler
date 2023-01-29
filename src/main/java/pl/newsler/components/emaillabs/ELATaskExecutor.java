@@ -2,7 +2,6 @@ package pl.newsler.components.emaillabs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import jakarta.ws.rs.core.HttpHeaders;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -23,7 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import pl.newsler.commons.models.NLEmailStatus;
-import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLStringValue;
 import pl.newsler.components.emaillabs.dto.ELASendMailResponse;
 import pl.newsler.components.emaillabs.dto.ELASentMailResults;
@@ -46,17 +45,16 @@ import java.util.Queue;
 class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor {
     private static final String BASE_URL = "https://api.emaillabs.net.pl/api";
     private static final String SEND_MAIL_URL = "/new_sendmail";
-    private final Queue<Pair<NLId, MailDetails>> queue;
+    private final Queue<Pair<NLUuid, MailDetails>> queue;
     private final NLIPasswordEncoder passwordEncoder;
     private final IMailRepository mailRepository;
     private final IUserRepository userRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    private final Gson gson;
     private boolean queueExecution = false;
 
     @Override
-    public void queue(NLId userId, MailDetails details) {
+    public void queue(NLUuid userId, MailDetails details) {
         mailRepository.save(NLUserMail.of(userId, details));
         queue.add(Pair.of(userId, details));
         if (!queueExecution) {
@@ -75,7 +73,7 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
     }
 
     private void execute() {
-        Pair<NLId, MailDetails> pair = queue.poll();
+        Pair<NLUuid, MailDetails> pair = queue.poll();
         if (pair == null) {
             queueExecution = false;
             return;
@@ -85,7 +83,7 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
         execute();
     }
 
-    private void getAndExecute(Pair<NLId, MailDetails> pair) {
+    private void getAndExecute(Pair<NLUuid, MailDetails> pair) {
         final Optional<NLUser> optionalUser = userRepository.findById(pair.getLeft());
         optionalUser.ifPresentOrElse(
                 nlUser -> execution(pair.getRight(), nlUser),
@@ -138,7 +136,7 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
         }
     }
 
-    private ELASentMailResults handleResponse(ResponseEntity<String> response, MailDetails details, NLId userId) {
+    private ELASentMailResults handleResponse(ResponseEntity<String> response, MailDetails details, NLUuid userId) {
         if (response == null) {
             return ELASentMailResults.of(details.id(), userId, NLEmailStatus.ERROR, "EmailLabs server did not respond", LocalDateTime.now());
         }
@@ -156,7 +154,7 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
     }
 
     @SneakyThrows(JsonProcessingException.class)
-    private ELASentMailResults handleException(NLId id, NLId userId, RestClientException e) {
+    private ELASentMailResults handleException(NLUuid id, NLUuid userId, RestClientException e) {
         ELASendMailResponse response = objectMapper.readValue(e.getMessage().substring(e.getMessage().indexOf("{") - 1).substring(1), ELASendMailResponse.class);
         if (e instanceof HttpClientErrorException) {
             return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, response.getMessage(), LocalDateTime.now());

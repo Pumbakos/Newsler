@@ -1,12 +1,12 @@
 package pl.newsler.components.emaillabs;
 
 import org.jetbrains.annotations.NotNull;
-import pl.newsler.commons.models.NLId;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.testcommons.InMemoryJpaRepository;
 
 import java.util.List;
 
-public class StubMailRepository extends InMemoryJpaRepository<NLUserMail, NLId> implements IMailRepository {
+public class StubMailRepository extends InMemoryJpaRepository<NLUserMail, NLUuid> implements IMailRepository {
     public StubMailRepository() {
         super(NLUserMail::getId);
     }
@@ -22,7 +22,7 @@ public class StubMailRepository extends InMemoryJpaRepository<NLUserMail, NLId> 
     }
 
     @Override
-    public List<NLUserMail> findAllByUserId(@NotNull NLId userId) {
+    public List<NLUserMail> findAllByUserId(@NotNull NLUuid userId) {
         return super.database.values().stream().filter(m -> m.getUserId().equals(userId)).toList();
     }
 }

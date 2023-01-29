@@ -1,4 +1,4 @@
-package pl.newsler.commons.exceptions;
+package pl.newsler.commons.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

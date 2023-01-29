@@ -19,14 +19,15 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
-import pl.newsler.api.exceptions.UnauthorizedException;
+import pl.newsler.commons.exception.InvalidTokenException;
+import pl.newsler.commons.exception.UnauthorizedException;
 import pl.newsler.auth.AuthUserDetailService;
 import pl.newsler.auth.JWTClaim;
 import pl.newsler.auth.JWTUtility;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.NLUser;
-import pl.newsler.components.user.UserDataNotFineException;
+import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.security.NLAuthenticationToken;
 import pl.newsler.security.NLCredentials;
 import pl.newsler.security.NLPrincipal;
@@ -68,7 +69,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.isBlank(header)) {
-            throw new UnauthorizedException("Nullable or empty auth header", "Not authorized");
+            throw new InvalidTokenException("Nullable or empty auth header", "Not authorized");
         }
 
         final String bearer = header.replace("Bearer ", "");
@@ -92,14 +93,14 @@ public class JWTFilter extends OncePerRequestFilter {
         final String email = jwt.getClaim(JWTClaim.EMAIL).asString();
         final NLEmail nlEmail = NLEmail.of(email);
         if (!nlEmail.validate()) {
-            throw new UnauthorizedException("Email", "Invalid email");
+            throw new InvalidTokenException("Email", "Invalid email");
         }
 
         final NLUser user;
         try {
             user = (NLUser) authUserDetailService.loadUserByUsername(email);
-        } catch (UsernameNotFoundException | UserDataNotFineException e) {
-            throw new UnauthorizedException(TOKEN, "Incorrect credentials.");
+        } catch (UsernameNotFoundException | InvalidUserDataException e) {
+            throw new InvalidTokenException(TOKEN, "Incorrect credentials.");
         }
 
         if (JWTResolver.resolveJWT(jwt)) {
@@ -110,7 +111,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
             return new NLAuthenticationToken(principal, credentials, roles);
         }
-        throw new UnauthorizedException(TOKEN, "Access denied.");
+        throw new InvalidTokenException(TOKEN, "Access denied.");
     }
 
     private @NotNull DecodedJWT verifyToken(@NotNull String authToken) {
@@ -118,7 +119,7 @@ public class JWTFilter extends OncePerRequestFilter {
         try {
             return verifier.verify(authToken);
         } catch (JWTVerificationException e) {
-            throw new UnauthorizedException(TOKEN, "Invalid token");
+            throw new InvalidTokenException(TOKEN, "Invalid token");
         }
     }
 

@@ -5,10 +5,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import pl.newsler.commons.exceptions.ValidationException;
+import pl.newsler.commons.exception.ValidationException;
 
 import java.io.Serial;
-import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PACKAGE, force = true)
@@ -16,47 +15,24 @@ import java.util.UUID;
 @EqualsAndHashCode
 public class NLId implements NLModel {
     @Serial
-    private static final long serialVersionUID = -2838811969171019799L;
+    private static final long serialVersionUID = 5202504447274656522L;
+    private final long value;
 
-    private final String value;
-
-    public static NLId of(final UUID uuid) {
-        return of(uuid, NLUserType.USER);
+    public static NLId of(final long id) {
+        return new NLId(id);
     }
 
     public static NLId of(String id) {
-        NLId nlId = NLId.of(fromString(id));
-        if (!nlId.validate()) {
+        NLId nlUuid = fromString(id);
+        if (!nlUuid.validate()) {
             throw new ValidationException("User ID", "Not validated");
         }
-        return nlId;
+        return nlUuid;
     }
 
-    public static NLId of(final UUID uuid, final NLUserType type) {
-        if (type == null) {
-            throw new IllegalArgumentException();
-        }
-        return new NLId(String.format("%s_%s", type.getPrefix(), uuid.toString()));
-    }
-
-    public static NLId of(final UUID uuid, final NLIdType type) {
-        if (type == null) {
-            throw new IllegalArgumentException();
-        }
-        return new NLId(String.format("%s_%s", type.getPrefix(), uuid.toString()));
-    }
-
-    public static NLId fromStringifyNLId(String id, NLIdType type) {
+    private static NLId fromString(String id) {
         try {
-            return of(UUID.fromString(id.contains("_") ? id.split("_")[1] : id), type);
-        } catch (Exception e) {
-            throw new ValidationException();
-        }
-    }
-
-    private static UUID fromString(String id) {
-        try {
-            return UUID.fromString(id.contains("_") ? id.split("_")[1] : id);
+            return of(Long.parseLong(id));
         } catch (Exception e) {
             throw new ValidationException();
         }
@@ -64,11 +40,11 @@ public class NLId implements NLModel {
 
     @Override
     public boolean validate() {
-        return value.matches("[a-z]{3}_[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}");
+        return value > 0;
     }
 
     @Override
     public String toString() {
-        return value;
+        return String.valueOf(value);
     }
 }

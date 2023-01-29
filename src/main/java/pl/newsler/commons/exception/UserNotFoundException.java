@@ -1,4 +1,4 @@
-package pl.newsler.commons.exceptions;
+package pl.newsler.commons.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,7 +1,8 @@
 package pl.newsler.commons.models;
 
 public enum NLIdType {
-    MAIL("mai");
+    MAIL("mai"),
+    CONFIRMATION_TOKEN("cot");
 
     private final String prefix;
 

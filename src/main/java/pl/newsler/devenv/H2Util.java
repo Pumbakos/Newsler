@@ -3,7 +3,7 @@ package pl.newsler.devenv;
 import com.github.javafaker.Faker;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import pl.newsler.components.emaillabs.dto.MailSendRequest;
+import pl.newsler.components.emaillabs.dto.ELAMailSendRequest;
 
 import java.security.SecureRandom;
 import java.util.Collections;
@@ -63,8 +63,8 @@ class H2Util {
         return faker.regexify("[0-9]{1}[.]{1}[a-z]{3,}[.]{1}smtp");
     }
 
-    static MailSendRequest createMailSendRequest(String userMail) {
-        return new MailSendRequest(userMail, randomEmails(), randomEmails(), randomEmails(), faker.book().author(), randomMessage());
+    static ELAMailSendRequest createMailSendRequest(String userMail) {
+        return new ELAMailSendRequest(userMail, randomEmails(), randomEmails(), randomEmails(), faker.book().author(), randomMessage());
     }
 
     private static List<String> randomEmails() {

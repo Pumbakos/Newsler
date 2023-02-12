@@ -12,7 +12,7 @@ import pl.newsler.commons.models.NLUuid;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-interface ConfirmationTokenRepositoryJpa extends JpaRepository<NLConfirmationToken, NLId>, ConfirmationTokenRepository {
+interface ConfirmationTokenRepositoryJpa extends JpaRepository<NLConfirmationToken, NLId> {
     @Query(value = "SELECT ct FROM NLConfirmationToken ct WHERE ct.token = :token")
     Optional<NLConfirmationToken> findByToken(@Param("token") NLToken token);
 

@@ -3,6 +3,7 @@ package pl.newsler.commons.utillity;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import pl.newsler.components.receiver.dto.ReceiverCreateRequest;
 import pl.newsler.components.signup.dto.UserCreateRequest;
 import pl.newsler.components.signup.dto.UserResendTokenRequest;
 import pl.newsler.components.user.dto.UserDeleteRequest;
@@ -11,12 +12,14 @@ import pl.newsler.components.user.dto.UserUpdateRequest;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ObjectUtils {
+    //* USER
     public static boolean isNotBlank(UserCreateRequest request) {
         return !isBlank(request);
     }
 
     public static boolean isBlank(UserCreateRequest request) {
-        return ((request == null) || (isValueBlank(request.name()) || isValueBlank(request.lastName()) || isValueBlank(request.email()) || isValueBlank(request.password())));
+        return ((request == null) || (isValueBlank(request.name()) || isValueBlank(request.lastName()) ||
+                isValueBlank(request.email()) || isValueBlank(request.password())));
     }
 
     public static boolean isNotBlank(UserGetRequest request) {
@@ -32,7 +35,8 @@ public final class ObjectUtils {
     }
 
     public static boolean isBlank(UserUpdateRequest request) {
-        return ((request == null) || (isValueBlank(request.appKey()) || isValueBlank(request.secretKey()) || isValueBlank(request.email())) || (isValueBlank(request.smtpAccount())));
+        return ((request == null) || (isValueBlank(request.appKey()) || isValueBlank(request.secretKey()) ||
+                isValueBlank(request.email())) || (isValueBlank(request.smtpAccount())));
     }
 
     public static boolean isNotBlank(UserDeleteRequest request) {
@@ -51,7 +55,11 @@ public final class ObjectUtils {
         return ((request == null) || (isValueBlank(request.email()) || isValueBlank(request.password())));
     }
 
-
+    //* RECEIVER
+    public static boolean isBlank(ReceiverCreateRequest request) {
+        return ((request == null) || (isValueBlank(request.userUuid()) || isValueBlank(request.email()) || isValueBlank(request.nickname())
+                || isValueBlank(request.firstName()) || isValueBlank(request.lastName())));
+    }
 
     private static boolean isValueBlank(String value) {
         return StringUtils.isBlank(value);

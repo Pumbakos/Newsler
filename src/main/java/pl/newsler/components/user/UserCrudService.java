@@ -17,6 +17,7 @@ import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.utillity.ObjectUtils;
 import pl.newsler.components.user.dto.UserDeleteRequest;
 import pl.newsler.components.user.dto.UserGetRequest;
+import pl.newsler.components.user.dto.UserGetResponse;
 import pl.newsler.components.user.dto.UserUpdateRequest;
 import pl.newsler.security.NLIPasswordEncoder;
 
@@ -29,7 +30,7 @@ class UserCrudService implements IUserCrudService {
     private final NLIPasswordEncoder passwordEncoder;
 
     @Override
-    public @NotNull NLDUser get(final UserGetRequest request) {
+    public @NotNull UserGetResponse get(final UserGetRequest request) {
         if (ObjectUtils.isBlank(request)) {
             throw new InvalidUserDataException("Data", "Invalid email or password");
         }
@@ -51,7 +52,11 @@ class UserCrudService implements IUserCrudService {
             throw new InvalidUserDataException("Either email or password is incorrect");
         }
 
-        return user.map();
+        user.setAppKey(NLAppKey.of(passwordEncoder.decrypt(user.getAppKey().getValue())));
+        user.setSecretKey(NLSecretKey.of(passwordEncoder.decrypt(user.getSecretKey().getValue())));
+        user.setSmtpAccount(NLSmtpAccount.of(passwordEncoder.decrypt(user.getSmtpAccount().getValue())));
+
+        return user.truncate();
     }
 
     @Override
@@ -61,7 +66,7 @@ class UserCrudService implements IUserCrudService {
         }
 
         if (!isDataOk(name, lastName, email)) {
-            throw new InvalidUserDataException(String.format("Either name: %s, lastName: %s or email: %s are not valid.", name.getValue(), lastName.getValue(), email.getValue()));
+            throw new InvalidUserDataException(String.format("Either name: %s, lastName: %s or email: %s are invalid.", name.getValue(), lastName.getValue(), email.getValue()));
         }
 
         userRepository.findByEmail(email).ifPresent(ignored -> {

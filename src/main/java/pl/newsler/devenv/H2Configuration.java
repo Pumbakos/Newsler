@@ -23,6 +23,7 @@ import pl.newsler.security.NLIPasswordEncoder;
 import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -89,25 +90,28 @@ class H2Configuration {
             );
 
             tokenRepository.findAll().forEach(token -> token.setConfirmationDate(LocalDateTime.now()));
-            userRepository.findAll().forEach(user -> {
+            List<NLUser> all = userRepository.findAll();
+            for (NLUser user : all) {
                 user.setEnabled(true);
                 saveUserMails(user);
 
-                if (user.getEmail().getValue().equals(email.get())) {
-                    user.setAppKey(NLAppKey.of(appKey.get()));
-                    user.setSecretKey(NLSecretKey.of(secretKey.get()));
-                    user.setSmtpAccount(NLSmtpAccount.of(smtp.get()));
+                if (user.getEmail().getValue().equals(passwordEncoder.encrypt(email.get()))) {
+                    user.setAppKey(NLAppKey.of(passwordEncoder.encrypt(appKey.get())));
+                    user.setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(secretKey.get())));
+                    user.setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(smtp.get())));
                 } else {
-                    user.setAppKey(NLAppKey.of(secretOrAppKey()));
-                    user.setSecretKey(NLSecretKey.of(secretOrAppKey()));
-                    user.setSmtpAccount(NLSmtpAccount.of(smtpAccount()));
+                    user.setAppKey(NLAppKey.of(passwordEncoder.encrypt(secretOrAppKey())));
+                    user.setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(secretOrAppKey())));
+                    user.setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(smtpAccount())));
                 }
-            });
+
+                userRepository.save(user);
+            }
         };
     }
 
     private void saveUserMails(final NLUser user) {
-        for (int i = 0; i < random.nextInt(5) + 3; i++) {
+        for (int i = 0; i < random.nextInt(9) + 5; i++) {
             mailRepository.save(NLUserMail.of(user.map().getId(), MailDetails.of(H2Util.createMailSendRequest(user.getEmail().getValue()))));
         }
     }

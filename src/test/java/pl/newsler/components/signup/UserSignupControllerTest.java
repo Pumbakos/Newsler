@@ -26,6 +26,7 @@ import pl.newsler.commons.models.NLFirstName;
 import pl.newsler.commons.models.NLId;
 import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
+import pl.newsler.commons.models.NLStringValue;
 import pl.newsler.commons.models.NLToken;
 import pl.newsler.components.signup.dto.UserCreateRequest;
 import pl.newsler.components.signup.dto.UserResendTokenRequest;
@@ -41,6 +42,7 @@ import pl.newsler.security.StubNLPasswordEncoder;
 import java.lang.reflect.Field;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 
@@ -124,12 +126,12 @@ public class UserSignupControllerTest {
         final String email = email();
         final UserCreateRequest request = new UserCreateRequest(firstName(), lastName(), email, "Ma47c!n9Pa$$#0rd");
 
-        ResponseEntity<String> response = controller.signup(request);
+        ResponseEntity<NLStringValue> response = controller.signup(request);
 
         Assertions.assertNotNull(response);
         Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
         Assertions.assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode());
-        Assertions.assertEquals(String.format("Confirmation message will be send to %s", email), response.getBody());
+        Assertions.assertEquals(String.format("Confirmation message will be send to %s", email), Objects.requireNonNull(response.getBody()).getValue());
     }
 
     @Test
@@ -371,12 +373,12 @@ public class UserSignupControllerTest {
         final String email = factory.dotted().getEmail().getValue();
         final UserResendTokenRequest request = new UserResendTokenRequest(email, factory.dotted_plainPassword());
 
-        ResponseEntity<String> response = controller.resendToken(request);
+        ResponseEntity<NLStringValue> response = controller.resendToken(request);
 
         Assertions.assertNotNull(response);
         Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
         Assertions.assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode());
-        Assertions.assertEquals(String.format("Confirmation message will be send to %s", email), response.getBody());
+        Assertions.assertEquals(NLStringValue.of(String.format("Confirmation message will be send to %s", email)), response.getBody());
     }
 
     @Test

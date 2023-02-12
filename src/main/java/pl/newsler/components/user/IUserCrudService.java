@@ -10,10 +10,11 @@ import pl.newsler.commons.models.NLLastName;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.components.user.dto.UserDeleteRequest;
 import pl.newsler.components.user.dto.UserGetRequest;
+import pl.newsler.components.user.dto.UserGetResponse;
 import pl.newsler.components.user.dto.UserUpdateRequest;
 
 public interface IUserCrudService {
-    NLDUser get(UserGetRequest request) throws InvalidUserDataException;
+    UserGetResponse get(UserGetRequest request) throws InvalidUserDataException;
 
     void update(final UserUpdateRequest request) throws InvalidUserDataException;
 

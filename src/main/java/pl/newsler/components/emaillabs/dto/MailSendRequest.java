@@ -5,6 +5,6 @@ import org.springframework.lang.Nullable;
 
 import java.util.List;
 
-public record MailSendRequest(@NotNull String userMail, @NotNull List<String> toAddresses, @Nullable List<String> cc,
+public record MailSendRequest(@NotNull String from, @NotNull List<String> to, @Nullable List<String> cc,
                               @Nullable List<String> bcc, @NotNull String subject, @NotNull String message) {
 }

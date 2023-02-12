@@ -82,8 +82,8 @@ class JWTFilterTest {
     void shouldResolveJWT() {
         NLUser standardUser = factory.standard();
         UserAuthModel model = new UserAuthModel(
-                passwordEncoder.encrypt(standardUser.getEmail().getValue()),
-                passwordEncoder.encrypt(factory.standard_plainPassword())
+                standardUser.getEmail().getValue(),
+                factory.standard_plainPassword()
         );
         String token = service.generateJWT(model);
         DecodedJWT decodedJWT = verify(token);
@@ -128,8 +128,8 @@ class JWTFilterTest {
     void shouldDoFilterInternal() {
         NLUser standardUser = factory.standard();
         UserAuthModel model = new UserAuthModel(
-                passwordEncoder.encrypt(standardUser.getEmail().getValue()),
-                passwordEncoder.encrypt(factory.standard_plainPassword())
+                standardUser.getEmail().getValue(),
+                factory.standard_plainPassword()
         );
         String token = service.generateJWT(model);
 
@@ -142,8 +142,8 @@ class JWTFilterTest {
     void shouldDoFilterInternal_BearerPrefix() {
         NLUser standardUser = factory.standard();
         UserAuthModel model = new UserAuthModel(
-                passwordEncoder.encrypt(standardUser.getEmail().getValue()),
-                passwordEncoder.encrypt(factory.standard_plainPassword())
+                standardUser.getEmail().getValue(),
+                factory.standard_plainPassword()
         );
         String token = service.generateJWT(model);
 

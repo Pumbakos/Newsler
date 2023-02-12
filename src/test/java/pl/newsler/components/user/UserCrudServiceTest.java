@@ -14,6 +14,7 @@ import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLUuid;
 import pl.newsler.components.user.dto.UserDeleteRequest;
 import pl.newsler.components.user.dto.UserGetRequest;
+import pl.newsler.components.user.dto.UserGetResponse;
 import pl.newsler.components.user.dto.UserUpdateRequest;
 import pl.newsler.security.StubNLPasswordEncoder;
 
@@ -71,11 +72,10 @@ class UserCrudServiceTest {
     void shouldGetUserWhenValidData() {
         final String emailStandard = factory.standard().getEmail().getValue();
         final UserGetRequest request = new UserGetRequest(emailStandard, factory.standard().getPassword());
-        final NLDUser standard = service.get(request);
+        UserGetResponse response = service.get(request);
 
-        Assertions.assertNotNull(standard);
+        Assertions.assertNotNull(response);
         Assertions.assertDoesNotThrow(() -> service.get(request));
-        Assertions.assertFalse(standard.isEnabled());
     }
 
     @Test

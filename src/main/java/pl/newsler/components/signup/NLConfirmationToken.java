@@ -22,7 +22,7 @@ import pl.newsler.commons.models.NLUuid;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "CONFIRMATION_TOEKN", catalog = "NEWSLER", schema = "PUBLIC")
+@Table(name = "CONFIRMATION_TOKENS", catalog = "NEWSLER", schema = "PUBLIC")
 @Setter
 @Getter
 @NoArgsConstructor

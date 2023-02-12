@@ -156,6 +156,7 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
     @SneakyThrows(JsonProcessingException.class)
     private ELASentMailResults handleException(NLUuid id, NLUuid userId, RestClientException e) {
         ELASendMailResponse response = objectMapper.readValue(e.getMessage().substring(e.getMessage().indexOf("{") - 1).substring(1), ELASendMailResponse.class);
+        log.info(this.objectMapper.convertValue(e, String.class));
         if (e instanceof HttpClientErrorException) {
             return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, response.getMessage(), LocalDateTime.now());
         }

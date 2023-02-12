@@ -8,9 +8,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import pl.newsler.api.IMailController;
+import pl.newsler.api.IELAMailController;
 import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLIdType;
+import pl.newsler.components.emaillabs.dto.GetMailResponse;
 import pl.newsler.components.emaillabs.dto.GetMailStatus;
 import pl.newsler.components.emaillabs.dto.MailSendRequest;
 import pl.newsler.commons.exception.InvalidUserDataException;
@@ -19,8 +20,8 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-public class MailController implements IMailController {
-    private final IMailService service;
+public class ELAMailController implements IELAMailController {
+    private final IELAMailService service;
 
     @PostMapping
     @Override
@@ -31,19 +32,7 @@ public class MailController implements IMailController {
 
     @GetMapping("/{userId}")
     @Override
-    public ResponseEntity<List<NLUserMail>> fetchAllMails(@PathVariable("userId") String userId) throws InvalidUserDataException {
+    public ResponseEntity<List<GetMailResponse>> fetchAllMails(@PathVariable("userId") String userId) throws InvalidUserDataException {
         return ResponseEntity.ok(service.fetchAllMails(NLUuid.of(userId)));
-    }
-
-    @GetMapping("/{mailId}/user/{userId}")
-    @Override
-    public ResponseEntity<GetMailStatus> getMailStatus(@PathVariable("mailId") String mailId, @PathVariable("userId") String userId) throws InvalidUserDataException {
-        NLUuid mailID = NLUuid.fromStringifyNLId(mailId, NLIdType.MAIL);
-        NLUuid userID = NLUuid.of(userId);
-        if (!mailID.validate()) {
-            throw new InvalidUserDataException("Mail ID invalid.");
-        }
-
-        return ResponseEntity.ok(service.getMailStatus(mailID, userID));
     }
 }

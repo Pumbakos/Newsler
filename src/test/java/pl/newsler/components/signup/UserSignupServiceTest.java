@@ -125,7 +125,7 @@ class UserSignupServiceTest {
 
         NLStringValue stringValue = value.get();
         Assertions.assertNotNull(stringValue);
-        Assertions.assertEquals(NLStringValue.of(String.format("Confirmation message will be send to %s", email)), stringValue);
+        Assertions.assertEquals(String.format("Confirmation message will be send to %s", email), stringValue.getValue());
     }
 
     @Test

@@ -1,5 +1,6 @@
 package pl.newsler.auth;
 
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,7 @@ import pl.newsler.commons.exception.InvalidUserDataException;
 @RequiredArgsConstructor
 class JWTAuthController implements IJWTAuthController {
     private final IJWTAuthService jwtService;
-
+    private final Gson gson = new Gson();
     @Override
     public ResponseEntity<String> generateJWT(UserAuthModel userAuthModel) {
         try {

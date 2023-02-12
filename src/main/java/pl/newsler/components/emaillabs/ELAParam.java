@@ -4,7 +4,7 @@ package pl.newsler.components.emaillabs;
  * <a href="https://dev.emaillabs.io/#api-Send-new_sendmail">EmailLabs: Send e-mails API documentation</a>'
  * <p><strong>Note:</strong> parameters are required unless stated otherwise</p>
  */
-public sealed class Param permits TemplateParam {
+public sealed class ELAParam permits ELATemplateParam {
     /**
      * An array with a structure in which the keys are email addresses
      * and the values are arrays containing information such as message uuid and recipient name.

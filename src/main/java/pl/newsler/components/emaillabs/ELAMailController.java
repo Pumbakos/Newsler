@@ -10,10 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.IELAMailController;
 import pl.newsler.commons.models.NLUuid;
-import pl.newsler.commons.models.NLIdType;
-import pl.newsler.components.emaillabs.dto.GetMailResponse;
-import pl.newsler.components.emaillabs.dto.GetMailStatus;
-import pl.newsler.components.emaillabs.dto.MailSendRequest;
+import pl.newsler.components.emaillabs.dto.ELAGetMailResponse;
+import pl.newsler.components.emaillabs.dto.ELAMailSendRequest;
 import pl.newsler.commons.exception.InvalidUserDataException;
 
 import java.util.List;
@@ -25,14 +23,14 @@ public class ELAMailController implements IELAMailController {
 
     @PostMapping
     @Override
-    public ResponseEntity<HttpStatus> queue(@RequestBody MailSendRequest request) throws InvalidUserDataException {
+    public ResponseEntity<HttpStatus> queue(@RequestBody ELAMailSendRequest request) throws InvalidUserDataException {
         service.queue(request);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/{userId}")
     @Override
-    public ResponseEntity<List<GetMailResponse>> fetchAllMails(@PathVariable("userId") String userId) throws InvalidUserDataException {
+    public ResponseEntity<List<ELAGetMailResponse>> fetchAllMails(@PathVariable("userId") String userId) throws InvalidUserDataException {
         return ResponseEntity.ok(service.fetchAllMails(NLUuid.of(userId)));
     }
 }

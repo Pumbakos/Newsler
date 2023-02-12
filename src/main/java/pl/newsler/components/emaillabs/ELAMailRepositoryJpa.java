@@ -7,7 +7,7 @@ import pl.newsler.commons.models.NLUuid;
 
 import java.util.List;
 
-public interface MailRepositoryJpa extends JpaRepository<NLUserMail, NLUuid>, MailRepository {
-    @Query(value = "SELECT m FROM NLUserMail m WHERE m.userId = :userId")
-    List<NLUserMail> findAllByUserId(@Param("userId") NLUuid userId);
+public interface ELAMailRepositoryJpa extends JpaRepository<ELAUserMail, NLUuid>, ELAMailRepository {
+    @Query(value = "SELECT m FROM ELAUserMail m WHERE m.userId = :userId")
+    List<ELAUserMail> findAllByUserId(@Param("userId") NLUuid userId);
 }

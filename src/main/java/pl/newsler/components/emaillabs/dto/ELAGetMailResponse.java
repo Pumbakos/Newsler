@@ -2,7 +2,7 @@ package pl.newsler.components.emaillabs.dto;
 
 import java.util.List;
 
-public record GetMailResponse(
+public record ELAGetMailResponse(
         String uuid,
         String from,
         List<String> to,

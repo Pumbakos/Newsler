@@ -3,10 +3,8 @@ package pl.newsler.components.emaillabs;
 import lombok.RequiredArgsConstructor;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLUuid;
-import pl.newsler.components.emaillabs.dto.GetMailResponse;
-import pl.newsler.components.emaillabs.dto.GetMailStatus;
-import pl.newsler.components.emaillabs.dto.MailSendRequest;
-import pl.newsler.components.emaillabs.exceptions.ELAMailNotFoundException;
+import pl.newsler.components.emaillabs.dto.ELAGetMailResponse;
+import pl.newsler.components.emaillabs.dto.ELAMailSendRequest;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.commons.exception.InvalidUserDataException;
@@ -18,20 +16,20 @@ import java.util.Optional;
 class ELAMailService implements IELAMailService {
     private final IELATaskExecutor executor;
     private final IUserRepository userRepository;
-    private final IMailRepository mailRepository;
+    private final IELAMailRepository mailRepository;
 
     @Override
-    public void queue(MailSendRequest request) throws InvalidUserDataException {
+    public void queue(ELAMailSendRequest request) throws InvalidUserDataException {
         Optional<NLUser> optionalUser = userRepository.findByEmail(NLEmail.of(request.from()));
         if (optionalUser.isEmpty()) {
             throw new InvalidUserDataException();
         }
 
-        executor.queue(optionalUser.get().map().getId(), MailDetails.of(request));
+        executor.queue(optionalUser.get().map().getId(), ELAMailDetails.of(request));
     }
 
     @Override
-    public List<GetMailResponse> fetchAllMails(NLUuid userId) throws InvalidUserDataException {
+    public List<ELAGetMailResponse> fetchAllMails(NLUuid userId) throws InvalidUserDataException {
         Optional<NLUser> optional = userRepository.findById(userId);
         if (optional.isEmpty()) {
             throw new InvalidUserDataException();

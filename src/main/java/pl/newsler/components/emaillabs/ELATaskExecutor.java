@@ -45,17 +45,17 @@ import java.util.Queue;
 class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor {
     private static final String BASE_URL = "https://api.emaillabs.net.pl/api";
     private static final String SEND_MAIL_URL = "/new_sendmail";
-    private final Queue<Pair<NLUuid, MailDetails>> queue;
+    private final Queue<Pair<NLUuid, ELAMailDetails>> queue;
     private final NLIPasswordEncoder passwordEncoder;
-    private final IMailRepository mailRepository;
+    private final IELAMailRepository mailRepository;
     private final IUserRepository userRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private boolean queueExecution = false;
 
     @Override
-    public void queue(NLUuid userId, MailDetails details) {
-        mailRepository.save(NLUserMail.of(userId, details));
+    public void queue(NLUuid userId, ELAMailDetails details) {
+        mailRepository.save(ELAUserMail.of(userId, details));
         queue.add(Pair.of(userId, details));
         if (!queueExecution) {
             queueExecution = true;
@@ -73,7 +73,7 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
     }
 
     private void execute() {
-        Pair<NLUuid, MailDetails> pair = queue.poll();
+        Pair<NLUuid, ELAMailDetails> pair = queue.poll();
         if (pair == null) {
             queueExecution = false;
             return;
@@ -83,7 +83,7 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
         execute();
     }
 
-    private void getAndExecute(Pair<NLUuid, MailDetails> pair) {
+    private void getAndExecute(Pair<NLUuid, ELAMailDetails> pair) {
         final Optional<NLUser> optionalUser = userRepository.findById(pair.getLeft());
         optionalUser.ifPresentOrElse(
                 nlUser -> execution(pair.getRight(), nlUser),
@@ -91,9 +91,9 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
         );
     }
 
-    private void execution(MailDetails details, NLUser user) {
+    private void execution(ELAMailDetails details, NLUser user) {
         final ELASentMailResults results = call(user, details);
-        final Optional<NLUserMail> optionalUserMail = mailRepository.findById(results.getId());
+        final Optional<ELAUserMail> optionalUserMail = mailRepository.findById(results.getId());
         optionalUserMail.ifPresent(m -> {
             m.setStatus(results.getStatus());
             m.setErrorMessage(NLStringValue.of(results.getMessage()));
@@ -101,20 +101,20 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
         });
     }
 
-    private ELASentMailResults call(NLUser user, MailDetails details) {
+    private ELASentMailResults call(NLUser user, ELAMailDetails details) {
         log.info("Executing task {}", details.id());
         final Map<String, String> params = new LinkedHashMap<>();
         String userPass = passwordEncoder.decrypt(user.getAppKey().getValue()) + ":" + passwordEncoder.decrypt(user.getSecretKey().getValue());
         String auth = "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
 
         String name = String.format("%s %s", user.getFirstName(), user.getLastName());
-        params.put(Param.FROM, user.getEmail().getValue());
-        params.put(Param.FROM_NAME, name);
-        params.put(Param.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
-        params.put(String.format(Param.TO_ADDRESS_NAME, user.getEmail().getValue(), name), Arrays.toString(details.toAddresses().toArray()));
-        params.put(Param.SUBJECT, details.subject());
-        params.put(Param.HTML, String.format("<pre>%s</pre>", details.message()));
-        params.put(Param.TEXT, details.message());
+        params.put(ELAParam.FROM, user.getEmail().getValue());
+        params.put(ELAParam.FROM_NAME, name);
+        params.put(ELAParam.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
+        params.put(String.format(ELAParam.TO_ADDRESS_NAME, user.getEmail().getValue(), name), Arrays.toString(details.toAddresses().toArray()));
+        params.put(ELAParam.SUBJECT, details.subject());
+        params.put(ELAParam.HTML, String.format("<pre>%s</pre>", details.message()));
+        params.put(ELAParam.TEXT, details.message());
 
         LinkedMultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         headers.add(HttpHeaders.AUTHORIZATION, auth);
@@ -136,7 +136,7 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
         }
     }
 
-    private ELASentMailResults handleResponse(ResponseEntity<String> response, MailDetails details, NLUuid userId) {
+    private ELASentMailResults handleResponse(ResponseEntity<String> response, ELAMailDetails details, NLUuid userId) {
         if (response == null) {
             return ELASentMailResults.of(details.id(), userId, NLEmailStatus.ERROR, "EmailLabs server did not respond", LocalDateTime.now());
         }

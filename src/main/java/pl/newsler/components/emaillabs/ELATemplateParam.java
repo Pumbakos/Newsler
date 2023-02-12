@@ -4,7 +4,7 @@ package pl.newsler.components.emaillabs;
  * <a href="https://dev.emaillabs.io/#api-Send-sendmail_templates">EmailLabs: Send e-mail with template API documentation</a>
  * <p><strong>Note:</strong> parameters are required unless stated otherwise</p>
  */
-public final class TemplateParam extends Param {
+public final class ELATemplateParam extends ELAParam {
     /**
      * An array of variables for substitution in a template.<br>
      * <strong>Optional parameter</strong>

@@ -14,9 +14,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @ComponentScan
 @RequiredArgsConstructor
 @Configuration(proxyBeanMethods = false)
-class MailModuleConfiguration {
+class ELAMailModuleConfiguration {
     private final IUserRepository userRepository;
-    private final IMailRepository mailRepository;
+    private final IELAMailRepository mailRepository;
     private final NLIPasswordEncoder passwordEncoder;
 
     @Bean(name = "restTemplate")

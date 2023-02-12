@@ -23,7 +23,7 @@ import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLStringValue;
 import pl.newsler.commons.models.NLSubject;
 import pl.newsler.commons.models.NLVersion;
-import pl.newsler.components.emaillabs.dto.GetMailResponse;
+import pl.newsler.components.emaillabs.dto.ELAGetMailResponse;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -37,13 +37,13 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class NLUserMail implements Serializable {
+public class ELAUserMail implements Serializable {
     @Serial
     private static final long serialVersionUID = 9009272834852329455L;
 
     @Getter(AccessLevel.PACKAGE)
     @EmbeddedId
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ID")))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "UUID")))
     private NLUuid id;
 
     @Getter(AccessLevel.PACKAGE)
@@ -52,7 +52,7 @@ public class NLUserMail implements Serializable {
     private NLVersion version;
 
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "USER_ID")))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "USER_UUID")))
     private NLUuid userId;
 
     @Embedded
@@ -83,10 +83,10 @@ public class NLUserMail implements Serializable {
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ERROR_MESSAGE", length = 512)))
     private NLStringValue errorMessage;
 
-    public static NLUserMail of(NLUuid userId, MailDetails details) {
-        return new NLUserMail(
+    public static ELAUserMail of(NLUuid userId, ELAMailDetails details) {
+        return new ELAUserMail(
                 details.id(),
-                MailRepository.version,
+                ELAMailRepository.version,
                 userId,
                 NLStringValue.of(Arrays.toString(details.toAddresses().toArray())),
                 NLStringValue.of(Arrays.toString(details.cc() != null ? details.cc().toArray() : new String[0])),
@@ -98,8 +98,8 @@ public class NLUserMail implements Serializable {
         );
     }
 
-    public NLDUserMail map() {
-        return NLDUserMail.builder()
+    public ELADUserMail map() {
+        return ELADUserMail.builder()
                 .id(this.id)
                 .toAddresses(this.toAddresses)
                 .cc(this.cc)
@@ -112,8 +112,8 @@ public class NLUserMail implements Serializable {
     }
 
 
-    public GetMailResponse toResponse(String from) {
-        return new GetMailResponse(
+    public ELAGetMailResponse toResponse(String from) {
+        return new ELAGetMailResponse(
                 this.id.getValue(),
                 from,
                 Arrays.asList(this.toAddresses.getValue().split(",")),
@@ -134,7 +134,7 @@ public class NLUserMail implements Serializable {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        final NLUserMail that = (NLUserMail) o;
+        final ELAUserMail that = (ELAUserMail) o;
         return id != null && Objects.equals(id, that.id);
     }
 

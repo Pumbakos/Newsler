@@ -9,12 +9,11 @@ import pl.newsler.commons.models.NLEmailStatus;
 import pl.newsler.commons.models.NLStringValue;
 import pl.newsler.commons.models.NLSubject;
 import pl.newsler.commons.models.NLUuid;
-import pl.newsler.components.emaillabs.dto.GetMailResponse;
 
 @Value
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class NLDUserMail {
+public class ELADUserMail {
     NLUuid id;
     NLStringValue toAddresses;
     NLStringValue cc;
@@ -24,8 +23,8 @@ public class NLDUserMail {
     NLEmailStatus status;
     NLStringValue errorMessage;
 
-    public static NLDUserMail of(NLUserMail mail) {
-        return NLDUserMail.builder()
+    public static ELADUserMail of(ELAUserMail mail) {
+        return ELADUserMail.builder()
                 .id(mail.getId())
                 .toAddresses(mail.getToAddresses())
                 .cc(mail.getCc())

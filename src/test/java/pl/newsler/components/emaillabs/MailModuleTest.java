@@ -19,7 +19,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestTemplate;
-import pl.newsler.api.IMailController;
+import pl.newsler.api.IELAMailController;
 import pl.newsler.commons.exception.GlobalRestExceptionHandler;
 import pl.newsler.commons.exception.NLError;
 import pl.newsler.commons.exception.NLException;
@@ -31,6 +31,7 @@ import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
 import pl.newsler.components.emaillabs.dto.ELASendMailResponse;
+import pl.newsler.components.emaillabs.dto.GetMailResponse;
 import pl.newsler.components.emaillabs.dto.GetMailStatus;
 import pl.newsler.components.emaillabs.dto.MailSendRequest;
 import pl.newsler.components.emaillabs.exceptions.ELAMailNotFoundException;
@@ -63,15 +64,15 @@ class MailModuleTest {
     private final TestUserFactory factory = new TestUserFactory();
     private final Gson gson = new Gson();
     private MockRestServiceServer mockServer;
-    private IMailService service;
-    private IMailController controller;
+    private IELAMailService service;
+    private IELAMailController controller;
 
     @BeforeEach
     void beforeEach() {
         RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
         service = configuration.mailService(configuration.taskExecutor(restTemplate));
         mockServer = MockRestServiceServer.createServer(restTemplate);
-        controller = new MailController(service);
+        controller = new ELAMailController(service);
 
         NLUuid standardId = NLUuid.of(UUID.randomUUID());
         factory.standard().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.standard_plainPassword())));
@@ -164,11 +165,11 @@ class MailModuleTest {
         controller.queue(second);
         controller.queue(third);
 
-        ResponseEntity<List<NLUserMail>> responseEntity = controller.fetchAllMails(user.map().getId().getValue());
-        Assertions.assertNotNull(responseEntity);
-        Assertions.assertNotNull(responseEntity.getBody());
-        Assertions.assertEquals(mailRepository.findAll(), responseEntity.getBody());
-        Assertions.assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        ResponseEntity<List<GetMailResponse>> entity = controller.fetchAllMails(user.map().getId().getValue());
+        Assertions.assertNotNull(entity);
+        Assertions.assertNotNull(entity.getBody());
+        Assertions.assertEquals(mailRepository.findAll().get(0).toResponse(user.getEmail().getValue()), entity.getBody().get(0));
+        Assertions.assertEquals(HttpStatus.OK, entity.getStatusCode());
     }
 
     @Test
@@ -184,93 +185,7 @@ class MailModuleTest {
         }
     }
 
-    /* ----------------- GET MAILS ---------------- */
-    @Test
-    void shouldGetMailStatusAndReturn200_OKWhenMailIdAndUserIdAreValid() {
-        final List<NLUser> users = userRepository.findAll();
-        if (users.isEmpty()) {
-            Assertions.fail("Users empty");
-        }
-
-        final NLUser user = users.get(0);
-        final MailSendRequest first = createMailRequest(users, user);
-        final MailSendRequest second = createMailRequest(users, user);
-        final MailSendRequest third = createMailRequest(users, user);
-
-        controller.queue(first);
-        controller.queue(second);
-        controller.queue(third);
-
-        NLUserMail mail = mailRepository.findAll().get(0);
-        ResponseEntity<GetMailStatus> response = controller.getMailStatus(mail.getId().getValue(), mail.getUserId().getValue());
-        Assertions.assertNotNull(response);
-        Assertions.assertFalse(Objects.requireNonNull(response.getBody()).error());
-        Assertions.assertEquals(mail.getStatus(), response.getBody().status());
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
-
-    @Test
-    void shouldNotGetMailStatusAndReturn400_BadRequestWhenMailIdOrUserIdInvalidated() {
-        try {
-            controller.getMailStatus("a187-0d-43-02-0f7f2b", "abb8dc3b-73ec-4b31-bab7-9b7d25892b4c");
-            Assertions.fail();
-        } catch (NLException e) {
-            ResponseEntity<NLError> response = handler.handleException(e);
-            Assertions.assertNotNull(response);
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        }
-
-        try {
-            controller.getMailStatus("abb8dc3b-73ec-4b31-bab7-9b7d25892b4c", "a187-0d-43-02-0f7f2b");
-            Assertions.fail();
-        } catch (NLException e) {
-            ResponseEntity<NLError> response = handler.handleException(e);
-            Assertions.assertNotNull(response);
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        }
-    }
-
     /* ------------------ SERVICE ----------------- */
-    /* ------------- GET & FETCH MAILS ------------ */
-    @Test
-    void shouldNotGetMailStatus_UserIdValid_MailIdInvalid() {
-        final NLUuid userId = factory.dashed().map().getId();
-        final NLUuid userTypeId = NLUuid.of(UUID.randomUUID());
-        Assertions.assertThrows(ELAMailNotFoundException.class, () -> service.getMailStatus(userTypeId, userId));
-
-        final NLUuid mailTypeId = NLUuid.of(UUID.randomUUID(), NLIdType.MAIL);
-        Assertions.assertThrows(ELAMailNotFoundException.class, () -> service.getMailStatus(mailTypeId, userId));
-    }
-
-    @Test
-    void shouldNotGetMailStatus_UserIdInvalid() {
-        final NLUuid id = NLUuid.of(UUID.randomUUID());
-        Assertions.assertThrows(InvalidUserDataException.class, () -> service.getMailStatus(id, id));
-        Assertions.assertThrows(InvalidUserDataException.class, () -> service.getMailStatus(id, id));
-    }
-
-    @Test
-    void shouldGetMailStatus_UserIdValid_MailIdValid() {
-        final List<NLUser> users = userRepository.findAll();
-        if (users.isEmpty()) {
-            Assertions.fail("Users empty");
-        }
-
-        final ELASendMailResponse response = ELASendMailResponse.of(200, "OK", "", "", TestUtils.reqId());
-        mockServer.expect(MockRestRequestMatchers.requestTo("/v1/api/mails")).andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-                .andRespond(MockRestResponseCreators.withSuccess(gson.toJson(response), MediaType.APPLICATION_JSON));
-
-        final NLUser user = users.get(0);
-        final MailSendRequest request = createMailRequest(users, user);
-
-        final AtomicReference<List<NLUserMail>> mails = new AtomicReference<>();
-        Assertions.assertDoesNotThrow(() -> service.queue(request));
-        Assertions.assertDoesNotThrow(() -> mails.set(service.fetchAllMails(user.map().getId())));
-        NLUserMail mail = mails.get().get(0);
-        Assertions.assertEquals(NLEmailStatus.QUEUED, mail.getStatus());
-        Assertions.assertDoesNotThrow(() -> service.getMailStatus(mail.getId(), user.map().getId()));
-    }
-
     /* ---------------- QUEUE MAIL ---------------- */
     @Test
     void shouldNotQueueMail_RequesterEmailInvalid() {

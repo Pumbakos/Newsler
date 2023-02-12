@@ -22,13 +22,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
-import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLLastName;
+import pl.newsler.commons.models.NLModel;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
 import pl.newsler.commons.models.NLUserType;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLVersion;
+import pl.newsler.components.user.dto.UserGetResponse;
 
 import java.io.Serial;
 import java.util.Collection;
@@ -56,7 +58,7 @@ public class NLUser implements UserDetails {
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "EMAIL")))
-    private NLEmail email;
+    private NLEmail email = NLEmail.of("");
 
     /**
      * If user is an organization it is preferred to use name as one String omitting lastName <br/>
@@ -66,15 +68,15 @@ public class NLUser implements UserDetails {
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "FIRST_NAME")))
-    private NLFirstName firstName;
+    private NLFirstName firstName = NLFirstName.of("");
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "LAST_NAME")))
-    private NLLastName lastName;
+    private NLLastName lastName = NLLastName.of("");
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "PASSWORD")))
-    private NLPassword password;
+    private NLPassword password = NLPassword.of("");
 
     /**
      * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find APP KEY here</a><br/>
@@ -82,7 +84,7 @@ public class NLUser implements UserDetails {
      */
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "APP_KEY")))
-    private NLAppKey appKey;
+    private NLAppKey appKey = NLAppKey.of("");
 
     /**
      * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find SECRET KEY here</a><br/>
@@ -90,7 +92,7 @@ public class NLUser implements UserDetails {
      */
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SECRET_KEY")))
-    private NLSecretKey secretKey;
+    private NLSecretKey secretKey = NLSecretKey.of("");
 
     /**
      * <a href="https://panel.emaillabs.net.pl/pl/smtp">You can find SMTP ACCOUNT here</a><br/>
@@ -98,7 +100,7 @@ public class NLUser implements UserDetails {
      */
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SMTP_ACCOUNT")))
-    private NLSmtpAccount smtpAccount;
+    private NLSmtpAccount smtpAccount = NLSmtpAccount.of("");
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ROLE")
@@ -163,6 +165,10 @@ public class NLUser implements UserDetails {
                 .credentialsNonExpired(false)
                 .enabled(enabled)
                 .build();
+    }
+
+    public UserGetResponse truncate() {
+        return new UserGetResponse(id.getValue(), email.getValue(), firstName.getValue(), lastName.getValue(), smtpAccount.getValue(), secretKey.getValue(), appKey.getValue());
     }
 
     @Override

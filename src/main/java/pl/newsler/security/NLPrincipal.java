@@ -63,6 +63,6 @@ public class NLPrincipal implements Principal, Serializable {
 
     @Override
     public String toString() {
-        return String.format("{%n'id':'%s',%n'email':'%s',%n'name':'%s'%n}", id.getValue(), email.getValue(), name.getValue());
+        return String.format("{%n'uuid':'%s',%n'email':'%s',%n'name':'%s'%n}", id.getValue(), email.getValue(), name.getValue());
     }
 }

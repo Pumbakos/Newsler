@@ -7,7 +7,7 @@ package pl.newsler.components.emaillabs;
 public sealed class Param permits TemplateParam {
     /**
      * An array with a structure in which the keys are email addresses
-     * and the values are arrays containing information such as message id and recipient name.
+     * and the values are arrays containing information such as message uuid and recipient name.
      * (Max 200 addresses) The recipient name is optional.
      */
     public static String TO_ADDRESS_NAME = "to[%s][%s]";

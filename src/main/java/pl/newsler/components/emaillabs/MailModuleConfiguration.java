@@ -30,7 +30,7 @@ class MailModuleConfiguration {
     }
 
     @Bean(name = "mailService")
-    IMailService mailService(IELATaskExecutor taskExecutor) {
-        return new MailService(taskExecutor, userRepository, mailRepository);
+    IELAMailService mailService(IELATaskExecutor taskExecutor) {
+        return new ELAMailService(taskExecutor, userRepository, mailRepository);
     }
 }

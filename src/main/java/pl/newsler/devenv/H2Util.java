@@ -105,6 +105,6 @@ class H2Util {
                     .append(faker.backToTheFuture().quote()).append(" ");
         }
 
-        return builder.length() > 5000 ? builder.substring(0, 5_000) : builder.toString();
+        return builder.length() > 1_000 ? builder.substring(0, 1_000) : builder.toString();
     }
 }

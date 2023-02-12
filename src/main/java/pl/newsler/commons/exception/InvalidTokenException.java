@@ -3,6 +3,7 @@ package pl.newsler.commons.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+
 public class InvalidTokenException extends NLException {
     public InvalidTokenException(String error, String errorMessage) {
         super(error, errorMessage);

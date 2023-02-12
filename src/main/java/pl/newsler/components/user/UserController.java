@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.IUserController;
 import pl.newsler.components.user.dto.UserGetRequest;
 import pl.newsler.components.user.dto.UserDeleteRequest;
+import pl.newsler.components.user.dto.UserGetResponse;
 import pl.newsler.components.user.dto.UserUpdateRequest;
 
 @RestController
@@ -15,8 +16,8 @@ class UserController implements IUserController {
     private final IUserCrudService userService;
 
     @Override
-    public ResponseEntity<NLDUser> get(UserGetRequest request) {
-        NLDUser user = userService.get(request);
+    public ResponseEntity<UserGetResponse> get(UserGetRequest request) {
+        UserGetResponse user = userService.get(request);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 

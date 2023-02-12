@@ -1,6 +1,6 @@
 newsler:
-  schema: https
-  port: 8443
+  schema: http
+  port: 8080
   domain-name: localhost
 
 server:

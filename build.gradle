@@ -82,11 +82,6 @@ dependencies {
     testImplementation 'junit:junit:4.13.1'
 }
 
-test {
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
-}
-
 jacocoTestReport {
     reports {
         xml.required = false
@@ -110,7 +105,7 @@ jacocoTestCoverageVerification {
 tasks.register('runMailDevContainer', Exec) {
     group 'newsler'
     commandLine 'docker', 'run', '-p', project.ext.browserMailDevPort, '-p', project.ext.smtpMailDevPort,
-            '--name', project.ext.maildevContainerName, 'maildev/maildev'
+            '--name', project.ext.maildevContainerName, 'maildev/maildev', '--detach', 'newsler-maildev'
 }
 
 tasks.register('stopMailDevContainer', Exec) {
@@ -123,4 +118,9 @@ tasks.register('deleteMailDevContainer', Exec) {
 
     dependsOn(tasks.named('stopMailDevContainer').name)
     commandLine 'docker', 'rm', project.ext.maildevContainerName
+}
+
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
 }

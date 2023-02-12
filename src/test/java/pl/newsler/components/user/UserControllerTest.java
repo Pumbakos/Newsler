@@ -18,6 +18,7 @@ import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLUuid;
 import pl.newsler.components.user.dto.UserDeleteRequest;
 import pl.newsler.components.user.dto.UserGetRequest;
+import pl.newsler.components.user.dto.UserGetResponse;
 import pl.newsler.components.user.dto.UserUpdateRequest;
 import pl.newsler.security.StubNLPasswordEncoder;
 
@@ -230,7 +231,7 @@ class UserControllerTest {
 
     private void handleResponse(final UserGetRequest request, final HttpStatus expectedStatus) {
         try {
-            ResponseEntity<NLDUser> response = controller.get(request);
+            ResponseEntity<UserGetResponse> response = controller.get(request);
             Assertions.assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(200));
         } catch (Exception e) {
             if (e instanceof NLException nle) {

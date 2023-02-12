@@ -20,7 +20,7 @@ class JWTAuthService implements IJWTAuthService {
 
     @Override
     public String generateJWT(UserAuthModel userAuthModel) throws UnauthorizedException {
-        final String email = passwordEncoder.decrypt(userAuthModel.email());
+        final String email = userAuthModel.email();
         final NLEmail nlEmail = NLEmail.of(email);
         if (!nlEmail.validate()) {
             throw new UnauthorizedException("email", "invalid");
@@ -40,11 +40,11 @@ class JWTAuthService implements IJWTAuthService {
     }
 
     private boolean credentialsValid(NLDUser user, UserAuthModel userAuthModel) {
-        final String password = passwordEncoder.decrypt(userAuthModel.password());
-        final String email = passwordEncoder.decrypt(userAuthModel.email());
+//        final String password = passwordEncoder.decrypt(userAuthModel.password());
+//        final String email = passwordEncoder.decrypt(userAuthModel.email());
 
-        return (passwordEncoder.bCrypt().matches(password, user.getPassword().getValue())
-                && email.equals(user.getEmail().getValue())
+        return (passwordEncoder.bCrypt().matches(userAuthModel.password(), user.getPassword().getValue())
+                && userAuthModel.email().equals(user.getEmail().getValue())
                 && user.isEnabled()
                 && user.isCredentialsNonExpired()
         );

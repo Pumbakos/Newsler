@@ -14,9 +14,12 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 import pl.newsler.auth.AuthUserDetailService;
 import pl.newsler.auth.JWTUtility;
 import pl.newsler.security.filters.JWTFilter;
+
+import java.util.List;
 
 @ComponentScan
 @Configuration(proxyBeanMethods = false)
@@ -33,6 +36,13 @@ class SecurityConfiguration {
         http
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors().configurationSource(request -> {
+                    CorsConfiguration cors = new CorsConfiguration();
+                    cors.setAllowedOrigins(List.of("http://localhost:4200", "http://127.0.0.1:80", "https://localhost:4200"));
+                    cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    cors.setAllowedHeaders(List.of("*"));
+                    return cors;
+                }).and()
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() // temporarily authenticated via JWT
                 )
@@ -42,7 +52,7 @@ class SecurityConfiguration {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
 }

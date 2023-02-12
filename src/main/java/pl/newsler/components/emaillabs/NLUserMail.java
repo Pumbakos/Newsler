@@ -23,6 +23,7 @@ import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLStringValue;
 import pl.newsler.commons.models.NLSubject;
 import pl.newsler.commons.models.NLVersion;
+import pl.newsler.components.emaillabs.dto.GetMailResponse;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -96,6 +97,34 @@ public class NLUserMail implements Serializable {
                 NLStringValue.of("")
         );
     }
+
+    public NLDUserMail map() {
+        return NLDUserMail.builder()
+                .id(this.id)
+                .toAddresses(this.toAddresses)
+                .cc(this.cc)
+                .bcc(this.bcc)
+                .subject(this.subject)
+                .message(this.message)
+                .status(this.status)
+                .errorMessage(this.errorMessage)
+                .build();
+    }
+
+
+    public GetMailResponse toResponse(String from) {
+        return new GetMailResponse(
+                this.id.getValue(),
+                from,
+                Arrays.asList(this.toAddresses.getValue().split(",")),
+                Arrays.asList(this.cc.getValue().split(",")),
+                Arrays.asList(this.bcc.getValue().split(",")),
+                this.subject.getValue(),
+                this.message.getValue(),
+                this.status.name()
+        );
+    }
+
 
     @Override
     public boolean equals(Object o) {

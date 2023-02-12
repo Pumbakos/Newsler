@@ -24,32 +24,32 @@ class UserSignupController implements IUserSignupController {
     private final IUserSignupService service;
 
     @Override
-    public ResponseEntity<String> signup(UserCreateRequest request) throws InvalidUserDataException {
+    public ResponseEntity<NLStringValue> signup(UserCreateRequest request) throws InvalidUserDataException {
         if (ObjectUtils.isBlank(request)) {
             throw new InvalidUserDataException("Blank or empty data");
         }
 
         NLStringValue value = service.singUp(request);
-        return new ResponseEntity<>(value.getValue(), HttpStatus.OK);
+        return new ResponseEntity<>(value, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<String> confirm(@RequestParam("token") String token) throws InvalidTokenException, EmailAlreadyConfirmedException, TokenExpiredException {
+    public ResponseEntity<NLStringValue> confirm(@RequestParam("token") String token) throws InvalidTokenException, EmailAlreadyConfirmedException, TokenExpiredException {
         if (StringUtils.isBlank(token)) {
             throw new InvalidTokenException("Blank or empty data");
         }
 
         NLStringValue value = service.confirmToken(NLToken.of(token));
-        return new ResponseEntity<>(value.getValue(), HttpStatus.OK);
+        return new ResponseEntity<>(value, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<String> resendToken(@RequestBody UserResendTokenRequest request) throws InvalidUserDataException {
+    public ResponseEntity<NLStringValue> resendToken(@RequestBody UserResendTokenRequest request) throws InvalidUserDataException {
         if (ObjectUtils.isBlank(request)) {
             throw new InvalidUserDataException("Blank or empty data");
         }
 
         NLStringValue value = service.resendConfirmationToken(request);
-        return new ResponseEntity<>(value.getValue(), HttpStatus.OK);
+        return new ResponseEntity<>(value, HttpStatus.OK);
     }
 }

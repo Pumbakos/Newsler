@@ -70,8 +70,8 @@ class JWTModuleTest {
     void shouldReturn_200OK() {
         NLUser standardUser = factory.standard();
         UserAuthModel model = new UserAuthModel(
-                passwordEncoder.encrypt(standardUser.getEmail().getValue()),
-                passwordEncoder.encrypt(factory.standard_plainPassword())
+                standardUser.getEmail().getValue(),
+                factory.standard_plainPassword()
         );
         ResponseEntity<String> response = controller.generateJWT(model);
         Assertions.assertNotNull(response);
@@ -79,32 +79,14 @@ class JWTModuleTest {
     }
 
     @Test
-    void shouldReturn_401Unauthorized_InvalidEncryption() {
-        UserAuthModel model = new UserAuthModel(
-                factory.standard().getEmail().getValue(),
-                factory.standard_plainPassword()
-        );
-        Assertions.assertThrows(DecryptionException.class, () -> controller.generateJWT(model));
-    }
-
-    @Test
     void shouldGenerateJWT() {
         NLUser standardUser = factory.standard();
         UserAuthModel model = new UserAuthModel(
-                passwordEncoder.encrypt(standardUser.getEmail().getValue()),
-                passwordEncoder.encrypt(factory.standard_plainPassword())
+                standardUser.getEmail().getValue(),
+                factory.standard_plainPassword()
         );
         String token = service.generateJWT(model);
         Assertions.assertTrue(JWTTestResolver.resolve(verify(token)));
-    }
-
-    @Test
-    void shouldNotGenerateTokenWhenInvalidEncryptionAndThrowDecryptionException() {
-        UserAuthModel model = new UserAuthModel(
-                factory.standard().getEmail().getValue(),
-                factory.standard_plainPassword()
-        );
-        Assertions.assertThrows(DecryptionException.class, () -> service.generateJWT(model));
     }
 
     @Test

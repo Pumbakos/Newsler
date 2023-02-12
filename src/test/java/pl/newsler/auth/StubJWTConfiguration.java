@@ -8,7 +8,7 @@ public class StubJWTConfiguration {
     private final JWTConfiguration configuration;
 
     public StubJWTConfiguration(StubUserRepository userRepository, StubNLIKeyProvider keyProvider, StubNLPasswordEncoder passwordEncoder) {
-        this.configuration = new JWTConfiguration(userRepository, passwordEncoder, keyProvider);;
+        this.configuration = new JWTConfiguration(userRepository, passwordEncoder, keyProvider);
     }
 
     public JWTUtility jwtUtility() {

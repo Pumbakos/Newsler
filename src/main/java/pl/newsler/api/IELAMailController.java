@@ -8,16 +8,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import pl.newsler.commons.exception.InvalidUserDataException;
-import pl.newsler.components.emaillabs.dto.GetMailResponse;
-import pl.newsler.components.emaillabs.dto.MailSendRequest;
+import pl.newsler.components.emaillabs.dto.ELAGetMailResponse;
+import pl.newsler.components.emaillabs.dto.ELAMailSendRequest;
 
 import java.util.List;
 
 @RequestMapping(NLApi.V1 + "/api/mails")
 public interface IELAMailController {
     @PostMapping
-    ResponseEntity<HttpStatus> queue(@RequestBody MailSendRequest request) throws InvalidUserDataException;
+    ResponseEntity<HttpStatus> queue(@RequestBody ELAMailSendRequest request) throws InvalidUserDataException;
 
     @GetMapping("/{userId}")
-    ResponseEntity<List<GetMailResponse>> fetchAllMails(@PathVariable("userId") String userId) throws InvalidUserDataException;
+    ResponseEntity<List<ELAGetMailResponse>> fetchAllMails(@PathVariable("userId") String userId) throws InvalidUserDataException;
 }

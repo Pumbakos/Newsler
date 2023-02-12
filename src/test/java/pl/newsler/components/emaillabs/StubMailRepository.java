@@ -6,23 +6,23 @@ import pl.newsler.testcommons.InMemoryJpaRepository;
 
 import java.util.List;
 
-public class StubMailRepository extends InMemoryJpaRepository<NLUserMail, NLUuid> implements IMailRepository {
+public class StubMailRepository extends InMemoryJpaRepository<ELAUserMail, NLUuid> implements IELAMailRepository {
     public StubMailRepository() {
-        super(NLUserMail::getId);
+        super(ELAUserMail::getId);
     }
 
     @Override
-    public <S extends NLUserMail> @NotNull S save(@NotNull S entity) {
+    public <S extends ELAUserMail> @NotNull S save(@NotNull S entity) {
         return super.save(entity);
     }
 
     @Override
-    public @NotNull List<NLUserMail> findAll() {
+    public @NotNull List<ELAUserMail> findAll() {
         return super.findAll();
     }
 
     @Override
-    public List<NLUserMail> findAllByUserId(@NotNull NLUuid userId) {
+    public List<ELAUserMail> findAllByUserId(@NotNull NLUuid userId) {
         return super.database.values().stream().filter(m -> m.getUserId().getValue().equals(userId.getValue())).toList();
     }
 }

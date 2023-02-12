@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Configuration;
 import pl.newsler.commons.models.NLAppKey;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.components.emaillabs.IMailRepository;
-import pl.newsler.components.emaillabs.MailDetails;
-import pl.newsler.components.emaillabs.NLUserMail;
+import pl.newsler.components.emaillabs.IELAMailRepository;
+import pl.newsler.components.emaillabs.ELAMailDetails;
+import pl.newsler.components.emaillabs.ELAUserMail;
 import pl.newsler.components.signup.IConfirmationTokenRepository;
 import pl.newsler.components.signup.IUserSignupService;
 import pl.newsler.components.signup.dto.UserCreateRequest;
@@ -39,7 +39,7 @@ import static pl.newsler.devenv.H2Util.username;
 @RequiredArgsConstructor
 class H2Configuration {
     private static final Random random = new SecureRandom();
-    private final IMailRepository mailRepository;
+    private final IELAMailRepository mailRepository;
     private final NLIPasswordEncoder passwordEncoder;
 
     @Bean(initMethod = "start", destroyMethod = "stop")
@@ -112,7 +112,7 @@ class H2Configuration {
 
     private void saveUserMails(final NLUser user) {
         for (int i = 0; i < random.nextInt(9) + 5; i++) {
-            mailRepository.save(NLUserMail.of(user.map().getId(), MailDetails.of(H2Util.createMailSendRequest(user.getEmail().getValue()))));
+            mailRepository.save(ELAUserMail.of(user.map().getId(), ELAMailDetails.of(H2Util.createMailSendRequest(user.getEmail().getValue()))));
         }
     }
 

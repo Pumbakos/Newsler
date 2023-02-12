@@ -18,7 +18,7 @@ public class StubReceiverRepository extends InMemoryJpaRepository<Receiver, NLUu
     }
 
     @Override
-    public Optional<Receiver> findByEmailAndUserUuid(final NLUuid userUuid, final NLEmail email) {
+    public Optional<Receiver> findByUserUuidAndEmail(final NLUuid userUuid, final NLEmail email) {
         return super.database.values().stream()
                 .filter(receiver -> receiver.getUserUuid().equals(userUuid))
                 .filter(receiver -> receiver.getEmail().equals(email))

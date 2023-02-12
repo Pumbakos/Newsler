@@ -13,6 +13,6 @@ interface ReceiverRepositoryJpa extends JpaRepository<Receiver, NLUuid> {
     @Query(value = "SELECT r FROM Receiver r WHERE r.userUuid = :uuid")
     List<Receiver> findAllByUserUuid(@Param("uuid") NLUuid uuid);
 
-    @Query(value = "SELECT r FROM Receiver r WHERE r.userUuid = :uuid AND r.email = :email")
-    Optional<Receiver> findByEmailAndUserUuid(@Param("uuid") final NLUuid userUuid, @Param("email") final NLEmail email);
+    @Query(value = "SELECT r FROM Receiver r WHERE r.userUuid = :userUuid AND r.email = :email")
+    Optional<Receiver> findByUserUuidAndEmail(@Param("userUuid") NLUuid userUuid, @Param("email") NLEmail email);
 }

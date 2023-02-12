@@ -34,7 +34,7 @@ class ReceiverService implements IReceiverService {
 
         final NLUuid userUuid = NLUuid.of(request.userUuid());
         final NLEmail email = NLEmail.of(request.email());
-        final Optional<Receiver> optionalReceiver = receiverRepository.findByEmailAndUserUuid(userUuid, email);
+        final Optional<Receiver> optionalReceiver = receiverRepository.findByUserUuidAndEmail(userUuid, email);
         if (optionalReceiver.isPresent()) {
             if (autoSaved) {
                 final Receiver receiver = optionalReceiver.get();

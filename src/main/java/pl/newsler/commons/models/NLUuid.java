@@ -24,8 +24,8 @@ public class NLUuid implements NLModel {
         return of(uuid, NLUserType.USER);
     }
 
-    public static NLUuid of(String id) {
-        NLUuid nlUuid = NLUuid.of(fromString(id));
+    public static NLUuid of(String uuid) {
+        NLUuid nlUuid = NLUuid.of(fromString(uuid));
         if (!nlUuid.validate()) {
             throw new ValidationException("User ID", "Not validated");
         }

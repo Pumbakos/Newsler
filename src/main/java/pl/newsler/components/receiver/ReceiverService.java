@@ -31,18 +31,23 @@ class ReceiverService implements IReceiverService {
             throw new InvalidReceiverDataException();
         }
 
-        final NLUuid uuid = NLUuid.of(request.userUuid());
+        final NLUuid userUuid = NLUuid.of(request.userUuid());
         final NLEmail email = NLEmail.of(request.email());
         final NLNickname nickname = NLNickname.of(request.nickname());
         final NLFirstName firstName = NLFirstName.of(request.firstName());
         final NLLastName lastName = NLLastName.of(request.lastName());
-        final boolean validated = ReceiverService.validate(uuid, email, nickname, firstName, lastName);
+        final boolean validated = ReceiverService.validate(userUuid, email, nickname, firstName, lastName);
 
         if (!validated) {
             throw new InvalidReceiverDataException("Input", "Incorrect data");
         }
 
-        receiverRepository.save(new Receiver(uuid, email, nickname, firstName, lastName, autoSaved));
+        Optional<NLUser> optionalUser = userRepository.findById(NLUuid.of(request.userUuid()));
+        if (optionalUser.isEmpty()) {
+            throw new InvalidReceiverDataException("User", "Not found");
+        }
+
+        receiverRepository.save(new Receiver(userUuid, email, nickname, firstName, lastName, autoSaved));
 
         return "Receiver added successfully";
     }
@@ -54,9 +59,6 @@ class ReceiverService implements IReceiverService {
         }
 
         final NLUuid uuid = NLUuid.of(userUuid);
-        if (!uuid.validate()) {
-            throw new InvalidReceiverDataException("UUID", "Invalid format");
-        }
 
         final Optional<NLUser> optionalUser = userRepository.findById(uuid);
         if (optionalUser.isEmpty()) {
@@ -67,17 +69,14 @@ class ReceiverService implements IReceiverService {
     }
 
     private static boolean validate(NLModel first, NLModel... models) {
-        if (models == null || models.length == 0) {
-            return first != null && first.validate();
-        }
         AtomicBoolean validated = new AtomicBoolean(true);
         Arrays.stream(models).forEach(model -> {
-            if (model == null || !model.validate()) {
+            if (!model.validate()) {
                 validated.set(false);
             }
         });
 
-        return validated.get();
+        return validated.get() && first.validate();
     }
 
 }

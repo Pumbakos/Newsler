@@ -7,6 +7,6 @@ import pl.newsler.components.receiver.dto.ReceiverCreateRequest;
 import java.util.List;
 
 public interface IReceiverService {
-    String add(ReceiverCreateRequest request, boolean autoSaved) throws InvalidReceiverDataException;
+    String addReceiver(ReceiverCreateRequest request, boolean autoSaved) throws InvalidReceiverDataException;
     List<ReceiverGetResponse> fetchAllUserReceivers(String userUuid) throws InvalidReceiverDataException;
 }

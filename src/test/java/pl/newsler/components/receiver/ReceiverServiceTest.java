@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import pl.newsler.commons.exception.InvalidReceiverDataException;
+import pl.newsler.commons.exception.ReceiverAssociatedWithUserAlready;
 import pl.newsler.commons.exception.ValidationException;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
@@ -84,7 +85,7 @@ class ReceiverServiceTest {
         final ReceiverCreateRequest validCreateRequest = new ReceiverCreateRequest(
                 factory.standard().map().getId().getValue(), email(), firstName(), firstName(), lastName()
         );
-        Assertions.assertDoesNotThrow(() -> service.add(validCreateRequest, false));
+        Assertions.assertDoesNotThrow(() -> service.addReceiver(validCreateRequest, false));
         Assertions.assertEquals(size +1, receiverRepository.findAll().size());
     }
 
@@ -102,8 +103,8 @@ class ReceiverServiceTest {
                 factory.standard().map().getId().getValue(), null, null, null, null
         );
 
-        Assertions.assertThrows(InvalidReceiverDataException.class, () -> service.add(invalidCreateRequest, false));
-        Assertions.assertThrows(InvalidReceiverDataException.class, () -> service.add(invalidCreateRequestModelsNull, false));
+        Assertions.assertThrows(InvalidReceiverDataException.class, () -> service.addReceiver(invalidCreateRequest, false));
+        Assertions.assertThrows(InvalidReceiverDataException.class, () -> service.addReceiver(invalidCreateRequestModelsNull, false));
         Assertions.assertEquals(size, receiverRepository.findAll().size());
     }
 
@@ -111,7 +112,7 @@ class ReceiverServiceTest {
     void shouldNotAddReceiverWhenRequestNull() {
         final int size = receiverRepository.findAll().size();
 
-        Assertions.assertThrows(InvalidReceiverDataException.class, () -> service.add(null, false));
+        Assertions.assertThrows(InvalidReceiverDataException.class, () -> service.addReceiver(null, false));
         Assertions.assertEquals(size, receiverRepository.findAll().size());
     }
 
@@ -120,7 +121,7 @@ class ReceiverServiceTest {
         final int size = receiverRepository.findAll().size();
         final ReceiverCreateRequest nullCreateRequest = new ReceiverCreateRequest(null, null, null, null, null);
 
-        Assertions.assertThrows(InvalidReceiverDataException.class, () -> service.add(nullCreateRequest, false));
+        Assertions.assertThrows(InvalidReceiverDataException.class, () -> service.addReceiver(nullCreateRequest, false));
         Assertions.assertEquals(size, receiverRepository.findAll().size());
     }
 
@@ -129,7 +130,7 @@ class ReceiverServiceTest {
         final int size = receiverRepository.findAll().size();
         final ReceiverCreateRequest emptyCreateRequest = new ReceiverCreateRequest("", "", "", "", "");
 
-        Assertions.assertThrows(InvalidReceiverDataException.class, () -> service.add(emptyCreateRequest, false));
+        Assertions.assertThrows(InvalidReceiverDataException.class, () -> service.addReceiver(emptyCreateRequest, false));
         Assertions.assertEquals(size, receiverRepository.findAll().size());
     }
 
@@ -138,7 +139,31 @@ class ReceiverServiceTest {
         final int size = receiverRepository.findAll().size();
         final ReceiverCreateRequest validCreateRequest = new ReceiverCreateRequest(UUID.randomUUID().toString(), email(), firstName(), firstName(), lastName());
 
-        Assertions.assertThrows(InvalidReceiverDataException.class, () -> service.add(validCreateRequest, false));
+        Assertions.assertThrows(InvalidReceiverDataException.class, () -> service.addReceiver(validCreateRequest, false));
+        Assertions.assertEquals(size, receiverRepository.findAll().size());
+    }
+
+    @Test
+    void shouldNotAddReceiverWhenReceiverAlreadyAssociatedWithUserAndWasNotAutoSaved() {
+        final ReceiverCreateRequest validCreateRequest = new ReceiverCreateRequest(
+                factory.standard().map().getId().getValue(), email(), firstName(), firstName(), lastName()
+        );
+        service.addReceiver(validCreateRequest, false);
+        final int size = receiverRepository.findAll().size();
+
+        Assertions.assertThrows(ReceiverAssociatedWithUserAlready.class, () -> service.addReceiver(validCreateRequest, false));
+        Assertions.assertEquals(size, receiverRepository.findAll().size());
+    }
+
+    @Test
+    void shouldNotAddReceiverWhenReceiverAlreadyAssociatedWithUserAndWasAutoSaved() {
+        final ReceiverCreateRequest validCreateRequest = new ReceiverCreateRequest(
+                factory.standard().map().getId().getValue(), email(), firstName(), firstName(), lastName()
+        );
+        service.addReceiver(validCreateRequest, false);
+        final int size = receiverRepository.findAll().size();
+
+        Assertions.assertThrows(ReceiverAssociatedWithUserAlready.class, () -> service.addReceiver(validCreateRequest, true));
         Assertions.assertEquals(size, receiverRepository.findAll().size());
     }
 

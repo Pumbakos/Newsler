@@ -3,6 +3,7 @@ package pl.newsler.components.receiver;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import pl.newsler.commons.exception.InvalidReceiverDataException;
+import pl.newsler.commons.exception.ReceiverAssociatedWithUserAlready;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
 import pl.newsler.commons.models.NLLastName;
@@ -26,13 +27,23 @@ class ReceiverService implements IReceiverService {
     private final IUserRepository userRepository;
 
     @Override
-    public String add(final ReceiverCreateRequest request, boolean autoSaved) throws InvalidReceiverDataException {
+    public String addReceiver(final ReceiverCreateRequest request, final boolean autoSaved) throws InvalidReceiverDataException {
         if (ObjectUtils.isBlank(request)) {
             throw new InvalidReceiverDataException();
         }
 
         final NLUuid userUuid = NLUuid.of(request.userUuid());
         final NLEmail email = NLEmail.of(request.email());
+        final Optional<Receiver> optionalReceiver = receiverRepository.findByEmailAndUserUuid(userUuid, email);
+        if (optionalReceiver.isPresent()) {
+            if (autoSaved) {
+                final Receiver receiver = optionalReceiver.get();
+                receiver.setAutoSaved(false);
+                receiverRepository.save(receiver);
+            }
+            throw new ReceiverAssociatedWithUserAlready();
+        }
+
         final NLNickname nickname = NLNickname.of(request.nickname());
         final NLFirstName firstName = NLFirstName.of(request.firstName());
         final NLLastName lastName = NLLastName.of(request.lastName());
@@ -42,7 +53,7 @@ class ReceiverService implements IReceiverService {
             throw new InvalidReceiverDataException("Input", "Incorrect data");
         }
 
-        Optional<NLUser> optionalUser = userRepository.findById(NLUuid.of(request.userUuid()));
+        final Optional<NLUser> optionalUser = userRepository.findById(NLUuid.of(request.userUuid()));
         if (optionalUser.isEmpty()) {
             throw new InvalidReceiverDataException("User", "Not found");
         }
@@ -53,7 +64,7 @@ class ReceiverService implements IReceiverService {
     }
 
     @Override
-    public List<ReceiverGetResponse> fetchAllUserReceivers(String userUuid) throws InvalidReceiverDataException {
+    public List<ReceiverGetResponse> fetchAllUserReceivers(final String userUuid) throws InvalidReceiverDataException {
         if (StringUtils.isBlank(userUuid)) {
             throw new InvalidReceiverDataException("UUID", "Not provided");
         }
@@ -68,7 +79,7 @@ class ReceiverService implements IReceiverService {
         return receiverRepository.findAllByUserUuid(uuid).stream().map(Receiver::toResponse).toList();
     }
 
-    private static boolean validate(NLModel first, NLModel... models) {
+    private static boolean validate(final NLModel first, final NLModel... models) {
         AtomicBoolean validated = new AtomicBoolean(true);
         Arrays.stream(models).forEach(model -> {
             if (!model.validate()) {

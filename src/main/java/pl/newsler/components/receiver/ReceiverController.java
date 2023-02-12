@@ -17,7 +17,7 @@ public class ReceiverController implements IReceiverController {
 
     @Override
     public ResponseEntity<String> addReceiver(final ReceiverCreateRequest request) {
-        return new ResponseEntity<>(service.add(request, false), HttpStatus.OK);
+        return new ResponseEntity<>(service.addReceiver(request, false), HttpStatus.OK);
     }
 
     @Override

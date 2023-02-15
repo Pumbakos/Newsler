@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+import pl.newsler.components.receiver.IReceiverService;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.security.NLIPasswordEncoder;
 
@@ -14,10 +15,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @ComponentScan
 @RequiredArgsConstructor
 @Configuration(proxyBeanMethods = false)
-class MailModuleConfiguration {
+class ELAMailModuleConfiguration {
     private final IUserRepository userRepository;
-    private final IMailRepository mailRepository;
+    private final IELAMailRepository mailRepository;
     private final NLIPasswordEncoder passwordEncoder;
+    private final IReceiverService receiverService;
 
     @Bean(name = "restTemplate")
     RestTemplate restTemplate() {
@@ -26,7 +28,7 @@ class MailModuleConfiguration {
 
     @Bean(name = "elaTaskExecutor")
     IELATaskExecutor taskExecutor(RestTemplate restTemplate) {
-        return new ELATaskExecutor(new ConcurrentLinkedQueue<>(), passwordEncoder, mailRepository, userRepository, restTemplate, new ObjectMapper());
+        return new ELATaskExecutor(new ConcurrentLinkedQueue<>(), passwordEncoder, mailRepository, receiverService, userRepository, restTemplate, new ObjectMapper());
     }
 
     @Bean(name = "mailService")

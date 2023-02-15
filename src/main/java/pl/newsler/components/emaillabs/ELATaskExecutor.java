@@ -21,11 +21,21 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLEmailStatus;
-import pl.newsler.commons.models.NLUuid;
+import pl.newsler.commons.models.NLFirstName;
+import pl.newsler.commons.models.NLLastName;
+import pl.newsler.commons.models.NLNickname;
 import pl.newsler.commons.models.NLStringValue;
+import pl.newsler.commons.models.NLUserType;
+import pl.newsler.commons.models.NLUuid;
 import pl.newsler.components.emaillabs.dto.ELASendMailResponse;
 import pl.newsler.components.emaillabs.dto.ELASentMailResults;
+import pl.newsler.components.receiver.IReceiverRepository;
+import pl.newsler.components.receiver.IReceiverService;
+import pl.newsler.components.receiver.Receiver;
+import pl.newsler.components.receiver.dto.ReceiverCreateRequest;
+import pl.newsler.components.receiver.dto.ReceiverGetResponse;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.security.NLIPasswordEncoder;
@@ -35,9 +45,12 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -45,17 +58,18 @@ import java.util.Queue;
 class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor {
     private static final String BASE_URL = "https://api.emaillabs.net.pl/api";
     private static final String SEND_MAIL_URL = "/new_sendmail";
-    private final Queue<Pair<NLUuid, MailDetails>> queue;
+    private final Queue<Pair<NLUuid, ELAMailDetails>> queue;
     private final NLIPasswordEncoder passwordEncoder;
-    private final IMailRepository mailRepository;
+    private final IELAMailRepository mailRepository;
+    private final IReceiverService receiverService;
     private final IUserRepository userRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private boolean queueExecution = false;
 
     @Override
-    public void queue(NLUuid userId, MailDetails details) {
-        mailRepository.save(NLUserMail.of(userId, details));
+    public void queue(NLUuid userId, ELAMailDetails details) {
+        mailRepository.save(ELAUserMail.of(userId, details));
         queue.add(Pair.of(userId, details));
         if (!queueExecution) {
             queueExecution = true;
@@ -73,7 +87,7 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
     }
 
     private void execute() {
-        Pair<NLUuid, MailDetails> pair = queue.poll();
+        Pair<NLUuid, ELAMailDetails> pair = queue.poll();
         if (pair == null) {
             queueExecution = false;
             return;
@@ -83,7 +97,7 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
         execute();
     }
 
-    private void getAndExecute(Pair<NLUuid, MailDetails> pair) {
+    private void getAndExecute(Pair<NLUuid, ELAMailDetails> pair) {
         final Optional<NLUser> optionalUser = userRepository.findById(pair.getLeft());
         optionalUser.ifPresentOrElse(
                 nlUser -> execution(pair.getRight(), nlUser),
@@ -91,9 +105,12 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
         );
     }
 
-    private void execution(MailDetails details, NLUser user) {
+    private void execution(ELAMailDetails details, NLUser user) {
+        final NLUuid uuid = user.map().getId();
+        final List<ReceiverGetResponse> all = receiverService.fetchAllUserReceivers(uuid.getValue());
+        addReceiverIfNotExist(all, details, uuid);
         final ELASentMailResults results = call(user, details);
-        final Optional<NLUserMail> optionalUserMail = mailRepository.findById(results.getId());
+        final Optional<ELAUserMail> optionalUserMail = mailRepository.findById(results.getId());
         optionalUserMail.ifPresent(m -> {
             m.setStatus(results.getStatus());
             m.setErrorMessage(NLStringValue.of(results.getMessage()));
@@ -101,20 +118,20 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
         });
     }
 
-    private ELASentMailResults call(NLUser user, MailDetails details) {
+    private ELASentMailResults call(NLUser user, ELAMailDetails details) {
         log.info("Executing task {}", details.id());
         final Map<String, String> params = new LinkedHashMap<>();
         String userPass = passwordEncoder.decrypt(user.getAppKey().getValue()) + ":" + passwordEncoder.decrypt(user.getSecretKey().getValue());
         String auth = "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
 
         String name = String.format("%s %s", user.getFirstName(), user.getLastName());
-        params.put(Param.FROM, user.getEmail().getValue());
-        params.put(Param.FROM_NAME, name);
-        params.put(Param.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
-        params.put(String.format(Param.TO_ADDRESS_NAME, user.getEmail().getValue(), name), Arrays.toString(details.toAddresses().toArray()));
-        params.put(Param.SUBJECT, details.subject());
-        params.put(Param.HTML, String.format("<pre>%s</pre>", details.message()));
-        params.put(Param.TEXT, details.message());
+        params.put(ELAParam.FROM, user.getEmail().getValue());
+        params.put(ELAParam.FROM_NAME, name);
+        params.put(ELAParam.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
+        params.put(String.format(ELAParam.TO_ADDRESS_NAME, user.getEmail().getValue(), name), Arrays.toString(details.toAddresses().toArray()));
+        params.put(ELAParam.SUBJECT, details.subject());
+        params.put(ELAParam.HTML, String.format("<pre>%s</pre>", details.message()));
+        params.put(ELAParam.TEXT, details.message());
 
         LinkedMultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         headers.add(HttpHeaders.AUTHORIZATION, auth);
@@ -136,7 +153,7 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
         }
     }
 
-    private ELASentMailResults handleResponse(ResponseEntity<String> response, MailDetails details, NLUuid userId) {
+    private ELASentMailResults handleResponse(ResponseEntity<String> response, ELAMailDetails details, NLUuid userId) {
         if (response == null) {
             return ELASentMailResults.of(details.id(), userId, NLEmailStatus.ERROR, "EmailLabs server did not respond", LocalDateTime.now());
         }
@@ -155,7 +172,7 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
 
     @SneakyThrows(JsonProcessingException.class)
     private ELASentMailResults handleException(NLUuid id, NLUuid userId, RestClientException e) {
-        ELASendMailResponse response = objectMapper.readValue(e.getMessage().substring(e.getMessage().indexOf("{") - 1).substring(1), ELASendMailResponse.class);
+        final ELASendMailResponse response = objectMapper.readValue(e.getMessage().substring(e.getMessage().indexOf("{") - 1).substring(1), ELASendMailResponse.class);
         log.info(this.objectMapper.convertValue(e, String.class));
         if (e instanceof HttpClientErrorException) {
             return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, response.getMessage(), LocalDateTime.now());
@@ -165,5 +182,69 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
         }
 
         return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, "General error. Check data, it is likely that SMTP, APP KEY or SECRET KEY are incorrect.", LocalDateTime.now());
+    }
+
+    private void addReceiverIfNotExist(List<ReceiverGetResponse> receivers, ELAMailDetails details, NLUuid uuid) {
+        final LinkedList<Receiver> receiversToAdd = new LinkedList<>();
+
+        details.toAddresses().forEach(address -> {
+                    Optional<ReceiverGetResponse> found = receivers.stream()
+                            .filter(receiver -> receiver.email().equals(address))
+                            .findFirst();
+                    if (found.isEmpty()) {
+                        receiversToAdd.push(new Receiver(
+                                NLUuid.of(UUID.randomUUID(), NLUserType.RECEIVER),
+                                IReceiverRepository.version,
+                                uuid,
+                                NLEmail.of(address),
+                                NLNickname.of(""),
+                                NLFirstName.of(""),
+                                NLLastName.of(""),
+                                true
+                        ));
+                    }
+                }
+        );
+        details.cc().forEach(address -> {
+                    Optional<ReceiverGetResponse> found = receivers.stream()
+                            .filter(receiver -> receiver.email().equals(address))
+                            .findFirst();
+                    if (found.isEmpty()) {
+                        receiversToAdd.push(new Receiver(
+                                NLUuid.of(UUID.randomUUID(), NLUserType.RECEIVER),
+                                IReceiverRepository.version,
+                                uuid,
+                                NLEmail.of(address),
+                                NLNickname.of(""),
+                                NLFirstName.of(""),
+                                NLLastName.of(""),
+                                true
+                        ));
+                    }
+                }
+        );
+        details.bcc().forEach(address -> {
+                    Optional<ReceiverGetResponse> found = receivers.stream()
+                            .filter(receiver -> receiver.email().equals(address))
+                            .findFirst();
+                    if (found.isEmpty()) {
+                        receiversToAdd.push(new Receiver(
+                                NLUuid.of(UUID.randomUUID(), NLUserType.RECEIVER),
+                                IReceiverRepository.version,
+                                uuid,
+                                NLEmail.of(address),
+                                NLNickname.of(""),
+                                NLFirstName.of(""),
+                                NLLastName.of(""),
+                                true
+                        ));
+                    }
+                }
+        );
+
+        receiversToAdd.forEach(receiver -> receiverService.addReceiver(
+                new ReceiverCreateRequest(uuid.getValue(), receiver.getEmail().getValue(), "", "", ""),
+                true
+        ));
     }
 }

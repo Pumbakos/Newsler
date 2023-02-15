@@ -3,7 +3,7 @@ package pl.newsler.devenv;
 import com.github.javafaker.Faker;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import pl.newsler.components.emaillabs.dto.MailSendRequest;
+import pl.newsler.components.emaillabs.dto.ELAMailSendRequest;
 
 import java.security.SecureRandom;
 import java.util.Collections;
@@ -34,21 +34,21 @@ class H2Util {
     }
 
     static String lastName() {
-        return faker
+        String lastName = faker
                 .name()
                 .lastName()
                 .replace(" ", ".")
-                .replace("'", ".")
-                .toLowerCase();
+                .replace("'", ".");
+        return lastName.substring(0, 1).concat(lastName.substring(1));
     }
 
     static String firstName() {
-        return faker
+        String firstName = faker
                 .name()
                 .firstName()
                 .replace(" ", ".")
-                .replace("'", ".")
-                .toLowerCase();
+                .replace("'", ".");
+        return firstName.substring(0, 1).concat(firstName.substring(1));
     }
 
     static String fullEmail() {
@@ -63,27 +63,27 @@ class H2Util {
         return faker.regexify("[0-9]{1}[.]{1}[a-z]{3,}[.]{1}smtp");
     }
 
-    static MailSendRequest createMailSendRequest(String userMail) {
-        return new MailSendRequest(userMail, randomEmails(), randomEmails(), randomEmails(), faker.book().author(), randomMessage());
+    static ELAMailSendRequest createMailSendRequest(String userMail) {
+        return new ELAMailSendRequest(userMail, randomEmails(), randomEmails(), randomEmails(), faker.book().author(), randomMessage());
     }
 
     private static List<String> randomEmails() {
         int rand = random.nextInt(10);
         if (rand == 0) {
-            return Collections.emptyList();
+            return List.of(fullEmail(), fullEmail());
         }
         if (rand % 2 == 0) {
             return List.of(fullEmail(), fullEmail(), fullEmail(), fullEmail());
         }
         if (rand % 3 == 0) {
-            return List.of(fullEmail(), fullEmail(), fullEmail(), fullEmail(), fullEmail(), fullEmail(), fullEmail(), fullEmail());
+            return List.of(fullEmail(), fullEmail(), fullEmail(), fullEmail(), fullEmail(), fullEmail(), fullEmail());
         }
 
         return List.of(fullEmail(), fullEmail());
     }
 
     private static String randomMessage() {
-        int rand = random.nextInt(90) + 10;
+        int rand = random.nextInt(15) + 10;
         final StringBuilder builder = new StringBuilder();
         if (rand % 2 == 0) {
             for (int i = 0; i < rand; i++) {
@@ -97,7 +97,7 @@ class H2Util {
                     .append(faker.chuckNorris().fact()).append(" ")
                     .append(faker.rickAndMorty().quote()).append(" ")
                     .append(faker.harryPotter().quote()).append(" ");
-        } else if (rand % 5 == 0) {
+        } else {
             builder.append(faker.lebowski().quote()).append(" ")
                     .append(faker.elderScrolls().quote()).append(" ")
                     .append(faker.music().genre()).append(" ")

@@ -21,24 +21,24 @@ import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestTemplate;
 import pl.newsler.api.IELAMailController;
 import pl.newsler.commons.exception.GlobalRestExceptionHandler;
+import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.exception.NLError;
 import pl.newsler.commons.exception.NLException;
 import pl.newsler.commons.models.NLAppKey;
-import pl.newsler.commons.models.NLEmailStatus;
-import pl.newsler.commons.models.NLUuid;
 import pl.newsler.commons.models.NLIdType;
 import pl.newsler.commons.models.NLPassword;
 import pl.newsler.commons.models.NLSecretKey;
 import pl.newsler.commons.models.NLSmtpAccount;
+import pl.newsler.commons.models.NLUuid;
+import pl.newsler.components.emaillabs.dto.ELAGetMailResponse;
+import pl.newsler.components.emaillabs.dto.ELAMailSendRequest;
 import pl.newsler.components.emaillabs.dto.ELASendMailResponse;
-import pl.newsler.components.emaillabs.dto.GetMailResponse;
-import pl.newsler.components.emaillabs.dto.GetMailStatus;
-import pl.newsler.components.emaillabs.dto.MailSendRequest;
-import pl.newsler.components.emaillabs.exceptions.ELAMailNotFoundException;
+import pl.newsler.components.receiver.IReceiverService;
+import pl.newsler.components.receiver.StubReceiverModuleConfiguration;
+import pl.newsler.components.receiver.StubReceiverRepository;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.TestUserFactory;
-import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.security.StubNLPasswordEncoder;
 import pl.newsler.testcommons.TestUserUtils;
 import pl.newsler.testcommons.TestUtils;
@@ -49,9 +49,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -59,8 +57,9 @@ class MailModuleTest {
     private final GlobalRestExceptionHandler handler = new GlobalRestExceptionHandler();
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final StubUserRepository userRepository = new StubUserRepository();
-    private final StubMailRepository mailRepository = new StubMailRepository();
-    private final MailModuleConfiguration configuration = new MailModuleConfiguration(userRepository, mailRepository, passwordEncoder);
+    private final StubELAMailRepository mailRepository = new StubELAMailRepository();
+    private final IReceiverService receiverRepository = new StubReceiverModuleConfiguration(new StubReceiverRepository(), userRepository).receiverService();
+    private final ELAMailModuleConfiguration configuration = new ELAMailModuleConfiguration(userRepository, mailRepository, passwordEncoder, receiverRepository);
     private final TestUserFactory factory = new TestUserFactory();
     private final Gson gson = new Gson();
     private MockRestServiceServer mockServer;
@@ -115,7 +114,7 @@ class MailModuleTest {
         }
 
         final NLUser user = users.get(0);
-        final MailSendRequest request = createMailRequest(users, user);
+        final ELAMailSendRequest request = createMailRequest(users, user);
 
         ResponseEntity<HttpStatus> response = controller.queue(request);
         Assertions.assertNotNull(response);
@@ -129,7 +128,7 @@ class MailModuleTest {
             Assertions.fail("Users empty");
         }
 
-        final MailSendRequest request = new MailSendRequest(
+        final ELAMailSendRequest request = new ELAMailSendRequest(
                 TestUserUtils.email(),
                 List.of(users.get(1).getEmail().getValue(), users.get(2).getEmail().getValue()),
                 List.of(""),
@@ -157,15 +156,15 @@ class MailModuleTest {
         }
 
         final NLUser user = users.get(0);
-        final MailSendRequest first = createMailRequest(users, user);
-        final MailSendRequest second = createMailRequest(users, user);
-        final MailSendRequest third = createMailRequest(users, user);
+        final ELAMailSendRequest first = createMailRequest(users, user);
+        final ELAMailSendRequest second = createMailRequest(users, user);
+        final ELAMailSendRequest third = createMailRequest(users, user);
 
         controller.queue(first);
         controller.queue(second);
         controller.queue(third);
 
-        ResponseEntity<List<GetMailResponse>> entity = controller.fetchAllMails(user.map().getId().getValue());
+        ResponseEntity<List<ELAGetMailResponse>> entity = controller.fetchAllMails(user.map().getId().getValue());
         Assertions.assertNotNull(entity);
         Assertions.assertNotNull(entity.getBody());
         Assertions.assertEquals(mailRepository.findAll().get(0).toResponse(user.getEmail().getValue()), entity.getBody().get(0));
@@ -198,7 +197,7 @@ class MailModuleTest {
         mockServer.expect(MockRestRequestMatchers.requestTo("/v1/api/mails")).andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withSuccess(gson.toJson(response), MediaType.APPLICATION_JSON));
 
-        final MailSendRequest request = new MailSendRequest(
+        final ELAMailSendRequest request = new ELAMailSendRequest(
                 TestUserUtils.email(),
                 List.of(users.get(0).getEmail().getValue(), users.get(1).getEmail().getValue(), users.get(2).getEmail().getValue()),
                 List.of(""),
@@ -222,7 +221,7 @@ class MailModuleTest {
                 .andRespond(MockRestResponseCreators.withSuccess(gson.toJson(response), MediaType.APPLICATION_JSON));
 
         final NLUser user = users.get(0);
-        final MailSendRequest request = createMailRequest(users, user);
+        final ELAMailSendRequest request = createMailRequest(users, user);
         Assertions.assertDoesNotThrow(() -> service.queue(request));
     }
 
@@ -238,7 +237,7 @@ class MailModuleTest {
                 .andRespond(MockRestResponseCreators.withSuccess(gson.toJson(response), MediaType.APPLICATION_JSON));
 
         final NLUser user = users.get(0);
-        final MailSendRequest request = createMailRequest(users, user);
+        final ELAMailSendRequest request = createMailRequest(users, user);
         Assertions.assertDoesNotThrow(() -> service.queue(request));
         Assertions.assertDoesNotThrow(() -> service.queue(request));
         Assertions.assertEquals(2, mailRepository.findAll().size());
@@ -259,18 +258,18 @@ class MailModuleTest {
             Assertions.fail("Users empty");
         }
         final NLUser user = users.get(0);
-        final MailSendRequest request = createMailRequest(users, user);
-        final MailDetails details = MailDetails.of(request);
+        final ELAMailSendRequest request = createMailRequest(users, user);
+        final ELAMailDetails details = ELAMailDetails.of(request);
         final Map<String, String> params = new LinkedHashMap<>();
         final String name = String.format("%s %s", user.getFirstName(), user.getLastName());
 
-        params.put(Param.FROM, user.getEmail().getValue());
-        params.put(Param.FROM_NAME, name);
-        params.put(Param.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
-        params.put(String.format(Param.TO_ADDRESS_NAME, user.getEmail().getValue(), name), Arrays.toString(details.toAddresses().toArray()));
-        params.put(Param.SUBJECT, details.subject());
-        params.put(Param.HTML, String.format("<pre>%s</pre>", details.message()));
-        params.put(Param.TEXT, details.message());
+        params.put(ELAParam.FROM, user.getEmail().getValue());
+        params.put(ELAParam.FROM_NAME, name);
+        params.put(ELAParam.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
+        params.put(String.format(ELAParam.TO_ADDRESS_NAME, user.getEmail().getValue(), name), Arrays.toString(details.toAddresses().toArray()));
+        params.put(ELAParam.SUBJECT, details.subject());
+        params.put(ELAParam.HTML, String.format("<pre>%s</pre>", details.message()));
+        params.put(ELAParam.TEXT, details.message());
 
         final String paramsWithUrlEncoded = ELAUrlParamBuilder.build(params);
         final String paramsWithoutURLEncoding = buildWithoutURLEncoding(params);
@@ -293,8 +292,8 @@ class MailModuleTest {
             Assertions.fail("Users empty");
         }
         final NLUser user = users.get(0);
-        final MailSendRequest requestForFirst = createMailRequest(users, user);
-        final MailSendRequest requestForSecond = new MailSendRequest(
+        final ELAMailSendRequest requestForFirst = createMailRequest(users, user);
+        final ELAMailSendRequest requestForSecond = new ELAMailSendRequest(
                 user.getEmail().getValue(),
                 List.of(users.get(1).getEmail().getValue(), users.get(2).getEmail().getValue()),
                 null,
@@ -302,8 +301,8 @@ class MailModuleTest {
                 "MOCK TEST",
                 "MOCK TEST MESSAGE"
         );
-        final NLUserMail first = NLUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), MailDetails.of(requestForFirst));
-        final NLUserMail second = NLUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), MailDetails.of(requestForSecond));
+        final ELAUserMail first = ELAUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), ELAMailDetails.of(requestForFirst));
+        final ELAUserMail second = ELAUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), ELAMailDetails.of(requestForSecond));
 
         Assertions.assertEquals(first, first);
         Assertions.assertEquals(first.toString(), first.toString());
@@ -321,8 +320,8 @@ class MailModuleTest {
             Assertions.fail("Users empty");
         }
         final NLUser user = users.get(0);
-        final MailSendRequest request = createMailRequest(users, user);
-        final NLUserMail first = NLUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), MailDetails.of(request));
+        final ELAMailSendRequest request = createMailRequest(users, user);
+        final ELAUserMail first = ELAUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), ELAMailDetails.of(request));
 
         Assertions.assertNotNull(first);
         Assertions.assertNotNull(first.getId());
@@ -372,8 +371,8 @@ class MailModuleTest {
     }
 
     @NotNull
-    private static MailSendRequest createMailRequest(List<NLUser> users, NLUser user) {
-        return new MailSendRequest(
+    private static ELAMailSendRequest createMailRequest(List<NLUser> users, NLUser user) {
+        return new ELAMailSendRequest(
                 user.getEmail().getValue(),
                 List.of(users.get(1).getEmail().getValue(), users.get(2).getEmail().getValue()),
                 List.of(""),

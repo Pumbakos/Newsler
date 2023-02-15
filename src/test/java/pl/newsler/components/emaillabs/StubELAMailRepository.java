@@ -6,8 +6,8 @@ import pl.newsler.testcommons.InMemoryJpaRepository;
 
 import java.util.List;
 
-public class StubMailRepository extends InMemoryJpaRepository<ELAUserMail, NLUuid> implements IELAMailRepository {
-    public StubMailRepository() {
+public class StubELAMailRepository extends InMemoryJpaRepository<ELAUserMail, NLUuid> implements IELAMailRepository {
+    public StubELAMailRepository() {
         super(ELAUserMail::getId);
     }
 

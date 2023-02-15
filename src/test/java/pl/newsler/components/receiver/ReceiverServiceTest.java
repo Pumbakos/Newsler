@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import pl.newsler.commons.exception.InvalidReceiverDataException;
-import pl.newsler.commons.exception.ReceiverAssociatedWithUserAlready;
+import pl.newsler.commons.exception.ReceiverAlreadyAssociatedWithUser;
 import pl.newsler.commons.exception.ValidationException;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
@@ -151,7 +151,7 @@ class ReceiverServiceTest {
         service.addReceiver(validCreateRequest, false);
         final int size = receiverRepository.findAll().size();
 
-        Assertions.assertThrows(ReceiverAssociatedWithUserAlready.class, () -> service.addReceiver(validCreateRequest, false));
+        Assertions.assertThrows(ReceiverAlreadyAssociatedWithUser.class, () -> service.addReceiver(validCreateRequest, false));
         Assertions.assertEquals(size, receiverRepository.findAll().size());
     }
 
@@ -163,7 +163,7 @@ class ReceiverServiceTest {
         service.addReceiver(validCreateRequest, false);
         final int size = receiverRepository.findAll().size();
 
-        Assertions.assertThrows(ReceiverAssociatedWithUserAlready.class, () -> service.addReceiver(validCreateRequest, true));
+        Assertions.assertThrows(ReceiverAlreadyAssociatedWithUser.class, () -> service.addReceiver(validCreateRequest, true));
         Assertions.assertEquals(size, receiverRepository.findAll().size());
     }
 

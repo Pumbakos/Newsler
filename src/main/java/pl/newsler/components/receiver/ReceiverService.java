@@ -3,7 +3,7 @@ package pl.newsler.components.receiver;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import pl.newsler.commons.exception.InvalidReceiverDataException;
-import pl.newsler.commons.exception.ReceiverAssociatedWithUserAlready;
+import pl.newsler.commons.exception.ReceiverAlreadyAssociatedWithUser;
 import pl.newsler.commons.models.NLEmail;
 import pl.newsler.commons.models.NLFirstName;
 import pl.newsler.commons.models.NLLastName;
@@ -41,7 +41,7 @@ class ReceiverService implements IReceiverService {
                 receiver.setAutoSaved(false);
                 receiverRepository.save(receiver);
             }
-            throw new ReceiverAssociatedWithUserAlready();
+            throw new ReceiverAlreadyAssociatedWithUser();
         }
 
         final NLNickname nickname = NLNickname.of(request.nickname());

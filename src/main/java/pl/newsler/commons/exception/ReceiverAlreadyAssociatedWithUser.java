@@ -3,16 +3,16 @@ package pl.newsler.commons.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-public class ReceiverAssociatedWithUserAlready extends NLException {
-    public ReceiverAssociatedWithUserAlready(String error, String errorMessage) {
+public class ReceiverAlreadyAssociatedWithUser extends NLException {
+    public ReceiverAlreadyAssociatedWithUser(String error, String errorMessage) {
         super(error, errorMessage);
     }
 
-    public ReceiverAssociatedWithUserAlready(String errorMessage) {
+    public ReceiverAlreadyAssociatedWithUser(String errorMessage) {
         super("Not provided", errorMessage);
     }
 
-    public ReceiverAssociatedWithUserAlready() {
+    public ReceiverAlreadyAssociatedWithUser() {
         super("Not provided", "Not specified");
     }
 

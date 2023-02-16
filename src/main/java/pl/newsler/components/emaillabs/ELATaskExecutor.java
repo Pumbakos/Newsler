@@ -31,6 +31,7 @@ import pl.newsler.commons.models.NLUserType;
 import pl.newsler.commons.models.NLUuid;
 import pl.newsler.components.emaillabs.dto.ELASendMailResponse;
 import pl.newsler.components.emaillabs.dto.ELASentMailResults;
+import pl.newsler.components.htmlremover.HtmlTagRemover;
 import pl.newsler.components.receiver.IReceiverRepository;
 import pl.newsler.components.receiver.IReceiverService;
 import pl.newsler.components.receiver.Receiver;
@@ -130,8 +131,8 @@ class ELATaskExecutor extends ConcurrentTaskExecutor implements IELATaskExecutor
         params.put(ELAParam.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
         params.put(String.format(ELAParam.TO_ADDRESS_NAME, user.getEmail().getValue(), name), Arrays.toString(details.toAddresses().toArray()));
         params.put(ELAParam.SUBJECT, details.subject());
-        params.put(ELAParam.HTML, String.format("<pre>%s</pre>", details.message()));
-        params.put(ELAParam.TEXT, details.message());
+        params.put(ELAParam.HTML, details.message());
+        params.put(ELAParam.TEXT, HtmlTagRemover.remove(details.message()));
 
         LinkedMultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         headers.add(HttpHeaders.AUTHORIZATION, auth);

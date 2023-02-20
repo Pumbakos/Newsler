@@ -10,9 +10,9 @@ import pl.newsler.commons.exception.EmailAlreadyConfirmedException;
 import pl.newsler.commons.exception.InvalidTokenException;
 import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.exception.TokenExpiredException;
-import pl.newsler.commons.models.NLStringValue;
-import pl.newsler.components.signup.dto.UserCreateRequest;
-import pl.newsler.components.signup.dto.UserResendTokenRequest;
+import pl.newsler.commons.model.NLStringValue;
+import pl.newsler.components.signup.usecase.UserCreateRequest;
+import pl.newsler.components.signup.usecase.UserResendTokenRequest;
 
 @RequestMapping(NLApi.V1 + "/api/auth/sign-up")
 public interface IUserSignupController {

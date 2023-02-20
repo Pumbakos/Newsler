@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import pl.newsler.auth.AuthUserDetailService;
 import pl.newsler.auth.JWTUtility;
-import pl.newsler.security.filters.JWTFilter;
+import pl.newsler.security.filter.JWTFilter;
 
 import java.util.List;
 

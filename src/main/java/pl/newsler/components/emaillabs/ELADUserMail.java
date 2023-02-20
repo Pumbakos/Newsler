@@ -4,11 +4,11 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
-import pl.newsler.commons.models.NLEmailMessage;
-import pl.newsler.commons.models.NLEmailStatus;
-import pl.newsler.commons.models.NLStringValue;
-import pl.newsler.commons.models.NLSubject;
-import pl.newsler.commons.models.NLUuid;
+import pl.newsler.commons.model.NLEmailMessage;
+import pl.newsler.commons.model.NLEmailStatus;
+import pl.newsler.commons.model.NLStringValue;
+import pl.newsler.commons.model.NLSubject;
+import pl.newsler.commons.model.NLUuid;
 
 @Value
 @Builder

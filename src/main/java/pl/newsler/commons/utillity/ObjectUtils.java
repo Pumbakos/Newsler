@@ -3,12 +3,12 @@ package pl.newsler.commons.utillity;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import pl.newsler.components.receiver.dto.ReceiverCreateRequest;
-import pl.newsler.components.signup.dto.UserCreateRequest;
-import pl.newsler.components.signup.dto.UserResendTokenRequest;
-import pl.newsler.components.user.dto.UserDeleteRequest;
-import pl.newsler.components.user.dto.UserGetRequest;
-import pl.newsler.components.user.dto.UserUpdateRequest;
+import pl.newsler.components.receiver.usecase.ReceiverCreateRequest;
+import pl.newsler.components.signup.usecase.UserCreateRequest;
+import pl.newsler.components.signup.usecase.UserResendTokenRequest;
+import pl.newsler.components.user.usecase.UserDeleteRequest;
+import pl.newsler.components.user.usecase.UserGetRequest;
+import pl.newsler.components.user.usecase.UserUpdateRequest;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ObjectUtils {

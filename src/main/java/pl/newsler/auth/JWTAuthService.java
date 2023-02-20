@@ -2,7 +2,7 @@ package pl.newsler.auth;
 
 import lombok.RequiredArgsConstructor;
 import pl.newsler.commons.exception.UnauthorizedException;
-import pl.newsler.commons.models.NLEmail;
+import pl.newsler.commons.model.NLEmail;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.NLUser;

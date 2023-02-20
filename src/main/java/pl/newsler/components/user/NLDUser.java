@@ -4,15 +4,15 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
-import pl.newsler.commons.models.NLAppKey;
-import pl.newsler.commons.models.NLEmail;
-import pl.newsler.commons.models.NLUuid;
-import pl.newsler.commons.models.NLLastName;
-import pl.newsler.commons.models.NLName;
-import pl.newsler.commons.models.NLPassword;
-import pl.newsler.commons.models.NLSecretKey;
-import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.commons.models.NLUserType;
+import pl.newsler.commons.model.NLAppKey;
+import pl.newsler.commons.model.NLEmail;
+import pl.newsler.commons.model.NLUuid;
+import pl.newsler.commons.model.NLLastName;
+import pl.newsler.commons.model.NLName;
+import pl.newsler.commons.model.NLPassword;
+import pl.newsler.commons.model.NLSecretKey;
+import pl.newsler.commons.model.NLSmtpAccount;
+import pl.newsler.commons.model.NLUserType;
 
 @Value
 @Builder

@@ -3,10 +3,9 @@ package pl.newsler.devenv;
 import com.github.javafaker.Faker;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import pl.newsler.components.emaillabs.dto.ELAMailSendRequest;
+import pl.newsler.components.emaillabs.usecase.ELAMailSendRequest;
 
 import java.security.SecureRandom;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 

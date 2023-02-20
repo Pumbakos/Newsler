@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import pl.newsler.commons.models.NLEmail;
+import pl.newsler.commons.model.NLEmail;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.commons.exception.InvalidUserDataException;

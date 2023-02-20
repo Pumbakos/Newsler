@@ -3,10 +3,10 @@ package pl.newsler.components.user;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import pl.newsler.commons.models.NLAppKey;
-import pl.newsler.commons.models.NLSecretKey;
-import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.commons.models.NLUuid;
+import pl.newsler.commons.model.NLAppKey;
+import pl.newsler.commons.model.NLSecretKey;
+import pl.newsler.commons.model.NLSmtpAccount;
+import pl.newsler.commons.model.NLUuid;
 
 import java.util.UUID;
 

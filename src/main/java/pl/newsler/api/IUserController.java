@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import pl.newsler.components.user.dto.UserDeleteRequest;
-import pl.newsler.components.user.dto.UserGetRequest;
-import pl.newsler.components.user.dto.UserGetResponse;
-import pl.newsler.components.user.dto.UserUpdateRequest;
+import pl.newsler.components.user.usecase.UserDeleteRequest;
+import pl.newsler.components.user.usecase.UserGetRequest;
+import pl.newsler.components.user.usecase.UserGetResponse;
+import pl.newsler.components.user.usecase.UserUpdateRequest;
 
 @RequestMapping(NLApi.V1 + "/api/users")
 public interface IUserController {

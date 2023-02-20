@@ -3,8 +3,8 @@ package pl.newsler.components.receiver;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import pl.newsler.commons.models.NLEmail;
-import pl.newsler.commons.models.NLUuid;
+import pl.newsler.commons.model.NLEmail;
+import pl.newsler.commons.model.NLUuid;
 
 import java.util.List;
 import java.util.Optional;

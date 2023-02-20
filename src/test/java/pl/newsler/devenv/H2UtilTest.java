@@ -3,12 +3,12 @@ package pl.newsler.devenv;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import pl.newsler.commons.models.NLEmail;
-import pl.newsler.commons.models.NLFirstName;
-import pl.newsler.commons.models.NLLastName;
-import pl.newsler.commons.models.NLSecretKey;
-import pl.newsler.commons.models.NLSmtpAccount;
-import pl.newsler.components.emaillabs.dto.ELAMailSendRequest;
+import pl.newsler.commons.model.NLEmail;
+import pl.newsler.commons.model.NLFirstName;
+import pl.newsler.commons.model.NLLastName;
+import pl.newsler.commons.model.NLSecretKey;
+import pl.newsler.commons.model.NLSmtpAccount;
+import pl.newsler.components.emaillabs.usecase.ELAMailSendRequest;
 
 class H2UtilTest {
     @Test

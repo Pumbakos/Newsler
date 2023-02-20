@@ -1,9 +1,9 @@
 package pl.newsler.components.signup;
 
 import org.jetbrains.annotations.NotNull;
-import pl.newsler.commons.models.NLId;
-import pl.newsler.commons.models.NLToken;
-import pl.newsler.commons.models.NLUuid;
+import pl.newsler.commons.model.NLId;
+import pl.newsler.commons.model.NLToken;
+import pl.newsler.commons.model.NLUuid;
 import pl.newsler.testcommons.InMemoryJpaRepository;
 
 import java.time.LocalDateTime;

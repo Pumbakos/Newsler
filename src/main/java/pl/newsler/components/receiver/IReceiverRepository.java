@@ -1,8 +1,8 @@
 package pl.newsler.components.receiver;
 
-import pl.newsler.commons.models.NLEmail;
-import pl.newsler.commons.models.NLUuid;
-import pl.newsler.commons.models.NLVersion;
+import pl.newsler.commons.model.NLEmail;
+import pl.newsler.commons.model.NLUuid;
+import pl.newsler.commons.model.NLVersion;
 
 import java.util.List;
 import java.util.Optional;

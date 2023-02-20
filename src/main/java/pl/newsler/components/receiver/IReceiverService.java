@@ -1,8 +1,8 @@
 package pl.newsler.components.receiver;
 
 import pl.newsler.commons.exception.InvalidReceiverDataException;
-import pl.newsler.components.receiver.dto.ReceiverGetResponse;
-import pl.newsler.components.receiver.dto.ReceiverCreateRequest;
+import pl.newsler.components.receiver.usecase.ReceiverGetResponse;
+import pl.newsler.components.receiver.usecase.ReceiverCreateRequest;
 
 import java.util.List;
 

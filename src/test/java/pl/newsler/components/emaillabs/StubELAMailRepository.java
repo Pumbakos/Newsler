@@ -1,7 +1,7 @@
 package pl.newsler.components.emaillabs;
 
 import org.jetbrains.annotations.NotNull;
-import pl.newsler.commons.models.NLUuid;
+import pl.newsler.commons.model.NLUuid;
 import pl.newsler.testcommons.InMemoryJpaRepository;
 
 import java.util.List;

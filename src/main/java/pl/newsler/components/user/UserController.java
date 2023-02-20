@@ -5,10 +5,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.IUserController;
-import pl.newsler.components.user.dto.UserGetRequest;
-import pl.newsler.components.user.dto.UserDeleteRequest;
-import pl.newsler.components.user.dto.UserGetResponse;
-import pl.newsler.components.user.dto.UserUpdateRequest;
+import pl.newsler.components.user.usecase.UserGetRequest;
+import pl.newsler.components.user.usecase.UserDeleteRequest;
+import pl.newsler.components.user.usecase.UserGetResponse;
+import pl.newsler.components.user.usecase.UserUpdateRequest;
 
 @RestController
 @RequiredArgsConstructor

@@ -1,10 +1,10 @@
 package pl.newsler.components.emaillabs;
 
 import lombok.RequiredArgsConstructor;
-import pl.newsler.commons.models.NLEmail;
-import pl.newsler.commons.models.NLUuid;
-import pl.newsler.components.emaillabs.dto.ELAGetMailResponse;
-import pl.newsler.components.emaillabs.dto.ELAMailSendRequest;
+import pl.newsler.commons.model.NLEmail;
+import pl.newsler.commons.model.NLUuid;
+import pl.newsler.components.emaillabs.usecase.ELAGetMailResponse;
+import pl.newsler.components.emaillabs.usecase.ELAMailSendRequest;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.commons.exception.InvalidUserDataException;

@@ -1,7 +1,7 @@
 package pl.newsler.security;
 
 import org.springframework.util.ResourceUtils;
-import pl.newsler.resources.FixedResourceLoader;
+import pl.newsler.resource.FixedResourceLoader;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

@@ -1,10 +1,10 @@
 package pl.newsler.testcommons;
 
 import pl.newsler.auth.UserAuthModel;
-import pl.newsler.components.signup.dto.UserCreateRequest;
-import pl.newsler.components.user.dto.UserDeleteRequest;
-import pl.newsler.components.user.dto.UserGetRequest;
-import pl.newsler.components.user.dto.UserUpdateRequest;
+import pl.newsler.components.signup.usecase.UserCreateRequest;
+import pl.newsler.components.user.usecase.UserDeleteRequest;
+import pl.newsler.components.user.usecase.UserGetRequest;
+import pl.newsler.components.user.usecase.UserUpdateRequest;
 import pl.newsler.security.NLIPasswordEncoder;
 
 public class ObjectEncoder {

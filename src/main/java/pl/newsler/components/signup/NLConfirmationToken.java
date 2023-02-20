@@ -15,9 +15,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import pl.newsler.commons.models.NLId;
-import pl.newsler.commons.models.NLToken;
-import pl.newsler.commons.models.NLUuid;
+import pl.newsler.commons.model.NLId;
+import pl.newsler.commons.model.NLToken;
+import pl.newsler.commons.model.NLUuid;
 
 import java.time.LocalDateTime;
 

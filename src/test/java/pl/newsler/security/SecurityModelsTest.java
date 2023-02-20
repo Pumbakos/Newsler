@@ -3,7 +3,7 @@ package pl.newsler.security;
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import pl.newsler.commons.models.NLUuid;
+import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.TestUserFactory;
 

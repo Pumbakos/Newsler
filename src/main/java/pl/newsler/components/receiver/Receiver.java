@@ -13,13 +13,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import pl.newsler.commons.models.NLEmail;
-import pl.newsler.commons.models.NLFirstName;
-import pl.newsler.commons.models.NLLastName;
-import pl.newsler.commons.models.NLNickname;
-import pl.newsler.commons.models.NLUuid;
-import pl.newsler.commons.models.NLVersion;
-import pl.newsler.components.receiver.dto.ReceiverGetResponse;
+import pl.newsler.commons.model.NLEmail;
+import pl.newsler.commons.model.NLFirstName;
+import pl.newsler.commons.model.NLLastName;
+import pl.newsler.commons.model.NLNickname;
+import pl.newsler.commons.model.NLUuid;
+import pl.newsler.commons.model.NLVersion;
+import pl.newsler.components.receiver.usecase.ReceiverGetResponse;
 
 import java.io.Serializable;
 

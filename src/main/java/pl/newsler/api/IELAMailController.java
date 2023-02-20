@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import pl.newsler.commons.exception.InvalidUserDataException;
-import pl.newsler.components.emaillabs.dto.ELAGetMailResponse;
-import pl.newsler.components.emaillabs.dto.ELAMailSendRequest;
+import pl.newsler.components.emaillabs.usecase.ELAGetMailResponse;
+import pl.newsler.components.emaillabs.usecase.ELAMailSendRequest;
 
 import java.util.List;
 

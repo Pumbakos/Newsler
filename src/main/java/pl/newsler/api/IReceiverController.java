@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import pl.newsler.components.receiver.dto.ReceiverGetResponse;
-import pl.newsler.components.receiver.dto.ReceiverCreateRequest;
+import pl.newsler.components.receiver.usecase.ReceiverGetResponse;
+import pl.newsler.components.receiver.usecase.ReceiverCreateRequest;
 
 import java.util.List;
 

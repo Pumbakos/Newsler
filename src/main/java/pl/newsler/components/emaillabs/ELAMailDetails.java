@@ -1,8 +1,8 @@
 package pl.newsler.components.emaillabs;
 
-import pl.newsler.commons.models.NLUuid;
-import pl.newsler.commons.models.NLIdType;
-import pl.newsler.components.emaillabs.dto.ELAMailSendRequest;
+import pl.newsler.commons.model.NLUuid;
+import pl.newsler.commons.model.NLIdType;
+import pl.newsler.components.emaillabs.usecase.ELAMailSendRequest;
 
 import java.util.List;
 import java.util.UUID;

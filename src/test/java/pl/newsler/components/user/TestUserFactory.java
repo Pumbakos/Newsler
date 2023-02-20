@@ -1,10 +1,10 @@
 package pl.newsler.components.user;
 
-import pl.newsler.commons.models.NLEmail;
-import pl.newsler.commons.models.NLFirstName;
-import pl.newsler.commons.models.NLLastName;
-import pl.newsler.commons.models.NLPassword;
-import pl.newsler.commons.models.NLUserType;
+import pl.newsler.commons.model.NLEmail;
+import pl.newsler.commons.model.NLFirstName;
+import pl.newsler.commons.model.NLLastName;
+import pl.newsler.commons.model.NLPassword;
+import pl.newsler.commons.model.NLUserType;
 
 import static pl.newsler.testcommons.TestUserUtils.domain;
 import static pl.newsler.testcommons.TestUserUtils.firstName;

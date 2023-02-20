@@ -3,9 +3,9 @@ package pl.newsler.security;
 import lombok.Getter;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import pl.newsler.commons.models.NLEmail;
-import pl.newsler.commons.models.NLUuid;
-import pl.newsler.commons.models.NLName;
+import pl.newsler.commons.model.NLEmail;
+import pl.newsler.commons.model.NLUuid;
+import pl.newsler.commons.model.NLName;
 
 import javax.security.auth.Subject;
 import java.io.Serializable;

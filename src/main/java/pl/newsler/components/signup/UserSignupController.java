@@ -12,11 +12,11 @@ import pl.newsler.commons.exception.EmailAlreadyConfirmedException;
 import pl.newsler.commons.exception.InvalidTokenException;
 import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.exception.TokenExpiredException;
-import pl.newsler.commons.models.NLStringValue;
-import pl.newsler.commons.models.NLToken;
+import pl.newsler.commons.model.NLStringValue;
+import pl.newsler.commons.model.NLToken;
 import pl.newsler.commons.utillity.ObjectUtils;
-import pl.newsler.components.signup.dto.UserCreateRequest;
-import pl.newsler.components.signup.dto.UserResendTokenRequest;
+import pl.newsler.components.signup.usecase.UserCreateRequest;
+import pl.newsler.components.signup.usecase.UserResendTokenRequest;
 
 @RestController
 @RequiredArgsConstructor

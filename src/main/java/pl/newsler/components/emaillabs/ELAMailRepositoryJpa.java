@@ -3,7 +3,7 @@ package pl.newsler.components.emaillabs;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import pl.newsler.commons.models.NLUuid;
+import pl.newsler.commons.model.NLUuid;
 
 import java.util.List;
 

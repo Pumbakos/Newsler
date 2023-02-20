@@ -3,7 +3,6 @@ package pl.newsler.testcommons;
 import com.github.javafaker.Faker;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import pl.newsler.commons.models.NLEmail;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestUserUtils {

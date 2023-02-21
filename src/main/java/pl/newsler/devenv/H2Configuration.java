@@ -16,7 +16,7 @@ import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.IELAMailRepository;
-import pl.newsler.components.emaillabs.ELAMailDetails;
+import pl.newsler.components.emaillabs.executor.ELAInstantMailDetails;
 import pl.newsler.components.emaillabs.ELAUserMail;
 import pl.newsler.components.receiver.IReceiverRepository;
 import pl.newsler.components.receiver.Receiver;
@@ -138,7 +138,7 @@ class H2Configuration {
 
     private void saveUserMails(final NLUser user) {
         for (int i = 0; i < random.nextInt(9) + 5; i++) {
-            mailRepository.save(ELAUserMail.of(user.map().getId(), ELAMailDetails.of(H2Util.createMailSendRequest(user.getEmail().getValue()))));
+            mailRepository.save(ELAUserMail.of(user.map().getId(), ELAInstantMailDetails.of(H2Util.createMailSendRequest(user.getEmail().getValue()))));
         }
     }
 

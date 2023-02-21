@@ -1,5 +1,6 @@
 package pl.newsler.components.emaillabs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
@@ -30,6 +31,8 @@ import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
 import pl.newsler.commons.model.NLUuid;
+import pl.newsler.components.emaillabs.executor.ELAInstantMailDetails;
+import pl.newsler.components.emaillabs.executor.ELAUrlParamBuilder;
 import pl.newsler.components.emaillabs.usecase.ELAGetMailResponse;
 import pl.newsler.components.emaillabs.usecase.ELAMailSendRequest;
 import pl.newsler.components.emaillabs.usecase.ELASendMailResponse;
@@ -68,8 +71,9 @@ class MailModuleTest {
 
     @BeforeEach
     void beforeEach() {
-        RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-        service = configuration.mailService(configuration.taskExecutor(restTemplate));
+        final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+        final ObjectMapper objectMapper = new ObjectMapper();
+        service = configuration.mailService(configuration.taskInstantExecutor(restTemplate, objectMapper), configuration.taskScheduledExecutor(restTemplate, objectMapper));
         mockServer = MockRestServiceServer.createServer(restTemplate);
         controller = new ELAMailController(service);
 
@@ -116,7 +120,7 @@ class MailModuleTest {
         final NLUser user = users.get(0);
         final ELAMailSendRequest request = createMailRequest(users, user);
 
-        ResponseEntity<HttpStatus> response = controller.queue(request);
+        ResponseEntity<HttpStatus> response = controller.queueAndExecute(request);
         Assertions.assertNotNull(response);
         Assertions.assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
     }
@@ -135,10 +139,10 @@ class MailModuleTest {
                 List.of(""),
                 "MOCK TEST",
                 "MOCK TEST MESSAGE"
-        );
+                );
 
         try {
-            controller.queue(request);
+            controller.queueAndExecute(request);
             Assertions.fail();
         } catch (NLException e) {
             ResponseEntity<NLError> response = handler.handleException(e);
@@ -160,9 +164,9 @@ class MailModuleTest {
         final ELAMailSendRequest second = createMailRequest(users, user);
         final ELAMailSendRequest third = createMailRequest(users, user);
 
-        controller.queue(first);
-        controller.queue(second);
-        controller.queue(third);
+        controller.queueAndExecute(first);
+        controller.queueAndExecute(second);
+        controller.queueAndExecute(third);
 
         ResponseEntity<List<ELAGetMailResponse>> entity = controller.fetchAllMails(user.map().getId().getValue());
         Assertions.assertNotNull(entity);
@@ -204,7 +208,7 @@ class MailModuleTest {
                 List.of(""),
                 "MOCK TEST",
                 "MOCK TEST MESSAGE"
-        );
+                );
 
         Assertions.assertThrows(InvalidUserDataException.class, () -> service.queue(request));
     }
@@ -259,7 +263,7 @@ class MailModuleTest {
         }
         final NLUser user = users.get(0);
         final ELAMailSendRequest request = createMailRequest(users, user);
-        final ELAMailDetails details = ELAMailDetails.of(request);
+        final ELAInstantMailDetails details = ELAInstantMailDetails.of(request);
         final Map<String, String> params = new LinkedHashMap<>();
         final String name = String.format("%s %s", user.getFirstName(), user.getLastName());
 
@@ -300,9 +304,9 @@ class MailModuleTest {
                 null,
                 "MOCK TEST",
                 "MOCK TEST MESSAGE"
-        );
-        final ELAUserMail first = ELAUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), ELAMailDetails.of(requestForFirst));
-        final ELAUserMail second = ELAUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), ELAMailDetails.of(requestForSecond));
+                );
+        final ELAUserMail first = ELAUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), ELAInstantMailDetails.of(requestForFirst));
+        final ELAUserMail second = ELAUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), ELAInstantMailDetails.of(requestForSecond));
 
         Assertions.assertEquals(first, first);
         Assertions.assertEquals(first.toString(), first.toString());
@@ -321,7 +325,7 @@ class MailModuleTest {
         }
         final NLUser user = users.get(0);
         final ELAMailSendRequest request = createMailRequest(users, user);
-        final ELAUserMail first = ELAUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), ELAMailDetails.of(request));
+        final ELAUserMail first = ELAUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), ELAInstantMailDetails.of(request));
 
         Assertions.assertNotNull(first);
         Assertions.assertNotNull(first.getId());
@@ -379,6 +383,6 @@ class MailModuleTest {
                 List.of(""),
                 "MOCK TEST",
                 "MOCK TEST MESSAGE"
-        );
+                );
     }
 }

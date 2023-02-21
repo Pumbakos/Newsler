@@ -1,4 +1,4 @@
-package pl.newsler.components.emaillabs;
+package pl.newsler.components.emaillabs.executor;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

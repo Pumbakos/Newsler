@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Instant;
+import java.time.ZonedDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TimeResolver {
@@ -12,17 +12,17 @@ public class TimeResolver {
      * This is pretty simple solution that not covers date switch or leap year, but is sufficient for now.
      * @return time rounded to the next 'fifth' minute (meaning: if invocation is at 6:31 it will be rounded to 6:35)
      */
-    static Instant getStartTime() {
-        final Instant now = Instant.now(); // declaration is split to simplify testing
+    static ZonedDateTime getStartTime() {
+        final ZonedDateTime now = ZonedDateTime.now(); // declaration is split to simplify testing
         final String dateTime = now.toString();
         final String[] splitDateTime = dateTime.split("T");
         final String date = splitDateTime[0];
         final String[] time = splitDateTime[1].split(":");
         final int hour = Integer.parseInt(time[0]);
-        final int minutes = Integer.parseInt(time[1]);
-        final String secondsAndMillis = ":00.000000000Z";
-        final String roundedTime = date + "T" + getClosestRoundedHour(hour, minutes) + secondsAndMillis;
-        return Instant.parse(roundedTime);
+        final int minutes = Integer.parseInt(time[1].split("\\+")[0]);
+        final String secondsAndMillis = splitDateTime[1].split("\\+")[1];
+        final String roundedTime = date + "T" + getClosestRoundedHour(hour, minutes) + "+" + secondsAndMillis;
+        return ZonedDateTime.parse(roundedTime);
     }
 
     private static CharSequence getClosestRoundedHour(int hour, int minutes) {

@@ -5,231 +5,245 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import java.time.Instant;
+import java.time.ZonedDateTime;
 
 @SuppressWarnings("java:S5976") // not applicable
 class TimeResolverTest {
     @Test
     void shouldGetClosestStartTimeAndRoundMinutes() {
-        final Instant parse = Instant.parse("2012-09-26T06:43:00.000000000Z");
-        final String stringifyInstant = "2012-09-26T06:45:00.000000000Z";
-        final Instant rounded = Instant.parse(stringifyInstant);
+        String zoneOffset = ZonedDateTime.now().toString().split("\\+")[1];
+        final ZonedDateTime parse = ZonedDateTime.parse(String.format("2012-09-26T06:43+%s", zoneOffset));
+        final String stringifyInstant = String.format("2012-09-26T06:45+%s", zoneOffset);
+        final ZonedDateTime rounded = ZonedDateTime.parse(stringifyInstant);
 
-        try (MockedStatic<Instant> utilities = Mockito.mockStatic(Instant.class)) {
-            utilities.when(Instant::now).thenReturn(parse);
-            utilities.when(() -> Instant.parse(stringifyInstant)).thenReturn(rounded);
-            Assertions.assertEquals(Instant.now(), parse);
+        try (MockedStatic<ZonedDateTime> utilities = Mockito.mockStatic(ZonedDateTime.class)) {
+            utilities.when(ZonedDateTime::now).thenReturn(parse);
+            utilities.when(() -> ZonedDateTime.parse(rounded.toString())).thenReturn(rounded);
+            Assertions.assertEquals(ZonedDateTime.now(), parse);
 
-            Instant startTime = TimeResolver.getStartTime();
-            Assertions.assertEquals(startTime, rounded);
+            ZonedDateTime startTime = TimeResolver.getStartTime();
+            Assertions.assertEquals(rounded, startTime);
         }
     }
 
     @Test
     void shouldGetClosestStartTimeAndRoundMinutesAndHour() {
-        final Instant parse = Instant.parse("2012-09-26T06:57:00.000000000Z");
-        final String stringifyInstant = "2012-09-26T07:00:00.000000000Z";
-        final Instant rounded = Instant.parse(stringifyInstant);
+        String zoneOffset = ZonedDateTime.now().toString().split("\\+")[1];
+        final ZonedDateTime parse = ZonedDateTime.parse(String.format("2012-09-26T06:57+%s", zoneOffset));
+        final String stringifyInstant = String.format("2012-09-26T07:00+%s", zoneOffset);
+        final ZonedDateTime rounded = ZonedDateTime.parse(stringifyInstant);
 
-        try (MockedStatic<Instant> utilities = Mockito.mockStatic(Instant.class)) {
-            utilities.when(Instant::now).thenReturn(parse);
-            utilities.when(() -> Instant.parse(stringifyInstant)).thenReturn(rounded);
-            Assertions.assertEquals(Instant.now(), parse);
+        try (MockedStatic<ZonedDateTime> utilities = Mockito.mockStatic(ZonedDateTime.class)) {
+            utilities.when(ZonedDateTime::now).thenReturn(parse);
+            utilities.when(() -> ZonedDateTime.parse(rounded.toString())).thenReturn(rounded);
 
-            Instant startTime = TimeResolver.getStartTime();
-            Assertions.assertEquals(startTime, rounded);
+            Assertions.assertEquals(ZonedDateTime.now(), parse);
+            ZonedDateTime startTime = TimeResolver.getStartTime();
+            Assertions.assertEquals(rounded, startTime);
         }
     }
 
     @Test
     void shouldGetClosestStartTimeAndRoundMinutesAndHourWhenMidnight() {
-        final Instant parse = Instant.parse("2012-09-26T23:57:00.000000000Z");
-        final String stringifyInstant = "2012-09-26T00:00:00.000000000Z";
-        final Instant rounded = Instant.parse(stringifyInstant);
+        String zoneOffset = ZonedDateTime.now().toString().split("\\+")[1];
+        final ZonedDateTime parse = ZonedDateTime.parse(String.format("2012-09-26T23:57+%s", zoneOffset));
+        final String stringifyInstant = String.format("2012-09-27T00:00+%s", zoneOffset);
+        final ZonedDateTime rounded = ZonedDateTime.parse(stringifyInstant);
 
-        try (MockedStatic<Instant> utilities = Mockito.mockStatic(Instant.class)) {
-            utilities.when(Instant::now).thenReturn(parse);
-            utilities.when(() -> Instant.parse(stringifyInstant)).thenReturn(rounded);
-            Assertions.assertEquals(Instant.now(), parse);
+        try (MockedStatic<ZonedDateTime> utilities = Mockito.mockStatic(ZonedDateTime.class)) {
+            utilities.when(ZonedDateTime::now).thenReturn(parse);
+            utilities.when(() -> ZonedDateTime.parse(rounded.toString())).thenReturn(rounded);
 
-            Instant startTime = TimeResolver.getStartTime();
-            Assertions.assertEquals(startTime, rounded);
+            Assertions.assertEquals(ZonedDateTime.now(), parse);
+            ZonedDateTime startTime = TimeResolver.getStartTime();
+            Assertions.assertEquals(rounded, startTime);
         }
     }
 
     @Test
     void shouldGetClosestStartTimeAndRoundMinutesTo05() {
-        final Instant parse = Instant.parse("2012-09-26T07:00:00.000000000Z");
-        final String stringifyInstant = "2012-09-26T07:05:00.000000000Z";
-        final Instant rounded = Instant.parse(stringifyInstant);
+        String zoneOffset = ZonedDateTime.now().toString().split("\\+")[1];
+        final ZonedDateTime parse = ZonedDateTime.parse(String.format("2012-09-26T07:00+%s", zoneOffset));
+        final String stringifyInstant = String.format("2012-09-26T07:05+%s", zoneOffset);
+        final ZonedDateTime rounded = ZonedDateTime.parse(stringifyInstant);
 
-        try (MockedStatic<Instant> utilities = Mockito.mockStatic(Instant.class)) {
-            utilities.when(Instant::now).thenReturn(parse);
-            utilities.when(() -> Instant.parse(stringifyInstant)).thenReturn(rounded);
-            Assertions.assertEquals(Instant.now(), parse);
+        try (MockedStatic<ZonedDateTime> utilities = Mockito.mockStatic(ZonedDateTime.class)) {
+            utilities.when(ZonedDateTime::now).thenReturn(parse);
+            utilities.when(() -> ZonedDateTime.parse(rounded.toString())).thenReturn(rounded);
 
-            Instant startTime = TimeResolver.getStartTime();
-            Assertions.assertEquals(startTime, rounded);
+            Assertions.assertEquals(ZonedDateTime.now(), parse);
+            ZonedDateTime startTime = TimeResolver.getStartTime();
+            Assertions.assertEquals(rounded, startTime);
         }
     }
 
     @Test
     void shouldGetClosestStartTimeAndRoundMinutesTo10() {
-        final Instant parse = Instant.parse("2012-09-26T07:08:00.000000000Z");
-        final String stringifyInstant = "2012-09-26T07:10:00.000000000Z";
-        final Instant rounded = Instant.parse(stringifyInstant);
+        String zoneOffset = ZonedDateTime.now().toString().split("\\+")[1];
+        final ZonedDateTime parse = ZonedDateTime.parse(String.format("2012-09-26T07:08+%s", zoneOffset));
+        final String stringifyInstant = String.format("2012-09-26T07:10+%s", zoneOffset);
+        final ZonedDateTime rounded = ZonedDateTime.parse(stringifyInstant);
 
-        try (MockedStatic<Instant> utilities = Mockito.mockStatic(Instant.class)) {
-            utilities.when(Instant::now).thenReturn(parse);
-            utilities.when(() -> Instant.parse(stringifyInstant)).thenReturn(rounded);
-            Assertions.assertEquals(Instant.now(), parse);
+        try (MockedStatic<ZonedDateTime> utilities = Mockito.mockStatic(ZonedDateTime.class)) {
+            utilities.when(ZonedDateTime::now).thenReturn(parse);
+            utilities.when(() -> ZonedDateTime.parse(rounded.toString())).thenReturn(rounded);
 
-            Instant startTime = TimeResolver.getStartTime();
-            Assertions.assertEquals(startTime, rounded);
+            Assertions.assertEquals(ZonedDateTime.now(), parse);
+            ZonedDateTime startTime = TimeResolver.getStartTime();
+            Assertions.assertEquals(rounded, startTime);
         }
     }
 
     @Test
     void shouldGetClosestStartTimeAndRoundMinutesTo15() {
-        final Instant parse = Instant.parse("2012-09-26T07:13:00.000000000Z");
-        final String stringifyInstant = "2012-09-26T07:15:00.000000000Z";
-        final Instant rounded = Instant.parse(stringifyInstant);
+        String zoneOffset = ZonedDateTime.now().toString().split("\\+")[1];
+        final ZonedDateTime parse = ZonedDateTime.parse(String.format("2012-09-26T07:13+%s", zoneOffset));
+        final String stringifyInstant = String.format("2012-09-26T07:15+%s", zoneOffset);
+        final ZonedDateTime rounded = ZonedDateTime.parse(stringifyInstant);
 
-        try (MockedStatic<Instant> utilities = Mockito.mockStatic(Instant.class)) {
-            utilities.when(Instant::now).thenReturn(parse);
-            utilities.when(() -> Instant.parse(stringifyInstant)).thenReturn(rounded);
-            Assertions.assertEquals(Instant.now(), parse);
+        try (MockedStatic<ZonedDateTime> utilities = Mockito.mockStatic(ZonedDateTime.class)) {
+            utilities.when(ZonedDateTime::now).thenReturn(parse);
+            utilities.when(() -> ZonedDateTime.parse(rounded.toString())).thenReturn(rounded);
 
-            Instant startTime = TimeResolver.getStartTime();
-            Assertions.assertEquals(startTime, rounded);
+            Assertions.assertEquals(ZonedDateTime.now(), parse);
+            ZonedDateTime startTime = TimeResolver.getStartTime();
+            Assertions.assertEquals(rounded, startTime);
         }
     }
 
     @Test
     void shouldGetClosestStartTimeAndRoundMinutesTo20() {
-        final Instant parse = Instant.parse("2012-09-26T07:18:00.000000000Z");
-        final String stringifyInstant = "2012-09-26T07:20:00.000000000Z";
-        final Instant rounded = Instant.parse(stringifyInstant);
+        String zoneOffset = ZonedDateTime.now().toString().split("\\+")[1];
+        final ZonedDateTime parse = ZonedDateTime.parse(String.format("2012-09-26T07:18+%s", zoneOffset));
+        final String stringifyInstant = String.format("2012-09-26T07:20+%s", zoneOffset);
+        final ZonedDateTime rounded = ZonedDateTime.parse(stringifyInstant);
 
-        try (MockedStatic<Instant> utilities = Mockito.mockStatic(Instant.class)) {
-            utilities.when(Instant::now).thenReturn(parse);
-            utilities.when(() -> Instant.parse(stringifyInstant)).thenReturn(rounded);
-            Assertions.assertEquals(Instant.now(), parse);
+        try (MockedStatic<ZonedDateTime> utilities = Mockito.mockStatic(ZonedDateTime.class)) {
+            utilities.when(ZonedDateTime::now).thenReturn(parse);
+            utilities.when(() -> ZonedDateTime.parse(rounded.toString())).thenReturn(rounded);
 
-            Instant startTime = TimeResolver.getStartTime();
-            Assertions.assertEquals(startTime, rounded);
+            Assertions.assertEquals(ZonedDateTime.now(), parse);
+            ZonedDateTime startTime = TimeResolver.getStartTime();
+            Assertions.assertEquals(rounded, startTime);
         }
     }
 
     @Test
     void shouldGetClosestStartTimeAndRoundMinutesTo25() {
-        final Instant parse = Instant.parse("2012-09-26T07:23:00.000000000Z");
-        final String stringifyInstant = "2012-09-26T07:25:00.000000000Z";
-        final Instant rounded = Instant.parse(stringifyInstant);
+        String zoneOffset = ZonedDateTime.now().toString().split("\\+")[1];
+        final ZonedDateTime parse = ZonedDateTime.parse(String.format("2012-09-26T07:23+%s", zoneOffset));
+        final String stringifyInstant = String.format("2012-09-26T07:25+%s", zoneOffset);
+        final ZonedDateTime rounded = ZonedDateTime.parse(stringifyInstant);
 
-        try (MockedStatic<Instant> utilities = Mockito.mockStatic(Instant.class)) {
-            utilities.when(Instant::now).thenReturn(parse);
-            utilities.when(() -> Instant.parse(stringifyInstant)).thenReturn(rounded);
-            Assertions.assertEquals(Instant.now(), parse);
+        try (MockedStatic<ZonedDateTime> utilities = Mockito.mockStatic(ZonedDateTime.class)) {
+            utilities.when(ZonedDateTime::now).thenReturn(parse);
+            utilities.when(() -> ZonedDateTime.parse(rounded.toString())).thenReturn(rounded);
 
-            Instant startTime = TimeResolver.getStartTime();
-            Assertions.assertEquals(startTime, rounded);
+            Assertions.assertEquals(ZonedDateTime.now(), parse);
+            ZonedDateTime startTime = TimeResolver.getStartTime();
+            Assertions.assertEquals(rounded, startTime);
         }
     }
 
     @Test
     void shouldGetClosestStartTimeAndRoundMinutesTo30() {
-        final Instant parse = Instant.parse("2012-09-26T07:28:00.000000000Z");
-        final String stringifyInstant = "2012-09-26T07:30:00.000000000Z";
-        final Instant rounded = Instant.parse(stringifyInstant);
+        String zoneOffset = ZonedDateTime.now().toString().split("\\+")[1];
+        final ZonedDateTime parse = ZonedDateTime.parse(String.format("2012-09-26T07:28+%s", zoneOffset));
+        final String stringifyInstant = String.format("2012-09-26T07:30+%s", zoneOffset);
+        final ZonedDateTime rounded = ZonedDateTime.parse(stringifyInstant);
 
-        try (MockedStatic<Instant> utilities = Mockito.mockStatic(Instant.class)) {
-            utilities.when(Instant::now).thenReturn(parse);
-            utilities.when(() -> Instant.parse(stringifyInstant)).thenReturn(rounded);
-            Assertions.assertEquals(Instant.now(), parse);
+        try (MockedStatic<ZonedDateTime> utilities = Mockito.mockStatic(ZonedDateTime.class)) {
+            utilities.when(ZonedDateTime::now).thenReturn(parse);
+            utilities.when(() -> ZonedDateTime.parse(rounded.toString())).thenReturn(rounded);
 
-            Instant startTime = TimeResolver.getStartTime();
-            Assertions.assertEquals(startTime, rounded);
+            Assertions.assertEquals(ZonedDateTime.now(), parse);
+            ZonedDateTime startTime = TimeResolver.getStartTime();
+            Assertions.assertEquals(rounded, startTime);
         }
     }
 
     @Test
     void shouldGetClosestStartTimeAndRoundMinutesTo35() {
-        final Instant parse = Instant.parse("2012-09-26T07:33:00.000000000Z");
-        final String stringifyInstant = "2012-09-26T07:35:00.000000000Z";
-        final Instant rounded = Instant.parse(stringifyInstant);
+        String zoneOffset = ZonedDateTime.now().toString().split("\\+")[1];
+        final ZonedDateTime parse = ZonedDateTime.parse(String.format("2012-09-26T07:33+%s", zoneOffset));
+        final String stringifyInstant = String.format("2012-09-26T07:35+%s", zoneOffset);
+        final ZonedDateTime rounded = ZonedDateTime.parse(stringifyInstant);
 
-        try (MockedStatic<Instant> utilities = Mockito.mockStatic(Instant.class)) {
-            utilities.when(Instant::now).thenReturn(parse);
-            utilities.when(() -> Instant.parse(stringifyInstant)).thenReturn(rounded);
-            Assertions.assertEquals(Instant.now(), parse);
+        try (MockedStatic<ZonedDateTime> utilities = Mockito.mockStatic(ZonedDateTime.class)) {
+            utilities.when(ZonedDateTime::now).thenReturn(parse);
+            utilities.when(() -> ZonedDateTime.parse(rounded.toString())).thenReturn(rounded);
 
-            Instant startTime = TimeResolver.getStartTime();
-            Assertions.assertEquals(startTime, rounded);
+            Assertions.assertEquals(ZonedDateTime.now(), parse);
+            ZonedDateTime startTime = TimeResolver.getStartTime();
+            Assertions.assertEquals(rounded, startTime);
         }
     }
 
     @Test
     void shouldGetClosestStartTimeAndRoundMinutesTo40() {
-        final Instant parse = Instant.parse("2012-09-26T07:38:00.000000000Z");
-        final String stringifyInstant = "2012-09-26T07:40:00.000000000Z";
-        final Instant rounded = Instant.parse(stringifyInstant);
+        String zoneOffset = ZonedDateTime.now().toString().split("\\+")[1];
+        final ZonedDateTime parse = ZonedDateTime.parse(String.format("2012-09-26T07:38+%s", zoneOffset));
+        final String stringifyInstant = String.format("2012-09-26T07:40+%s", zoneOffset);
+        final ZonedDateTime rounded = ZonedDateTime.parse(stringifyInstant);
 
-        try (MockedStatic<Instant> utilities = Mockito.mockStatic(Instant.class)) {
-            utilities.when(Instant::now).thenReturn(parse);
-            utilities.when(() -> Instant.parse(stringifyInstant)).thenReturn(rounded);
-            Assertions.assertEquals(Instant.now(), parse);
+        try (MockedStatic<ZonedDateTime> utilities = Mockito.mockStatic(ZonedDateTime.class)) {
+            utilities.when(ZonedDateTime::now).thenReturn(parse);
+            utilities.when(() -> ZonedDateTime.parse(rounded.toString())).thenReturn(rounded);
 
-            Instant startTime = TimeResolver.getStartTime();
-            Assertions.assertEquals(startTime, rounded);
+            Assertions.assertEquals(ZonedDateTime.now(), parse);
+            ZonedDateTime startTime = TimeResolver.getStartTime();
+            Assertions.assertEquals(rounded, startTime);
         }
     }
 
     @Test
     void shouldGetClosestStartTimeAndRoundMinutesTo45() {
-        final Instant parse = Instant.parse("2012-09-26T07:43:00.000000000Z");
-        final String stringifyInstant = "2012-09-26T07:45:00.000000000Z";
-        final Instant rounded = Instant.parse(stringifyInstant);
+        String zoneOffset = ZonedDateTime.now().toString().split("\\+")[1];
+        final ZonedDateTime parse = ZonedDateTime.parse(String.format("2012-09-26T07:43+%s", zoneOffset));
+        final String stringifyInstant = String.format("2012-09-26T07:45+%s", zoneOffset);
+        final ZonedDateTime rounded = ZonedDateTime.parse(stringifyInstant);
 
-        try (MockedStatic<Instant> utilities = Mockito.mockStatic(Instant.class)) {
-            utilities.when(Instant::now).thenReturn(parse);
-            utilities.when(() -> Instant.parse(stringifyInstant)).thenReturn(rounded);
-            Assertions.assertEquals(Instant.now(), parse);
+        try (MockedStatic<ZonedDateTime> utilities = Mockito.mockStatic(ZonedDateTime.class)) {
+            utilities.when(ZonedDateTime::now).thenReturn(parse);
+            utilities.when(() -> ZonedDateTime.parse(rounded.toString())).thenReturn(rounded);
 
-            Instant startTime = TimeResolver.getStartTime();
-            Assertions.assertEquals(startTime, rounded);
+            Assertions.assertEquals(ZonedDateTime.now(), parse);
+            ZonedDateTime startTime = TimeResolver.getStartTime();
+            Assertions.assertEquals(rounded, startTime);
         }
     }
 
     @Test
     void shouldGetClosestStartTimeAndRoundMinutesTo50() {
-        final Instant parse = Instant.parse("2012-09-26T07:48:00.000000000Z");
-        final String stringifyInstant = "2012-09-26T07:50:00.000000000Z";
-        final Instant rounded = Instant.parse(stringifyInstant);
+        String zoneOffset = ZonedDateTime.now().toString().split("\\+")[1];
+        final ZonedDateTime parse = ZonedDateTime.parse(String.format("2012-09-26T07:48+%s", zoneOffset));
+        final String stringifyInstant = String.format("2012-09-26T07:50+%s", zoneOffset);
+        final ZonedDateTime rounded = ZonedDateTime.parse(stringifyInstant);
 
-        try (MockedStatic<Instant> utilities = Mockito.mockStatic(Instant.class)) {
-            utilities.when(Instant::now).thenReturn(parse);
-            utilities.when(() -> Instant.parse(stringifyInstant)).thenReturn(rounded);
-            Assertions.assertEquals(Instant.now(), parse);
+        try (MockedStatic<ZonedDateTime> utilities = Mockito.mockStatic(ZonedDateTime.class)) {
+            utilities.when(ZonedDateTime::now).thenReturn(parse);
+            utilities.when(() -> ZonedDateTime.parse(rounded.toString())).thenReturn(rounded);
 
-            Instant startTime = TimeResolver.getStartTime();
-            Assertions.assertEquals(startTime, rounded);
+            Assertions.assertEquals(ZonedDateTime.now(), parse);
+            ZonedDateTime startTime = TimeResolver.getStartTime();
+            Assertions.assertEquals(rounded, startTime);
         }
     }
 
     @Test
     void shouldGetClosestStartTimeAndRoundMinutesTo55() {
-        final Instant parse = Instant.parse("2012-09-26T07:53:00.000000000Z");
-        final String stringifyInstant = "2012-09-26T07:55:00.000000000Z";
-        final Instant rounded = Instant.parse(stringifyInstant);
+        String zoneOffset = ZonedDateTime.now().toString().split("\\+")[1];
+        final ZonedDateTime parse = ZonedDateTime.parse(String.format("2012-09-26T07:53+%s", zoneOffset));
+        final String stringifyInstant = String.format("2012-09-26T07:55+%s", zoneOffset);
+        final ZonedDateTime rounded = ZonedDateTime.parse(stringifyInstant);
 
-        try (MockedStatic<Instant> utilities = Mockito.mockStatic(Instant.class)) {
-            utilities.when(Instant::now).thenReturn(parse);
-            utilities.when(() -> Instant.parse(stringifyInstant)).thenReturn(rounded);
-            Assertions.assertEquals(Instant.now(), parse);
+        try (MockedStatic<ZonedDateTime> utilities = Mockito.mockStatic(ZonedDateTime.class)) {
+            utilities.when(ZonedDateTime::now).thenReturn(parse);
+            utilities.when(() -> ZonedDateTime.parse(rounded.toString())).thenReturn(rounded);
 
-            Instant startTime = TimeResolver.getStartTime();
-            Assertions.assertEquals(startTime, rounded);
+            Assertions.assertEquals(ZonedDateTime.now(), parse);
+            ZonedDateTime startTime = TimeResolver.getStartTime();
+            Assertions.assertEquals(rounded, startTime);
         }
     }
 }

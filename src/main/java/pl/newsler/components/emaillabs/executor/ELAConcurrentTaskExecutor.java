@@ -20,7 +20,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import pl.newsler.commons.model.NLEmailStatus;
-import pl.newsler.commons.model.NLExecutionDate;
 import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.ELAParam;
@@ -32,6 +31,7 @@ import pl.newsler.components.htmlremover.HtmlTagRemover;
 import pl.newsler.components.receiver.IReceiverService;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
+import pl.newsler.internal.exception.ConfigurationException;
 import pl.newsler.security.NLIPasswordEncoder;
 
 import java.nio.charset.StandardCharsets;
@@ -44,7 +44,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.StringJoiner;
 
 @Slf4j
 public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
@@ -80,7 +79,15 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
 
     protected final void scheduleAtFixedRate(Runnable runnable, Duration duration) {
         if (taskExecutor instanceof ConcurrentTaskScheduler scheduler) {
-            scheduler.scheduleAtFixedRate(runnable, TimeResolver.getStartTime(), duration);
+            try {
+                Instant instant = TimeResolver.getStartTime().toInstant();
+                scheduler.scheduleAtFixedRate(runnable, instant, duration);
+                log.info("Scheduled mails queue will be executed first at {} with {} min interval", instant, duration.toMinutes());
+            } catch (Exception e) {
+                throw new ConfigurationException("Scheduled mails queue [ConcurrentTaskScheduler] could not be started, no scheduled mails will be sent.");
+            }
+        } else {
+            throw new ConfigurationException("Scheduled mails queue [ConcurrentTaskScheduler] could not be started, no scheduled mails will be sent.");
         }
     }
 

@@ -86,7 +86,7 @@ class JWTFilterTest {
         );
         String token = service.generateJWT(model);
         DecodedJWT decodedJWT = verify(token);
-        JWTResolver.resolveJWT(decodedJWT);
+        JWTResolver.resolveJWT(decodedJWT, standardUser);
 
         Assertions.assertEquals(String.valueOf(JWTClaim.JWT_ID), decodedJWT.getId());
         Assertions.assertEquals(JWTClaim.ISSUER, decodedJWT.getIssuer());
@@ -97,20 +97,24 @@ class JWTFilterTest {
 
     @Test
     void shouldNotResolveJWT() {
+        NLUser standardUser = factory.standard();
         Instant now = Instant.now();
         Assertions.assertFalse(
                 JWTResolver.resolveJWT(
-                        verify(generateToken(now, null, null, null, null, null, null))
+                        verify(generateToken(now, null, null, null, null, null, null)),
+                        standardUser
                 )
         );
         Assertions.assertFalse(
                 JWTResolver.resolveJWT(
-                        verify(generateToken(now, "", "", "", "", "", ""))
+                        verify(generateToken(now, "", "", "", "", "", "")),
+                        standardUser
                 )
         );
         Assertions.assertFalse(
                 JWTResolver.resolveJWT(
-                        verify(generateToken(now, "test", "test", "test", "test", "test", "test"))
+                        verify(generateToken(now, "test", "test", "test", "test", "test", "test")),
+                        standardUser
                 )
         );
 
@@ -118,7 +122,8 @@ class JWTFilterTest {
         Assertions.assertThrows(
                 InvalidTokenException.class,
                 () -> JWTResolver.resolveJWT(
-                        verify(generateToken(after, "test", "test", "test", "test", "test", "test"))
+                        verify(generateToken(after, "test", "test", "test", "test", "test", "test")),
+                        standardUser
                 )
         );
     }

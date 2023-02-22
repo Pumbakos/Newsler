@@ -15,9 +15,9 @@ import pl.newsler.commons.model.NLNickname;
 import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
 import pl.newsler.commons.model.NLUuid;
+import pl.newsler.components.emaillabs.ELAUserMail;
 import pl.newsler.components.emaillabs.IELAMailRepository;
 import pl.newsler.components.emaillabs.executor.ELAInstantMailDetails;
-import pl.newsler.components.emaillabs.ELAUserMail;
 import pl.newsler.components.receiver.IReceiverRepository;
 import pl.newsler.components.receiver.Receiver;
 import pl.newsler.components.signup.IConfirmationTokenRepository;
@@ -61,28 +61,27 @@ class H2Configuration {
     @SuppressWarnings("java:S112")
         //no need to define custom exception
     CommandLineRunner saveUsers(IUserSignupService signupService, IUserRepository userRepository, IConfirmationTokenRepository tokenRepository) {
-        final AtomicReference<String> appKey = new AtomicReference<>();
-        final AtomicReference<String> secretKey = new AtomicReference<>();
-        final AtomicReference<String> smtp = new AtomicReference<>();
-        final AtomicReference<String> email = new AtomicReference<>();
-
-        try {
-            appKey.set(System.getenv("NEWSLER_APP_KEY"));
-            secretKey.set(System.getenv("NEWSLER_SECRET_KEY"));
-            smtp.set(System.getenv("NEWSLER_SMTP"));
-            email.set(System.getenv("NEWSLER_EMAIL"));
-
-            if (envVariablesNotNull(appKey, secretKey, smtp, email)) {
-                throw new Exception();
-            }
-        } catch (Exception e) {
-            appKey.set(secretOrAppKey());
-            secretKey.set(secretOrAppKey());
-            smtp.set(smtpAccount());
-            email.set("newslerowsky@app.co.devenv");
-        }
-
         return args -> {
+            final AtomicReference<String> appKey = new AtomicReference<>();
+            final AtomicReference<String> secretKey = new AtomicReference<>();
+            final AtomicReference<String> smtp = new AtomicReference<>();
+            final AtomicReference<String> email = new AtomicReference<>();
+
+            try {
+                appKey.set(System.getenv("NEWSLER_APP_KEY"));
+                secretKey.set(System.getenv("NEWSLER_SECRET_KEY"));
+                smtp.set(System.getenv("NEWSLER_SMTP"));
+                email.set(System.getenv("NEWSLER_EMAIL"));
+
+                if (envVariablesNotNull(appKey, secretKey, smtp, email)) {
+                    throw new Exception();
+                }
+            } catch (Exception e) {
+                appKey.set(secretOrAppKey());
+                secretKey.set(secretOrAppKey());
+                smtp.set(smtpAccount());
+                email.set("newslerowsky@app.co.devenv");
+            }
             signupService.singUp(
                     new UserCreateRequest("Aizholat",
                             "Newsler",
@@ -102,18 +101,17 @@ class H2Configuration {
             tokenRepository.findAll().forEach(token -> token.setConfirmationDate(LocalDateTime.now()));
             final List<NLUser> all = userRepository.findAll();
             for (NLUser user : all) {
-                user.setEnabled(true);
                 saveUserMails(user);
                 saveUserReceivers(user);
 
-                if (user.getEmail().getValue().equals(passwordEncoder.encrypt(email.get()))) {
+                if (user.getEmail().getValue().equals(email.get())) {
                     user.setAppKey(NLAppKey.of(passwordEncoder.encrypt(appKey.get())));
                     user.setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(secretKey.get())));
                     user.setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(smtp.get())));
                 } else {
-                    user.setAppKey(NLAppKey.of(passwordEncoder.encrypt(secretOrAppKey())));
-                    user.setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(secretOrAppKey())));
-                    user.setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(smtpAccount())));
+                    user.setAppKey(NLAppKey.of(secretOrAppKey()));
+                    user.setSecretKey(NLSecretKey.of(secretOrAppKey()));
+                    user.setSmtpAccount(NLSmtpAccount.of(smtpAccount()));
                 }
 
                 userRepository.save(user);

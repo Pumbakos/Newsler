@@ -25,6 +25,7 @@ import java.util.Queue;
 @Slf4j
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class ELATaskScheduledExecutor extends ELAConcurrentTaskExecutor<ELAScheduleMailDetails> implements IELATaskScheduledExecutor {
+    @SuppressWarnings("java:S107")
     ELATaskScheduledExecutor(final Queue<Pair<NLUuid, ELAScheduleMailDetails>> queue, final ConcurrentTaskScheduler taskScheduler,
                              final NLIPasswordEncoder passwordEncoder, final IELAMailRepository mailRepository,
                              final IReceiverService receiverService, final IUserRepository userRepository,
@@ -49,7 +50,8 @@ public class ELATaskScheduledExecutor extends ELAConcurrentTaskExecutor<ELASched
         queue.add(Pair.of(userId, details));
     }
 
-    void scanQueue() { //add logger
+    void scanQueue() {
+        log.info("{} | Scanning queue...", ZonedDateTime.now());
         final ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT")).plusMinutes(5L);
         final LinkedList<Pair<NLUuid, ELAScheduleMailDetails>> toBeExecuted = new LinkedList<>();
         Iterator<Pair<NLUuid, ELAScheduleMailDetails>> iterator = queue.iterator();
@@ -57,13 +59,17 @@ public class ELATaskScheduledExecutor extends ELAConcurrentTaskExecutor<ELASched
         while (iterator.hasNext()) {
             Pair<NLUuid, ELAScheduleMailDetails> next = iterator.next();
             ZonedDateTime scheduleTime = next.getRight().zonedDateTime();
-            if (scheduleTime.isAfter(now) || scheduleTime.isEqual(now)) {
+            if (shouldBeSent(now, scheduleTime)) {
                 toBeExecuted.push(next);
                 iterator.remove();
             }
         }
 
         executeSchedule(toBeExecuted);
+    }
+
+    private static boolean shouldBeSent(final ZonedDateTime now, final ZonedDateTime scheduleTime) {
+        return scheduleTime.isBefore(now) || scheduleTime.isEqual(now);
     }
 
     void executeSchedule(final LinkedList<Pair<NLUuid, ELAScheduleMailDetails>> toBeExecuted) {

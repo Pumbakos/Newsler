@@ -27,7 +27,6 @@ import pl.newsler.components.emaillabs.ELAUserMail;
 import pl.newsler.components.emaillabs.IELAMailRepository;
 import pl.newsler.components.emaillabs.usecase.ELASendMailResponse;
 import pl.newsler.components.emaillabs.usecase.ELASentMailResults;
-import pl.newsler.components.htmlremover.HtmlTagRemover;
 import pl.newsler.components.receiver.IReceiverService;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
@@ -36,11 +35,9 @@ import pl.newsler.security.NLIPasswordEncoder;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.time.ZonedDateTime;
 import java.util.Base64;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -77,12 +74,12 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
         taskExecutor.execute(runnable);
     }
 
-    protected final void scheduleAtFixedRate(Runnable runnable, Duration duration) {
+    protected final void scheduleAtFixedRate(final Runnable runnable, final Duration duration) {
         if (taskExecutor instanceof ConcurrentTaskScheduler scheduler) {
             try {
-                Instant instant = TimeResolver.getStartTime().toInstant();
-                scheduler.scheduleAtFixedRate(runnable, instant, duration);
-                log.info("Scheduled mails queue will be executed first at {} with {} min interval", instant, duration.toMinutes());
+                ZonedDateTime startTime = TimeResolver.getStartTime();
+                scheduler.scheduleAtFixedRate(runnable, startTime.toInstant(), duration);
+                log.info("Scheduled mails queue will be executed first at {} with {} min interval", startTime, duration.toMinutes());
             } catch (Exception e) {
                 throw new ConfigurationException("Scheduled mails queue [ConcurrentTaskScheduler] could not be started, no scheduled mails will be sent.");
             }
@@ -91,33 +88,25 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
         }
     }
 
-    protected final ELASentMailResults call(NLUser user, T details) {
+    protected final ELASentMailResults call(final NLUser user, final T details) {
         log.info("Executing task {}", details.id());
-        final Map<String, String> params = new LinkedHashMap<>();
-        String userPass = passwordEncoder.decrypt(user.getAppKey().getValue()) + ":" + passwordEncoder.decrypt(user.getSecretKey().getValue());
-        String auth = "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
+        final String userPass = passwordEncoder.decrypt(user.getAppKey().getValue()) + ":" + passwordEncoder.decrypt(user.getSecretKey().getValue());
+        final String auth = "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
 
-        String name = String.format("%s %s", user.getFirstName(), user.getLastName());
-        params.put(ELAParam.FROM, user.getEmail().getValue());
-        params.put(ELAParam.FROM_NAME, name);
-        params.put(ELAParam.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
-        params.put(String.format(ELAParam.TO_ADDRESS_NAME, user.getEmail().getValue(), name), Arrays.toString(details.toAddresses().toArray()));
-        params.put(ELAParam.SUBJECT, details.subject());
-        params.put(ELAParam.HTML, details.message());
-        params.put(ELAParam.TEXT, HtmlTagRemover.remove(details.message()));
-
-        LinkedMultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        final LinkedMultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         headers.add(HttpHeaders.AUTHORIZATION, auth);
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 
-        HttpEntity<String> entity = new HttpEntity<>(ELAUrlParamBuilder.build(params), headers);
+        final Map<String, String> params = ELAParamBuilder.buildParamsMap(user, details);
+        params.put(ELAParam.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
 
-        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(BASE_URL)
+        final HttpEntity<String> entity = new HttpEntity<>(ELAParamBuilder.buildUrlEncoded(params), headers);
+        final UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(BASE_URL)
                 .path(SEND_MAIL_URL)
                 .build();
 
         try {
-            ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, entity, String.class);
+            final ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, entity, String.class);
             log.info("MAIL {} SENT", details.id());
             return handleResponse(response, details, user.map().getId());
         } catch (RestClientException e) {
@@ -126,7 +115,7 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
         }
     }
 
-    protected final ELASentMailResults handleResponse(ResponseEntity<String> response, T details, NLUuid userId) {
+    protected final ELASentMailResults handleResponse(final ResponseEntity<String> response, final T details, final NLUuid userId) {
         if (response == null) {
             return ELASentMailResults.of(details.id(), userId, NLEmailStatus.ERROR, "EmailLabs server did not respond", LocalDateTime.now());
         }

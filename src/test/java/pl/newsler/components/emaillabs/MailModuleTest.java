@@ -32,7 +32,7 @@ import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.executor.ELAInstantMailDetails;
-import pl.newsler.components.emaillabs.executor.ELAUrlParamBuilder;
+import pl.newsler.components.emaillabs.executor.ELAParamBuilder;
 import pl.newsler.components.emaillabs.usecase.ELAGetMailResponse;
 import pl.newsler.components.emaillabs.usecase.ELAMailSendRequest;
 import pl.newsler.components.emaillabs.usecase.ELASendMailResponse;
@@ -250,7 +250,7 @@ class MailModuleTest {
     @ParameterizedTest
     @NullAndEmptySource
     void shouldNotBuildParams(Map<String, String> map) {
-        String params = ELAUrlParamBuilder.build(map);
+        String params = ELAParamBuilder.buildUrlEncoded(map);
         Assertions.assertEquals("", params);
     }
 
@@ -270,12 +270,12 @@ class MailModuleTest {
         params.put(ELAParam.FROM, user.getEmail().getValue());
         params.put(ELAParam.FROM_NAME, name);
         params.put(ELAParam.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
-        params.put(String.format(ELAParam.TO_ADDRESS_NAME, user.getEmail().getValue(), name), Arrays.toString(details.toAddresses().toArray()));
+        params.put(String.format(ELAParam.TO, user.getEmail().getValue(), name), Arrays.toString(details.toAddresses().toArray()));
         params.put(ELAParam.SUBJECT, details.subject());
         params.put(ELAParam.HTML, String.format("<pre>%s</pre>", details.message()));
         params.put(ELAParam.TEXT, details.message());
 
-        final String paramsWithUrlEncoded = ELAUrlParamBuilder.build(params);
+        final String paramsWithUrlEncoded = ELAParamBuilder.buildUrlEncoded(params);
         final String paramsWithoutURLEncoding = buildWithoutURLEncoding(params);
         final String decodedParamsWithUrlEncoded = Arrays
                 .stream(paramsWithUrlEncoded.split("&"))

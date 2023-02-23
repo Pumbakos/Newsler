@@ -23,6 +23,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RequiredArgsConstructor
 class ELAMailService implements IELAMailService {
@@ -55,7 +56,13 @@ class ELAMailService implements IELAMailService {
                 throw new InvalidUserDataException();
             }
 
-            scheduledExecutor.schedule(optionalUser.get().map().getId(), ELAScheduleMailDetails.of(request, time.atZone(ZoneId.of(request.zone()))));
+            Set<String> availableZoneIds = ZoneId.getAvailableZoneIds();
+            boolean contains = availableZoneIds.contains(request.zone());
+
+            scheduledExecutor.schedule(
+                    optionalUser.get().map().getId(),
+                    ELAScheduleMailDetails.of(request, time.atZone(ZoneId.of(contains ? request.zone() : "Europe/Warsaw")))
+            );
         } catch (DateTimeException e) {
             throw new InvalidDateException();
         }

@@ -77,7 +77,7 @@ class ReceiverService implements IReceiverService {
                                 IReceiverRepository.version,
                                 uuid,
                                 NLEmail.of(address),
-                                NLNickname.of(""),
+                                NLNickname.of(address.split("@")[0]),
                                 NLFirstName.of(""),
                                 NLLastName.of(""),
                                 true

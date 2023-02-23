@@ -1,9 +1,13 @@
 package pl.newsler.components.emaillabs;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * <a href="https://dev.emaillabs.io/#api-Send-sendmail_templates">EmailLabs: Send e-mail with template API documentation</a>
  * <p><strong>Note:</strong> parameters are required unless stated otherwise</p>
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ELATemplateParam extends ELAParam {
     /**
      * An array of variables for substitution in a template.<br>

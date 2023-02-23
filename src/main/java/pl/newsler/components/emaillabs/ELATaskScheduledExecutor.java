@@ -52,7 +52,7 @@ public class ELATaskScheduledExecutor extends ELAConcurrentTaskExecutor<ELASched
 
     void scanQueue() {
         log.info("{} | Scanning queue...", ZonedDateTime.now());
-        final ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT")).plusMinutes(5L);
+        final ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Warsaw")).plusMinutes(5L);
         final LinkedList<Pair<NLUuid, ELAScheduleMailDetails>> toBeExecuted = new LinkedList<>();
         Iterator<Pair<NLUuid, ELAScheduleMailDetails>> iterator = queue.iterator();
 
@@ -72,7 +72,7 @@ public class ELATaskScheduledExecutor extends ELAConcurrentTaskExecutor<ELASched
         return scheduleTime.isBefore(now) || scheduleTime.isEqual(now);
     }
 
-    void executeSchedule(final LinkedList<Pair<NLUuid, ELAScheduleMailDetails>> toBeExecuted) {
+    private void executeSchedule(final LinkedList<Pair<NLUuid, ELAScheduleMailDetails>> toBeExecuted) {
         for (final Pair<NLUuid, ELAScheduleMailDetails> pair : toBeExecuted) {
             getUserAndExecute(pair);
         }

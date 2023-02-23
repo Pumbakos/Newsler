@@ -13,7 +13,7 @@ import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ELAParamBuilder {
-    public static <T extends ELAMailDetails> Map<String, String> buildParamsMap(NLUser user, T details) {
+    public static <T extends ELAMailDetails> Map<String, String> buildParamsMap(final NLUser user, final T details) {
         final Map<String, String> params = new LinkedHashMap<>();
 
         final String name = String.format("%s %s", user.getFirstName(), user.getLastName());

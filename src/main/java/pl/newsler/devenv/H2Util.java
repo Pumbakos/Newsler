@@ -63,7 +63,7 @@ class H2Util {
     }
 
     static ELAMailSendRequest createMailSendRequest(String userMail) {
-        return new ELAMailSendRequest(userMail, randomEmails(), randomEmails(), randomEmails(), faker.book().author(), randomMessage());
+        return new ELAMailSendRequest(userMail, randomEmails(), faker.book().author(), randomMessage());
     }
 
     private static List<String> randomEmails() {

@@ -66,14 +66,6 @@ public class ELAUserMail implements Serializable {
     private NLStringValue toAddresses;
 
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "CC")))
-    private NLStringValue cc;
-
-    @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "BCC")))
-    private NLStringValue bcc;
-
-    @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SUBJECT", length = 128)))
     private NLSubject subject;
 
@@ -99,11 +91,9 @@ public class ELAUserMail implements Serializable {
                 ELAMailRepository.version,
                 userId,
                 NLStringValue.of(Arrays.toString(details.toAddresses().toArray())),
-                NLStringValue.of(Arrays.toString(details.cc() != null ? details.cc().toArray() : new String[0])),
-                NLStringValue.of(Arrays.toString(details.bcc() != null ? details.bcc().toArray() : new String[0])),
                 NLSubject.of(details.subject()),
                 NLEmailMessage.of(details.message()),
-                NLExecutionDate.of(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault())), //FIXME: zone ID should be provided by user
+                NLExecutionDate.of(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault())),
                 NLEmailStatus.QUEUED,
                 NLStringValue.of("")
         );
@@ -115,8 +105,6 @@ public class ELAUserMail implements Serializable {
                 ELAMailRepository.version,
                 userId,
                 NLStringValue.of(Arrays.toString(details.toAddresses().toArray())),
-                NLStringValue.of(Arrays.toString(details.cc() != null ? details.cc().toArray() : new String[0])),
-                NLStringValue.of(Arrays.toString(details.bcc() != null ? details.bcc().toArray() : new String[0])),
                 NLSubject.of(details.subject()),
                 NLEmailMessage.of(details.message()),
                 NLExecutionDate.of(details.zonedDateTime()),
@@ -129,8 +117,6 @@ public class ELAUserMail implements Serializable {
         return ELADUserMail.builder()
                 .id(this.id)
                 .toAddresses(this.toAddresses)
-                .cc(this.cc)
-                .bcc(this.bcc)
                 .subject(this.subject)
                 .message(this.message)
                 .status(this.status)
@@ -144,8 +130,6 @@ public class ELAUserMail implements Serializable {
                 this.id.getValue(),
                 from,
                 Arrays.asList(this.toAddresses.getValue().split(",")),
-                Arrays.asList(this.cc.getValue().split(",")),
-                Arrays.asList(this.bcc.getValue().split(",")),
                 this.subject.getValue(),
                 this.message.getValue(),
                 this.status.name()

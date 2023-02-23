@@ -77,7 +77,7 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
     protected final void scheduleAtFixedRate(final Runnable runnable, final Duration duration) {
         if (taskExecutor instanceof ConcurrentTaskScheduler scheduler) {
             try {
-                ZonedDateTime startTime = TimeResolver.getStartTime();
+                final ZonedDateTime startTime = TimeResolver.getStartTime();
                 scheduler.scheduleAtFixedRate(runnable, startTime.toInstant(), duration);
                 log.info("Scheduled mails queue will be executed first at {} with {} min interval", startTime, duration.toMinutes());
             } catch (Exception e) {
@@ -133,7 +133,7 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
     }
 
     @SneakyThrows(JsonProcessingException.class)
-    protected final ELASentMailResults handleException(NLUuid id, NLUuid userId, RestClientException e) {
+    protected final ELASentMailResults handleException(final NLUuid id, final NLUuid userId, final RestClientException e) {
         final ELASendMailResponse response = objectMapper.readValue(e.getMessage().substring(e.getMessage().indexOf("{") - 1).substring(1), ELASendMailResponse.class);
         log.info(this.objectMapper.convertValue(e, String.class));
         if (e instanceof HttpClientErrorException) {
@@ -146,13 +146,11 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
         return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, "General error. Check data, it is likely that SMTP, APP KEY or SECRET KEY are incorrect.", LocalDateTime.now());
     }
 
-    protected final void addReceiverIfNotExist(T details, NLUuid uuid) {
+    protected final void addReceiverIfNotExist(final T details, final NLUuid uuid) {
         receiverService.autoSaveNewReceiver(details.toAddresses, uuid);
-        receiverService.autoSaveNewReceiver(details.cc, uuid);
-        receiverService.autoSaveNewReceiver(details.bcc, uuid);
     }
 
-    protected final void getUserAndExecute(Pair<NLUuid, T> pair) {
+    protected final void getUserAndExecute(final Pair<NLUuid, T> pair) {
         final Optional<NLUser> optionalUser = userRepository.findById(pair.getLeft());
         optionalUser.ifPresentOrElse(
                 nlUser -> execution(pair.getRight(), nlUser),
@@ -160,7 +158,7 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
         );
     }
 
-    public final void execution(T details, NLUser user) {
+    public final void execution(final T details, final NLUser user) {
         final NLUuid uuid = user.map().getId();
         addReceiverIfNotExist(details, uuid);
         final ELASentMailResults results = call(user, details);

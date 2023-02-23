@@ -23,6 +23,7 @@ import java.util.Queue;
 @Slf4j
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 class ELATaskInstantExecutor extends ELAConcurrentTaskExecutor<ELAInstantMailDetails> implements IELATaskInstantExecutor {
+    @SuppressWarnings("java:S107")
     ELATaskInstantExecutor(final Queue<Pair<NLUuid, ELAInstantMailDetails>> queue, final ConcurrentTaskExecutor taskExecutor,
                            final NLIPasswordEncoder passwordEncoder, final IELAMailRepository mailRepository,
                            final IReceiverService receiverService, final IUserRepository userRepository,

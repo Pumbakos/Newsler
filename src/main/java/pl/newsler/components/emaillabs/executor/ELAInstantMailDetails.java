@@ -9,34 +9,30 @@ import java.util.Objects;
 import java.util.UUID;
 
 public final class ELAInstantMailDetails extends ELAMailDetails {
-    private ELAInstantMailDetails(final NLUuid id, final List<String> toAddresses, final List<String> cc, final List<String> bcc, final String subject, final String message) {
-        super(id, toAddresses, cc, bcc, subject, message);
+    private ELAInstantMailDetails(final NLUuid id, final List<String> toAddresses, final String subject, final String message) {
+        super(id, toAddresses, subject, message);
     }
 
     public static ELAInstantMailDetails of(ELAMailSendRequest request) {
-        return new ELAInstantMailDetails(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), request.to(), request.cc(), request.bcc(), request.subject(), request.message());
+        return new ELAInstantMailDetails(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), request.to(), request.subject(), request.message());
     }
 
+    @Override
     public NLUuid id() {
         return super.id;
     }
 
+    @Override
     public List<String> toAddresses() {
         return super.toAddresses;
     }
 
-    public List<String> cc() {
-        return super.cc;
-    }
-
-    public List<String> bcc() {
-        return super.bcc;
-    }
-
+    @Override
     public String subject() {
         return super.subject;
     }
 
+    @Override
     public String message() {
         return super.message;
     }
@@ -48,15 +44,13 @@ public final class ELAInstantMailDetails extends ELAMailDetails {
         var that = (ELAInstantMailDetails) obj;
         return Objects.equals(super.id, that.id) &&
                 Objects.equals(super.toAddresses, that.toAddresses) &&
-                Objects.equals(super.cc, that.cc) &&
-                Objects.equals(super.bcc, that.bcc) &&
                 Objects.equals(super.subject, that.subject) &&
                 Objects.equals(super.message, that.message);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.id, super.toAddresses, super.cc, super.bcc, super.subject, super.message);
+        return Objects.hash(super.id, super.toAddresses, super.subject, super.message);
     }
 
     @Override
@@ -64,8 +58,6 @@ public final class ELAInstantMailDetails extends ELAMailDetails {
         return "ELAInstantMailDetails[" +
                 "id=" + super.id + ", " +
                 "toAddresses=" + super.toAddresses + ", " +
-                "cc=" + super.cc + ", " +
-                "bcc=" + super.bcc + ", " +
                 "subject=" + super.subject + ", " +
                 "message=" + super.message + ']';
     }

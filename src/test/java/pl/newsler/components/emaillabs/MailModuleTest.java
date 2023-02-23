@@ -135,8 +135,6 @@ class MailModuleTest {
         final ELAMailSendRequest request = new ELAMailSendRequest(
                 TestUserUtils.email(),
                 List.of(users.get(1).getEmail().getValue(), users.get(2).getEmail().getValue()),
-                List.of(""),
-                List.of(""),
                 "MOCK TEST",
                 "MOCK TEST MESSAGE"
                 );
@@ -204,8 +202,6 @@ class MailModuleTest {
         final ELAMailSendRequest request = new ELAMailSendRequest(
                 TestUserUtils.email(),
                 List.of(users.get(0).getEmail().getValue(), users.get(1).getEmail().getValue(), users.get(2).getEmail().getValue()),
-                List.of(""),
-                List.of(""),
                 "MOCK TEST",
                 "MOCK TEST MESSAGE"
                 );
@@ -300,8 +296,6 @@ class MailModuleTest {
         final ELAMailSendRequest requestForSecond = new ELAMailSendRequest(
                 user.getEmail().getValue(),
                 List.of(users.get(1).getEmail().getValue(), users.get(2).getEmail().getValue()),
-                null,
-                null,
                 "MOCK TEST",
                 "MOCK TEST MESSAGE"
                 );
@@ -379,8 +373,6 @@ class MailModuleTest {
         return new ELAMailSendRequest(
                 user.getEmail().getValue(),
                 List.of(users.get(1).getEmail().getValue(), users.get(2).getEmail().getValue()),
-                List.of(""),
-                List.of(""),
                 "MOCK TEST",
                 "MOCK TEST MESSAGE"
                 );

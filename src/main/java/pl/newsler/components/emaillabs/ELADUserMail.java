@@ -27,8 +27,6 @@ public class ELADUserMail {
         return ELADUserMail.builder()
                 .id(mail.getId())
                 .toAddresses(mail.getToAddresses())
-                .cc(mail.getCc())
-                .bcc(mail.getBcc())
                 .subject(mail.getSubject())
                 .message(mail.getMessage())
                 .status(mail.getStatus())

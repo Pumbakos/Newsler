@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record ELAMailScheduleRequest(@NotNull String from, @NotNull List<String> to,
+public record ELAScheduleMailRequest(@NotNull String from, @NotNull List<String> to,
                                      @NotNull String subject, @NotNull String message,
                                      @NotNull String dateTime, @NotNull String zone) {
 }

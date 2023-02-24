@@ -134,13 +134,13 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
 
     @SneakyThrows(JsonProcessingException.class)
     protected final ELASentMailResults handleException(final NLUuid id, final NLUuid userId, final RestClientException e) {
-        final ELASendMailResponse response = objectMapper.readValue(e.getMessage().substring(e.getMessage().indexOf("{") - 1).substring(1), ELASendMailResponse.class);
-        log.info(this.objectMapper.convertValue(e, String.class));
+        final String response = objectMapper.readValue(e.getMessage(), String.class);
+        log.info(response);
         if (e instanceof HttpClientErrorException) {
-            return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, response.getMessage(), LocalDateTime.now());
+            return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, "", LocalDateTime.now());
         }
         if (e instanceof HttpServerErrorException) {
-            return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, response.getMessage(), LocalDateTime.now());
+            return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, "", LocalDateTime.now());
         }
 
         return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, "General error. Check data, it is likely that SMTP, APP KEY or SECRET KEY are incorrect.", LocalDateTime.now());

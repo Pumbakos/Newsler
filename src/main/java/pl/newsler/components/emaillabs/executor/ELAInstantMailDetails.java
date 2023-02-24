@@ -2,7 +2,7 @@ package pl.newsler.components.emaillabs.executor;
 
 import pl.newsler.commons.model.NLIdType;
 import pl.newsler.commons.model.NLUuid;
-import pl.newsler.components.emaillabs.usecase.ELAMailSendRequest;
+import pl.newsler.components.emaillabs.usecase.ELAInstantMailRequest;
 
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +13,7 @@ public final class ELAInstantMailDetails extends ELAMailDetails {
         super(id, toAddresses, subject, message);
     }
 
-    public static ELAInstantMailDetails of(ELAMailSendRequest request) {
+    public static ELAInstantMailDetails of(ELAInstantMailRequest request) {
         return new ELAInstantMailDetails(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), request.to(), request.subject(), request.message());
     }
 

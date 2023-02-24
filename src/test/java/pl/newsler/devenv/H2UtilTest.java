@@ -8,7 +8,7 @@ import pl.newsler.commons.model.NLFirstName;
 import pl.newsler.commons.model.NLLastName;
 import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
-import pl.newsler.components.emaillabs.usecase.ELAMailSendRequest;
+import pl.newsler.components.emaillabs.usecase.ELAInstantMailRequest;
 
 class H2UtilTest {
     @Test
@@ -43,14 +43,10 @@ class H2UtilTest {
 
     @RepeatedTest(10)
     void shouldCreateMailSendRequest() {
-        ELAMailSendRequest request = H2Util.createMailSendRequest(H2Util.fullEmail());
+        ELAInstantMailRequest request = H2Util.createMailSendRequest(H2Util.fullEmail());
 
         Assertions.assertNotNull(request);
         Assertions.assertNotNull(request.to());
         Assertions.assertFalse(request.to().isEmpty());
-        Assertions.assertNotNull(request.cc());
-        Assertions.assertFalse(request.cc().isEmpty());
-        Assertions.assertNotNull(request.bcc());
-        Assertions.assertFalse(request.bcc().isEmpty());
     }
 }

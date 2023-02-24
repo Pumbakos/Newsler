@@ -2,7 +2,7 @@ package pl.newsler.components.emaillabs.executor;
 
 import pl.newsler.commons.model.NLIdType;
 import pl.newsler.commons.model.NLUuid;
-import pl.newsler.components.emaillabs.usecase.ELAMailScheduleRequest;
+import pl.newsler.components.emaillabs.usecase.ELAScheduleMailRequest;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -20,7 +20,7 @@ public final class ELAScheduleMailDetails extends ELAMailDetails {
         this.zoneId = zoneId;
     }
 
-    public static ELAScheduleMailDetails of(ELAMailScheduleRequest request, ZonedDateTime scheduleTime) {
+    public static ELAScheduleMailDetails of(ELAScheduleMailRequest request, ZonedDateTime scheduleTime) {
         return new ELAScheduleMailDetails(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), request.to(), request.subject(), request.message(), scheduleTime, request.zone());
     }
 

@@ -10,9 +10,9 @@ import pl.newsler.api.IELAMailController;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.exception.InvalidDateException;
 import pl.newsler.components.emaillabs.usecase.ELAGetMailResponse;
-import pl.newsler.components.emaillabs.usecase.ELAMailSendRequest;
+import pl.newsler.components.emaillabs.usecase.ELAInstantMailRequest;
 import pl.newsler.commons.exception.InvalidUserDataException;
-import pl.newsler.components.emaillabs.usecase.ELAMailScheduleRequest;
+import pl.newsler.components.emaillabs.usecase.ELAScheduleMailRequest;
 
 import java.util.List;
 
@@ -22,13 +22,13 @@ public class ELAMailController implements IELAMailController {
     private final IELAMailService service;
 
     @Override
-    public ResponseEntity<HttpStatus> queueAndExecute(@RequestBody final ELAMailSendRequest request) throws InvalidUserDataException {
+    public ResponseEntity<HttpStatus> queueAndExecute(@RequestBody final ELAInstantMailRequest request) throws InvalidUserDataException {
         service.queue(request);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @Override
-    public ResponseEntity<HttpStatus> schedule(@RequestBody final ELAMailScheduleRequest request) throws InvalidUserDataException, InvalidDateException {
+    public ResponseEntity<HttpStatus> schedule(@RequestBody final ELAScheduleMailRequest request) throws InvalidUserDataException, InvalidDateException {
         service.schedule(request);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }

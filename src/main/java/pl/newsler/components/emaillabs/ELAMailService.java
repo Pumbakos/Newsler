@@ -12,8 +12,8 @@ import pl.newsler.components.emaillabs.executor.ELAScheduleMailDetails;
 import pl.newsler.components.emaillabs.executor.IELATaskInstantExecutor;
 import pl.newsler.components.emaillabs.executor.IELATaskScheduledExecutor;
 import pl.newsler.components.emaillabs.usecase.ELAGetMailResponse;
-import pl.newsler.components.emaillabs.usecase.ELAMailSendRequest;
-import pl.newsler.components.emaillabs.usecase.ELAMailScheduleRequest;
+import pl.newsler.components.emaillabs.usecase.ELAInstantMailRequest;
+import pl.newsler.components.emaillabs.usecase.ELAScheduleMailRequest;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
 
@@ -33,7 +33,7 @@ class ELAMailService implements IELAMailService {
     private final IELAMailRepository mailRepository;
 
     @Override
-    public void queue(ELAMailSendRequest request) throws InvalidUserDataException {
+    public void queue(ELAInstantMailRequest request) throws InvalidUserDataException {
         Optional<NLUser> optionalUser = userRepository.findByEmail(NLEmail.of(request.from()));
         if (optionalUser.isEmpty()) {
             throw new InvalidUserDataException();
@@ -43,7 +43,7 @@ class ELAMailService implements IELAMailService {
     }
 
     @Override
-    public void schedule(final ELAMailScheduleRequest request) throws InvalidUserDataException, InvalidDateException {
+    public void schedule(final ELAScheduleMailRequest request) throws InvalidUserDataException, InvalidDateException {
         String dateTime = request.dateTime();
         if (StringUtils.isBlank(dateTime)) {
             throw new InvalidDateException();

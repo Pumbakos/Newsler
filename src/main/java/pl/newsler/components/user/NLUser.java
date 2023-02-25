@@ -11,7 +11,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -26,6 +25,7 @@ import pl.newsler.commons.model.NLLastName;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
+import pl.newsler.commons.model.NLToken;
 import pl.newsler.commons.model.NLUserType;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.commons.model.NLVersion;
@@ -34,13 +34,13 @@ import pl.newsler.components.user.usecase.UserGetResponse;
 import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 
 @Entity
 @Table(name = "USERS", catalog = "NEWSLER", schema = "PUBLIC")
 @ToString
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class NLUser implements UserDetails {
     @Serial
     private static final long serialVersionUID = -1087455812902755879L;
@@ -53,11 +53,11 @@ public class NLUser implements UserDetails {
     @Getter(AccessLevel.PACKAGE)
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "VERSION")))
-    private NLVersion version = UserRepository.version;
+    private NLVersion version;
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "EMAIL")))
-    private NLEmail email = NLEmail.of("");
+    private NLEmail email;
 
     /**
      * If user is an organization it is preferred to use name as one String omitting lastName <br/>
@@ -67,15 +67,15 @@ public class NLUser implements UserDetails {
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "FIRST_NAME")))
-    private NLFirstName firstName = NLFirstName.of("");
+    private NLFirstName firstName;
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "LAST_NAME")))
-    private NLLastName lastName = NLLastName.of("");
+    private NLLastName lastName;
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "PASSWORD")))
-    private NLPassword password = NLPassword.of("");
+    private NLPassword password;
 
     /**
      * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find APP KEY here</a><br/>
@@ -83,7 +83,7 @@ public class NLUser implements UserDetails {
      */
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "APP_KEY")))
-    private NLAppKey appKey = NLAppKey.of("");
+    private NLAppKey appKey;
 
     /**
      * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find SECRET KEY here</a><br/>
@@ -91,7 +91,7 @@ public class NLUser implements UserDetails {
      */
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SECRET_KEY")))
-    private NLSecretKey secretKey = NLSecretKey.of("");
+    private NLSecretKey secretKey;
 
     /**
      * <a href="https://panel.emaillabs.net.pl/pl/smtp">You can find SMTP ACCOUNT here</a><br/>
@@ -99,7 +99,11 @@ public class NLUser implements UserDetails {
      */
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SMTP_ACCOUNT")))
-    private NLSmtpAccount smtpAccount = NLSmtpAccount.of("");
+    private NLSmtpAccount smtpAccount;
+
+    @Embedded
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "CANCELLATION_TOKEN")))
+    private NLToken cancellationToken;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ROLE")
@@ -123,6 +127,18 @@ public class NLUser implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority(this.role.name()));
+    }
+
+    protected NLUser() {
+        version = UserRepository.version;
+        email = NLEmail.of("");
+        firstName = NLFirstName.of("");
+        lastName = NLLastName.of("");
+        password = NLPassword.of("");
+        appKey = NLAppKey.of("");
+        secretKey = NLSecretKey.of("");
+        smtpAccount = NLSmtpAccount.of("");
+        cancellationToken = NLToken.of(UUID.randomUUID().toString().concat("-").concat(UUID.randomUUID().toString()));
     }
 
     @Override

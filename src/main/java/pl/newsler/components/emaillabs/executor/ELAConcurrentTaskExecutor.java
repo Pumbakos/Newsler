@@ -25,7 +25,6 @@ import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.ELAParam;
 import pl.newsler.components.emaillabs.ELAUserMail;
 import pl.newsler.components.emaillabs.IELAMailRepository;
-import pl.newsler.components.emaillabs.usecase.ELASendMailResponse;
 import pl.newsler.components.emaillabs.usecase.ELASentMailResults;
 import pl.newsler.components.receiver.IReceiverService;
 import pl.newsler.components.user.IUserRepository;
@@ -152,13 +151,10 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
 
     protected final void getUserAndExecute(final Pair<NLUuid, T> pair) {
         final Optional<NLUser> optionalUser = userRepository.findById(pair.getLeft());
-        optionalUser.ifPresentOrElse(
-                nlUser -> execution(pair.getRight(), nlUser),
-                () -> log.debug("No more mail jobs, waiting...")
-        );
+        optionalUser.ifPresent(user -> execution(pair.getRight(), user));
     }
 
-    public final void execution(final T details, final NLUser user) {
+    protected void execution(final T details, final NLUser user) {
         final NLUuid uuid = user.map().getId();
         addReceiverIfNotExist(details, uuid);
         final ELASentMailResults results = call(user, details);

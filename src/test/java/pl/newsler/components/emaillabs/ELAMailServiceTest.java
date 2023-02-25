@@ -45,8 +45,8 @@ public class ELAMailServiceTest {
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final StubELAMailRepository mailRepository = new StubELAMailRepository();
     private final StubUserRepository userRepository = new StubUserRepository();
-    private final IReceiverService receiverRepository = new StubReceiverModuleConfiguration(new StubReceiverRepository(), userRepository).receiverService();
-    private final ELAMailModuleConfiguration configuration = new ELAMailModuleConfiguration(userRepository, mailRepository, passwordEncoder, receiverRepository);
+    private final IReceiverService receiverService = new StubReceiverModuleConfiguration(new StubReceiverRepository(), userRepository).receiverService();
+    private final ELAMailModuleConfiguration configuration = new ELAMailModuleConfiguration(userRepository, mailRepository, passwordEncoder, receiverService);
     private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
     private final ObjectMapper mapper = configuration.objectMapper();
     private final IELAMailService service = configuration.mailService(
@@ -95,7 +95,7 @@ public class ELAMailServiceTest {
         }
 
         final NLUser user = users.get(0);
-        final ELAInstantMailRequest request = createInstantMailRequest(users, user);
+        final ELAInstantMailRequest request = createInstantMailRequest(user);
 
         Assertions.assertDoesNotThrow(() -> service.queue(request));
     }
@@ -225,9 +225,9 @@ public class ELAMailServiceTest {
         }
 
         final NLUser user = users.get(0);
-        final ELAInstantMailRequest first = createInstantMailRequest(users, user);
-        final ELAInstantMailRequest second = createInstantMailRequest(users, user);
-        final ELAInstantMailRequest third = createInstantMailRequest(users, user);
+        final ELAInstantMailRequest first = createInstantMailRequest(user);
+        final ELAInstantMailRequest second = createInstantMailRequest(user);
+        final ELAInstantMailRequest third = createInstantMailRequest(user);
 
         mailRepository.save(ELAUserMail.of(user.map().getId(), ELAInstantMailDetails.of(first)));
         mailRepository.save(ELAUserMail.of(user.map().getId(), ELAInstantMailDetails.of(second)));

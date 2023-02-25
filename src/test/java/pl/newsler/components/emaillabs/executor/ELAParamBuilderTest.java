@@ -74,7 +74,7 @@ class ELAParamBuilderTest {
             Assertions.fail("Users empty");
         }
         final NLUser user = users.get(0);
-        final ELAInstantMailRequest request = MailModuleUtil.createInstantMailRequest(users, user);
+        final ELAInstantMailRequest request = MailModuleUtil.createInstantMailRequest(user);
         final ELAInstantMailDetails details = ELAInstantMailDetails.of(request);
         final Map<String, String> params = new LinkedHashMap<>();
         final String name = String.format("%s %s", user.getFirstName(), user.getLastName());

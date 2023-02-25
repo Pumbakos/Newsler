@@ -49,8 +49,8 @@ class ELAMailControllerTest {
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final StubUserRepository userRepository = new StubUserRepository();
     private final StubELAMailRepository mailRepository = new StubELAMailRepository();
-    private final IReceiverService receiverRepository = new StubReceiverModuleConfiguration(new StubReceiverRepository(), userRepository).receiverService();
-    private final ELAMailModuleConfiguration configuration = new ELAMailModuleConfiguration(userRepository, mailRepository, passwordEncoder, receiverRepository);
+    private final IReceiverService receiverService = new StubReceiverModuleConfiguration(new StubReceiverRepository(), userRepository).receiverService();
+    private final ELAMailModuleConfiguration configuration = new ELAMailModuleConfiguration(userRepository, mailRepository, passwordEncoder, receiverService);
     private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final IELAMailService service = configuration.mailService(
@@ -101,7 +101,7 @@ class ELAMailControllerTest {
         }
 
         final NLUser user = users.get(0);
-        final ELAInstantMailRequest request = createInstantMailRequest(users, user);
+        final ELAInstantMailRequest request = createInstantMailRequest(user);
 
         final ResponseEntity<HttpStatus> response = controller.queueAndExecute(request);
         Assertions.assertNotNull(response);
@@ -265,9 +265,9 @@ class ELAMailControllerTest {
         }
 
         final NLUser user = users.get(0);
-        final ELAInstantMailRequest first = createInstantMailRequest(users, user);
-        final ELAInstantMailRequest second = createInstantMailRequest(users, user);
-        final ELAInstantMailRequest third = createInstantMailRequest(users, user);
+        final ELAInstantMailRequest first = createInstantMailRequest(user);
+        final ELAInstantMailRequest second = createInstantMailRequest(user);
+        final ELAInstantMailRequest third = createInstantMailRequest(user);
 
         controller.queueAndExecute(first);
         controller.queueAndExecute(second);

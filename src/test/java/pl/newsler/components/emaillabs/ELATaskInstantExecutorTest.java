@@ -1,36 +1,62 @@
 package pl.newsler.components.emaillabs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
+import org.springframework.web.client.RestTemplate;
 import pl.newsler.commons.model.NLAppKey;
-import pl.newsler.commons.model.NLIdType;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.executor.ELAInstantMailDetails;
 import pl.newsler.components.emaillabs.usecase.ELAInstantMailRequest;
+import pl.newsler.components.receiver.IReceiverService;
+import pl.newsler.components.receiver.StubReceiverModuleConfiguration;
+import pl.newsler.components.receiver.StubReceiverRepository;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.TestUserFactory;
 import pl.newsler.security.StubNLPasswordEncoder;
 import pl.newsler.testcommons.TestUserUtils;
 
+import java.security.SecureRandom;
 import java.util.List;
+import java.util.Queue;
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static pl.newsler.components.emaillabs.MailModuleUtil.createInstantMailRequest;
-
-public class NLUserTest {
+class ELATaskInstantExecutorTest {
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
+    private final StubELAMailRepository mailRepository = new StubELAMailRepository();
     private final StubUserRepository userRepository = new StubUserRepository();
+    private final IReceiverService receiverService = new StubReceiverModuleConfiguration(new StubReceiverRepository(), userRepository).receiverService();
+    private final ELAMailModuleConfiguration configuration = new ELAMailModuleConfiguration(userRepository, mailRepository, passwordEncoder, receiverService);
+    private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+    private final ObjectMapper mapper = configuration.objectMapper();
     private final TestUserFactory factory = new TestUserFactory();
+    private final Random random = new SecureRandom();
+    private final Queue<Pair<NLUuid, ELAInstantMailDetails>> queue = new ConcurrentLinkedQueue<>();
+    private final ELATaskInstantExecutor executor = new ELATaskInstantExecutor (
+            queue,
+            new ConcurrentTaskExecutor(),
+            passwordEncoder,
+            mailRepository,
+            receiverService,
+            userRepository,
+            restTemplate,
+            mapper
+    );
 
     @BeforeEach
     void beforeEach() {
-        NLUuid standardId = NLUuid.of(UUID.randomUUID());
+        final NLUuid standardId = NLUuid.of(UUID.randomUUID());
         factory.standard().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.standard_plainPassword())));
         factory.standard().setId(standardId);
         factory.standard().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
@@ -38,7 +64,7 @@ public class NLUserTest {
         factory.standard().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
         userRepository.save(factory.standard());
 
-        NLUuid dashedId = NLUuid.of(UUID.randomUUID());
+        final NLUuid dashedId = NLUuid.of(UUID.randomUUID());
         factory.dashed().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dashed_plainPassword())));
         factory.dashed().setId(dashedId);
         factory.dashed().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
@@ -46,7 +72,7 @@ public class NLUserTest {
         factory.dashed().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
         userRepository.save(factory.dashed());
 
-        NLUuid dottedId = NLUuid.of(UUID.randomUUID());
+        final NLUuid dottedId = NLUuid.of(UUID.randomUUID());
         factory.dotted().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dotted_plainPassword())));
         factory.dotted().setId(dottedId);
         factory.dotted().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
@@ -61,50 +87,15 @@ public class NLUserTest {
     }
 
     @Test
-    @SuppressWarnings({"java:S5863"})
-    void shouldCompareNLUserMail() {
-        final List<NLUser> users = userRepository.findAll();
-        if (users.isEmpty()) {
-            Assertions.fail("Users empty");
-        }
-        final NLUser user = users.get(0);
-        final ELAInstantMailRequest requestForFirst = createInstantMailRequest(user);
-        final ELAInstantMailRequest requestForSecond = new ELAInstantMailRequest(
-                user.getEmail().getValue(),
-                List.of(users.get(1).getEmail().getValue(), users.get(2).getEmail().getValue()),
-                "MOCK TEST",
-                "MOCK TEST MESSAGE"
-        );
-        final ELAUserMail first = ELAUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), ELAInstantMailDetails.of(requestForFirst));
-        final ELAUserMail second = ELAUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), ELAInstantMailDetails.of(requestForSecond));
+    void shouldQueueAndExecuteAllRemaining() {
+        final ELAInstantMailRequest first = MailModuleUtil.createInstantMailRequest(factory.standard());
+        final ELAInstantMailRequest second = MailModuleUtil.createInstantMailRequest(factory.dashed());
+        final ELAInstantMailRequest third = MailModuleUtil.createInstantMailRequest(factory.dotted());
 
-        Assertions.assertEquals(first, first);
-        Assertions.assertEquals(first.toString(), first.toString());
-        Assertions.assertEquals(first.hashCode(), first.hashCode());
-        Assertions.assertNotEquals(first, second);
-        Assertions.assertNotEquals(first.toString(), second.toString());
-        Assertions.assertNotEquals(first.hashCode(), second.hashCode());
-        Assertions.assertNotEquals(first, second);
+        Assertions.assertEquals(0, mailRepository.findAll().size());
+        Assertions.assertDoesNotThrow(() -> executor.queue(factory.standard().map().getId(), ELAInstantMailDetails.of(first)));
+        Assertions.assertDoesNotThrow(() -> executor.queue(factory.dashed().map().getId(), ELAInstantMailDetails.of(second)));
+        Assertions.assertDoesNotThrow(() -> executor.queue(factory.dotted().map().getId(), ELAInstantMailDetails.of(third)));
+        Assertions.assertEquals(3, mailRepository.findAll().size());
     }
-
-    @Test
-    void shouldGetNLUserMailProperties() {
-        final List<NLUser> users = userRepository.findAll();
-        if (users.isEmpty()) {
-            Assertions.fail("Users empty");
-        }
-        final NLUser user = users.get(0);
-        final ELAInstantMailRequest request = createInstantMailRequest(user);
-        final ELAUserMail first = ELAUserMail.of(NLUuid.of(UUID.randomUUID(), NLIdType.MAIL), ELAInstantMailDetails.of(request));
-
-        Assertions.assertNotNull(first);
-        Assertions.assertNotNull(first.getId());
-        Assertions.assertNotNull(first.getUserId());
-        Assertions.assertNotNull(first.getMessage());
-        Assertions.assertNotNull(first.getStatus());
-        Assertions.assertNotNull(first.getToAddresses());
-        Assertions.assertNotNull(first.getVersion());
-        Assertions.assertTrue(first.getErrorMessage().getValue().isEmpty());
-    }
-
 }

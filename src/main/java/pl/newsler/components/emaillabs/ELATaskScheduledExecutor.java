@@ -7,6 +7,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.web.client.RestTemplate;
+import pl.newsler.commons.model.NLExecutionDate;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.executor.ELAConcurrentTaskExecutor;
 import pl.newsler.components.emaillabs.executor.ELAScheduleMailDetails;
@@ -16,8 +17,10 @@ import pl.newsler.components.user.IUserRepository;
 import pl.newsler.security.NLIPasswordEncoder;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -51,8 +54,9 @@ public class ELATaskScheduledExecutor extends ELAConcurrentTaskExecutor<ELASched
     }
 
     void scanQueue() {
-        log.info("{} | Scanning queue...", ZonedDateTime.now());
-        final ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Warsaw")).plusMinutes(5L);
+        final ZoneId zoneId = ZoneId.of("Europe/Warsaw");
+        log.info("{} | Scanning queue...", ZonedDateTime.of(LocalDateTime.now(), zoneId).format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)));
+        final ZonedDateTime now = ZonedDateTime.now(zoneId);
         final LinkedList<Pair<NLUuid, ELAScheduleMailDetails>> toBeExecuted = new LinkedList<>();
         Iterator<Pair<NLUuid, ELAScheduleMailDetails>> iterator = queue.iterator();
 

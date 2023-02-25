@@ -14,11 +14,11 @@ import pl.newsler.components.emaillabs.executor.ELAInstantMailDetails;
 import pl.newsler.components.emaillabs.executor.IELATaskInstantExecutor;
 import pl.newsler.components.receiver.IReceiverService;
 import pl.newsler.components.user.IUserRepository;
-import pl.newsler.components.user.NLUser;
 import pl.newsler.security.NLIPasswordEncoder;
 
-import java.util.Optional;
+import java.util.Iterator;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -40,19 +40,20 @@ class ELATaskInstantExecutor extends ELAConcurrentTaskExecutor<ELAInstantMailDet
         );
     }
 
-    private boolean queueExecution = false;
+    private final AtomicBoolean queueExecution = new AtomicBoolean(false);
 
     @Override
     public void queue(NLUuid userId, ELAInstantMailDetails details) {
         mailRepository.save(ELAUserMail.of(userId, details));
         queue.add(Pair.of(userId, details));
-        if (!queueExecution) {
-            queueExecution = true;
+        if (!queueExecution.get()) {
+            queueExecution.set(true);
             executeQueue();
         }
     }
 
-    private void executeQueue() {
+    @Async
+    void executeQueue() {
         try {
             super.execute(this::execute);
             log.info("Scheduled another task.");
@@ -61,14 +62,14 @@ class ELATaskInstantExecutor extends ELAConcurrentTaskExecutor<ELAInstantMailDet
         }
     }
 
-    @Async
-    void execute() {
+    public void execute() {
         Pair<NLUuid, ELAInstantMailDetails> pair = queue.poll();
         if (pair == null) {
-            queueExecution = false;
+            queueExecution.set(false);
             return;
         }
 
         getUserAndExecute(pair);
+        execute();
     }
 }

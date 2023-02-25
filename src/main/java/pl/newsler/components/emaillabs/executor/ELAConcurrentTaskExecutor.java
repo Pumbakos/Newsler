@@ -77,7 +77,7 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
     protected final void scheduleAtFixedRate(final Runnable runnable, final Duration duration) {
         if (taskExecutor instanceof ConcurrentTaskScheduler scheduler) {
             try {
-                final ZonedDateTime startTime = TimeResolver.getStartTime();
+                final ZonedDateTime startTime = TimeResolver.getStartTime(ZonedDateTime.now());
                 scheduler.scheduleAtFixedRate(runnable, startTime.toInstant(), duration);
                 log.info("Scheduled mails queue will be executed first at {} with {} min interval", startTime, duration.toMinutes());
             } catch (Exception e) {

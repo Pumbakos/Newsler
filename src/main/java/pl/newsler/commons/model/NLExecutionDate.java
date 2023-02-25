@@ -20,10 +20,16 @@ public class NLExecutionDate implements NLModel {
     private final String value;
 
     public static NLExecutionDate of(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return new NLExecutionDate(null);
+        }
         return new NLExecutionDate(dateTime.format(DateTimeFormatter.ofPattern(PATTERN)));
     }
 
     public static NLExecutionDate of(ZonedDateTime dateTime) {
+        if (dateTime == null) {
+            return new NLExecutionDate(null);
+        }
         return new NLExecutionDate(dateTime.format(DateTimeFormatter.ofPattern(PATTERN)));
     }
 

@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import pl.newsler.api.IJWTAuthController;
-import pl.newsler.commons.exception.GlobalRestExceptionHandler;
 import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.exception.UnauthorizedException;
 import pl.newsler.commons.model.NLPassword;
@@ -29,7 +28,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 class JWTModuleTest {
-    private final GlobalRestExceptionHandler handler = new GlobalRestExceptionHandler();
     private final StubUserRepository userRepository = new StubUserRepository();
     private final StubNLIKeyProvider keyProvider = new StubNLIKeyProvider();
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
@@ -85,7 +83,7 @@ class JWTModuleTest {
                 factory.standard_plainPassword()
         );
         String token = service.generateJWT(model);
-        Assertions.assertTrue(JWTTestResolver.resolve(verify(token)));
+        Assertions.assertTrue(JWTTestResolver.resolve(verify(token), standardUser));
     }
 
     @Test

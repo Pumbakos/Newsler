@@ -31,7 +31,7 @@ class JWTAuthService implements IJWTAuthService {
             throw new UnauthorizedException("User's credentials not valid", "Token not generated");
         }
 
-        final NLDUser user = NLDUser.of(optionalUser.get());
+        NLUser user = optionalUser.get();
         if (!credentialsValid(user, userAuthModel)) {
             throw new UnauthorizedException("User's credentials invalid", "Token not generated");
         }
@@ -39,18 +39,18 @@ class JWTAuthService implements IJWTAuthService {
         return generateToken(user);
     }
 
-    private boolean credentialsValid(NLDUser user, UserAuthModel userAuthModel) {
+    private boolean credentialsValid(NLUser user, UserAuthModel userAuthModel) {
 //        final String password = passwordEncoder.decrypt(userAuthModel.password());
 //        final String email = passwordEncoder.decrypt(userAuthModel.email());
 
-        return (passwordEncoder.bCrypt().matches(userAuthModel.password(), user.getPassword().getValue())
+        return (passwordEncoder.bCrypt().matches(userAuthModel.password(), user.getPassword())
                 && userAuthModel.email().equals(user.getEmail().getValue())
                 && user.isEnabled()
                 && user.isCredentialsNonExpired()
         );
     }
 
-    private String generateToken(NLDUser user) {
+    private String generateToken(NLUser user) {
         final Instant now = Instant.now();
         return jwtUtility.builder()
                 .withJWTId(String.valueOf(JWTClaim.JWT_ID))
@@ -59,7 +59,7 @@ class JWTAuthService implements IJWTAuthService {
                 .withIssuedAt(now)
                 .withExpiresAt(now.plus(60L, ChronoUnit.MINUTES))
                 .withClaim(JWTClaim.EMAIL, user.getEmail().getValue())
-                .withClaim(JWTClaim.NAME, user.getName().getValue())
+                .withClaim(JWTClaim.NAME, user.getFirstName().getValue())
                 .withClaim(JWTClaim.ROLE, user.getRole().toString())
                 .sign(jwtUtility.hmac384());
     }

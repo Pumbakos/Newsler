@@ -6,21 +6,21 @@ import lombok.Builder;
 import lombok.Value;
 import pl.newsler.commons.model.NLAppKey;
 import pl.newsler.commons.model.NLEmail;
-import pl.newsler.commons.model.NLUuid;
+import pl.newsler.commons.model.NLFirstName;
 import pl.newsler.commons.model.NLLastName;
-import pl.newsler.commons.model.NLName;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
 import pl.newsler.commons.model.NLUserType;
+import pl.newsler.commons.model.NLUuid;
 
 @Value
-@Builder
+@Builder(access = AccessLevel.PUBLIC)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class NLDUser {
     NLUuid id;
     NLEmail email;
-    NLName name;
+    NLFirstName name;
     NLLastName lastName;
     NLPassword password;
     NLSmtpAccount smtpAccount;
@@ -44,5 +44,20 @@ public class NLDUser {
                 .enabled(user.getEnabled())
                 .credentialsNonExpired(user.isCredentialsNonExpired())
                 .build();
+    }
+
+    public NLUser toUser() {
+        final NLUser user = new NLUser();
+        user.setId(id);
+        user.setEmail(email);
+        user.setFirstName(name);
+        user.setLastName(lastName);
+        user.setPassword(password);
+        user.setSmtpAccount(smtpAccount);
+        user.setSecretKey(secretKey);
+        user.setAppKey(appKey);
+        user.setRole(role);
+        user.setEnabled(enabled);
+        return user;
     }
 }

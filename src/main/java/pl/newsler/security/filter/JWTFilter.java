@@ -25,7 +25,6 @@ import pl.newsler.auth.AuthUserDetailService;
 import pl.newsler.auth.JWTClaim;
 import pl.newsler.auth.JWTUtility;
 import pl.newsler.commons.model.NLEmail;
-import pl.newsler.components.user.NLDUser;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.security.NLAuthenticationToken;
@@ -103,10 +102,9 @@ public class JWTFilter extends OncePerRequestFilter {
             throw new InvalidTokenException(TOKEN, "Incorrect credentials.");
         }
 
-        if (JWTResolver.resolveJWT(jwt)) {
-            final NLDUser dtoUser = user.map();
-            final NLPrincipal principal = createPrincipal(dtoUser);
-            final NLCredentials credentials = createCredentials(dtoUser);
+        if (JWTResolver.resolveJWT(jwt, user)) {
+            final NLPrincipal principal = createPrincipal(user);
+            final NLCredentials credentials = createCredentials(user);
             final Set<SimpleGrantedAuthority> roles = Collections.singleton(new SimpleGrantedAuthority(jwt.getClaim(JWTClaim.ROLE).asString()));
 
             return new NLAuthenticationToken(principal, credentials, roles);
@@ -123,11 +121,11 @@ public class JWTFilter extends OncePerRequestFilter {
         }
     }
 
-    private @NotNull NLPrincipal createPrincipal(@NotNull NLDUser user) {
-        return new NLPrincipal(user.getId(), user.getEmail(), user.getName());
+    private @NotNull NLPrincipal createPrincipal(@NotNull NLUser user) {
+        return new NLPrincipal(user.map().getId(), user.getEmail(), user.getFirstName());
     }
 
-    private @NotNull NLCredentials createCredentials(@NotNull NLDUser user) {
-        return new NLCredentials(user.getPassword());
+    private @NotNull NLCredentials createCredentials(@NotNull NLUser user) {
+        return new NLCredentials(user.getNLPassword());
     }
 }

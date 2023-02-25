@@ -6,12 +6,13 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import pl.newsler.auth.JWTClaim;
 import pl.newsler.commons.model.NLEmail;
+import pl.newsler.components.user.NLUser;
 
 import java.time.Instant;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 class JWTResolver {
-    static boolean resolveJWT(DecodedJWT jwt) {
+    static boolean resolveJWT(DecodedJWT jwt, final NLUser user) {
         final Instant now = Instant.now();
         final String keyId = jwt.getId();
         final String issuer = jwt.getIssuer();
@@ -27,6 +28,8 @@ class JWTResolver {
                         && (StringUtils.isNotBlank(role))
                         && (StringUtils.isNotBlank(name))
                         && (expiration != null) && (now.isBefore(expiration))
+                        && (user.isEnabled())
+                        && (user.isCredentialsNonExpired())
         );
     }
 }

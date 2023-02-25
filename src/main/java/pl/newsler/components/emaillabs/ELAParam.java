@@ -1,16 +1,20 @@
 package pl.newsler.components.emaillabs;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * <a href="https://dev.emaillabs.io/#api-Send-new_sendmail">EmailLabs: Send e-mails API documentation</a>'
  * <p><strong>Note:</strong> parameters are required unless stated otherwise</p>
  */
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public sealed class ELAParam permits ELATemplateParam {
     /**
      * An array with a structure in which the keys are email addresses
      * and the values are arrays containing information such as message uuid and recipient name.
      * (Max 200 addresses) The recipient name is optional.
      */
-    public static String TO_ADDRESS_NAME = "to[%s][%s]";
+    public static String TO = "to[%s][%s]";
 
     /**
      * Unique parameter for message. Should be similar to email address. F.e. qwerty1234567890@qw.qw

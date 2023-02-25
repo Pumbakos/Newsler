@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serial;
 
@@ -20,6 +21,9 @@ public class NLSubject implements NLModel {
 
     @Override
     public boolean validate() {
+        if (StringUtils.isBlank(value)) {
+            return false;
+        }
         return value.length() < 129;
     }
 }

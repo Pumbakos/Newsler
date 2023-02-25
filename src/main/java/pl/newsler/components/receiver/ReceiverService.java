@@ -3,6 +3,7 @@ package pl.newsler.components.receiver;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import pl.newsler.commons.exception.InvalidReceiverDataException;
+import pl.newsler.commons.model.NLUserType;
 import pl.newsler.components.receiver.exception.ReceiverAlreadyAssociatedWithUser;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
@@ -16,9 +17,11 @@ import pl.newsler.components.receiver.usecase.ReceiverGetResponse;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @RequiredArgsConstructor
@@ -61,6 +64,29 @@ class ReceiverService implements IReceiverService {
         receiverRepository.save(new Receiver(userUuid, email, nickname, firstName, lastName, autoSaved));
 
         return "Receiver added successfully";
+    }
+
+    @Override
+    public void autoSaveNewReceiver(final List<String> receivers, final NLUuid uuid) {
+        final List<Receiver> notStoredReceivers = new ArrayList<>(receivers.size());
+        receivers.forEach(address -> {
+                    Optional<Receiver> found = receiverRepository.findByUserUuidAndEmail(uuid, NLEmail.of(address));
+                    if (found.isEmpty()) {
+                        notStoredReceivers.add(new Receiver(
+                                NLUuid.of(UUID.randomUUID(), NLUserType.RECEIVER),
+                                IReceiverRepository.version,
+                                uuid,
+                                NLEmail.of(address),
+                                NLNickname.of(address.split("@")[0]),
+                                NLFirstName.of(""),
+                                NLLastName.of(""),
+                                true
+                        ));
+                    }
+                }
+        );
+
+        receiverRepository.saveAll(notStoredReceivers);
     }
 
     @Override

@@ -25,7 +25,7 @@ public class NLId implements NLModel {
     public static NLId of(String id) {
         NLId nlUuid = fromString(id);
         if (!nlUuid.validate()) {
-            throw new ValidationException("User ID", "Not validated");
+            return new NLId(-1);
         }
         return nlUuid;
     }
@@ -34,7 +34,7 @@ public class NLId implements NLModel {
         try {
             return of(Long.parseLong(id));
         } catch (Exception e) {
-            throw new ValidationException();
+            return new NLId(-1);
         }
     }
 

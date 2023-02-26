@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 import pl.newsler.commons.model.NLExecutionDate;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.executor.ELAConcurrentTaskExecutor;
-import pl.newsler.components.emaillabs.executor.ELAParamBuilder;
+import pl.newsler.components.emaillabs.executor.ELARequestBuilder;
 import pl.newsler.components.emaillabs.executor.ELAScheduleMailDetails;
 import pl.newsler.components.emaillabs.executor.IELATaskScheduledExecutor;
 import pl.newsler.components.receiver.IReceiverService;
@@ -32,7 +32,7 @@ public class ELATaskScheduledExecutor extends ELAConcurrentTaskExecutor<ELASched
     ELATaskScheduledExecutor(final Queue<Pair<NLUuid, ELAScheduleMailDetails>> queue, final ConcurrentTaskScheduler taskScheduler,
                              final NLIPasswordEncoder passwordEncoder, final IELAMailRepository mailRepository,
                              final IReceiverService receiverService, final IUserRepository userRepository,
-                             final RestTemplate restTemplate, final ELAParamBuilder paramBuilder) {
+                             final RestTemplate restTemplate, final ELARequestBuilder paramBuilder) {
         super(
                 queue,
                 taskScheduler,

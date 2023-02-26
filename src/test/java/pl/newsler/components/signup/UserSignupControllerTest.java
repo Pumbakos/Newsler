@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,6 +14,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.web.client.RestTemplate;
 import pl.newsler.api.IUserSignupController;
 import pl.newsler.commons.exception.GlobalRestExceptionHandler;
 import pl.newsler.commons.exception.InvalidUserDataException;
@@ -27,6 +27,8 @@ import pl.newsler.commons.model.NLLastName;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLToken;
+import pl.newsler.components.emaillabs.StubELAMailModuleConfiguration;
+import pl.newsler.components.emaillabs.StubELAMailRepository;
 import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.components.signup.usecase.UserCreateRequest;
 import pl.newsler.components.signup.usecase.UserResendTokenRequest;
@@ -55,9 +57,21 @@ public class UserSignupControllerTest {
     private final StubConfirmationTokenRepository confirmationTokenRepository = new StubConfirmationTokenRepository();
     private final NLIPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final IUserRepository userRepository = new StubUserRepository();
-    private final StubUserModuleConfiguration userModuleConfiguration = new StubUserModuleConfiguration(userRepository, passwordEncoder);
+    private final StubELAMailRepository mailRepository = new StubELAMailRepository();
+    private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+    private final StubELAMailModuleConfiguration mailModuleConfiguration = new StubELAMailModuleConfiguration(
+            userRepository,
+            mailRepository,
+            passwordEncoder,
+            null
+    );
+    private final StubUserModuleConfiguration userModuleConfiguration = new StubUserModuleConfiguration(
+            userRepository,
+            passwordEncoder,
+            mailModuleConfiguration.templateService(mailModuleConfiguration.elaParamBuilder(), restTemplate)
+    );
     private final IUserCrudService crudService = userModuleConfiguration.userService();
-    private final JavaMailSender mailSender = new JavaMailSenderImpl();
+    private final JavaMailSender mailSender = Mockito.mock(JavaMailSenderImpl.class);
     private final SignupModuleConfiguration configuration = new SignupModuleConfiguration(
             confirmationTokenRepository,
             passwordEncoder,

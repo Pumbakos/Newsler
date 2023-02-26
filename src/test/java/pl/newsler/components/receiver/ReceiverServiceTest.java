@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.mockito.Mockito;
+import org.springframework.web.client.RestTemplate;
 import pl.newsler.commons.exception.InvalidReceiverDataException;
 import pl.newsler.commons.exception.ValidationException;
 import pl.newsler.commons.model.NLEmail;
@@ -15,6 +17,8 @@ import pl.newsler.commons.model.NLNickname;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.commons.model.NLVersion;
+import pl.newsler.components.emaillabs.StubELAMailModuleConfiguration;
+import pl.newsler.components.emaillabs.StubELAMailRepository;
 import pl.newsler.components.receiver.exception.ReceiverAlreadyAssociatedWithUser;
 import pl.newsler.components.receiver.usecase.ReceiverCreateRequest;
 import pl.newsler.components.receiver.usecase.ReceiverGetResponse;
@@ -38,13 +42,22 @@ class ReceiverServiceTest {
     private final TestUserFactory factory = new TestUserFactory();
     private final IUserRepository userRepository = new StubUserRepository();
     private final IReceiverRepository receiverRepository = new StubReceiverRepository();
-    private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
-    private final StubUserModuleConfiguration userConfiguration = new StubUserModuleConfiguration(
-            userRepository,
-            passwordEncoder
-    );
     private final ReceiverModuleConfiguration configuration = new ReceiverModuleConfiguration(receiverRepository, userRepository);
-    private final IUserCrudService crudService = userConfiguration.userService();
+    private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
+    private final StubELAMailRepository mailRepository = new StubELAMailRepository();
+    private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+    private final StubELAMailModuleConfiguration mailModuleConfiguration = new StubELAMailModuleConfiguration(
+            userRepository,
+            mailRepository,
+            passwordEncoder,
+            configuration.receiverService()
+    );
+    private final StubUserModuleConfiguration userModuleConfiguration = new StubUserModuleConfiguration(
+            userRepository,
+            passwordEncoder,
+            mailModuleConfiguration.templateService(mailModuleConfiguration.elaParamBuilder(), restTemplate)
+    );
+    private final IUserCrudService crudService = userModuleConfiguration.userService();
     private final IReceiverService service = configuration.receiverService();
 
     @BeforeEach

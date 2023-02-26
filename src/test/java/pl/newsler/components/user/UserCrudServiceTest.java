@@ -4,6 +4,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.web.client.RestTemplate;
 import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.exception.ValidationException;
 import pl.newsler.commons.model.NLEmail;
@@ -11,6 +13,9 @@ import pl.newsler.commons.model.NLFirstName;
 import pl.newsler.commons.model.NLLastName;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLUuid;
+import pl.newsler.components.emaillabs.StubELAMailModuleConfiguration;
+import pl.newsler.components.emaillabs.StubELAMailRepository;
+import pl.newsler.components.emaillabs.exception.ELAValidationRequestException;
 import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.components.user.usecase.UserDeleteRequest;
 import pl.newsler.components.user.usecase.UserGetRequest;
@@ -31,9 +36,18 @@ import static pl.newsler.testcommons.TestUserUtils.smtpAccount;
 class UserCrudServiceTest {
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final StubUserRepository userRepository = new StubUserRepository();
+    private final StubELAMailRepository mailRepository = new StubELAMailRepository();
+    private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+    private final StubELAMailModuleConfiguration mailModuleConfiguration = new StubELAMailModuleConfiguration(
+            userRepository,
+            mailRepository,
+            passwordEncoder,
+            null
+    );
     private final UserModuleConfiguration configuration = new UserModuleConfiguration(
             userRepository,
-            passwordEncoder
+            passwordEncoder,
+            mailModuleConfiguration.templateService(mailModuleConfiguration.elaParamBuilder(), restTemplate)
     );
     private final IUserCrudService service = configuration.userService();
     private final TestUserFactory factory = new TestUserFactory();
@@ -190,7 +204,7 @@ class UserCrudServiceTest {
         final String email = standard.getEmail().getValue();
         final UserUpdateRequest request = new UserUpdateRequest(email, secretOrAppKey(), secretOrAppKey(), smtpAccount());
 
-        Assertions.assertDoesNotThrow(() -> service.update(request));
+        Assertions.assertThrows(ELAValidationRequestException.class, () -> service.update(request));
         Assertions.assertEquals(request.appKey(), passwordEncoder.decrypt(user.getAppKey().getValue()));
         Assertions.assertEquals(request.secretKey(), passwordEncoder.decrypt(user.getSecretKey().getValue()));
     }

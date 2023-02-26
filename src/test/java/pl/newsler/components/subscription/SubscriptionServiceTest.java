@@ -4,12 +4,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.web.client.RestTemplate;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
 import pl.newsler.commons.model.NLLastName;
 import pl.newsler.commons.model.NLNickname;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLUuid;
+import pl.newsler.components.emaillabs.StubELAMailModuleConfiguration;
+import pl.newsler.components.emaillabs.StubELAMailRepository;
 import pl.newsler.components.receiver.IReceiverRepository;
 import pl.newsler.components.receiver.Receiver;
 import pl.newsler.components.receiver.StubReceiverRepository;
@@ -32,6 +36,14 @@ class SubscriptionServiceTest {
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final StubReceiverRepository receiverRepository = new StubReceiverRepository();
     private final StubUserRepository userRepository = new StubUserRepository();
+    private final StubELAMailRepository mailRepository = new StubELAMailRepository();
+    private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+    private final StubELAMailModuleConfiguration mailModuleConfiguration = new StubELAMailModuleConfiguration(
+            userRepository,
+            mailRepository,
+            passwordEncoder,
+            null
+    );
     private final SubscriptionModuleConfiguration configuration = new SubscriptionModuleConfiguration(
             receiverRepository,
             userRepository
@@ -43,7 +55,8 @@ class SubscriptionServiceTest {
     void beforeEach() {
         final StubUserModuleConfiguration userModuleConfiguration = new StubUserModuleConfiguration(
                 userRepository,
-                passwordEncoder
+                passwordEncoder,
+                mailModuleConfiguration.templateService(mailModuleConfiguration.elaParamBuilder(), restTemplate)
         );
         final IUserCrudService userCrudService = userModuleConfiguration.userService();
 

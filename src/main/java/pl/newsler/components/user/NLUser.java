@@ -25,6 +25,7 @@ import pl.newsler.commons.model.NLLastName;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
+import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLToken;
 import pl.newsler.commons.model.NLUserType;
 import pl.newsler.commons.model.NLUuid;
@@ -105,6 +106,10 @@ public class NLUser implements UserDetails {
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "CANCELLATION_TOKEN")))
     private NLToken cancellationToken;
 
+    @Embedded
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "FOOTER_TEMPLATE_ID")))
+    private NLStringValue footerTemplateId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "ROLE")
     private NLUserType role;
@@ -129,7 +134,7 @@ public class NLUser implements UserDetails {
         return Collections.singletonList(new SimpleGrantedAuthority(this.role.name()));
     }
 
-    NLUser() {
+    protected NLUser() {
         version = UserRepository.version;
         email = NLEmail.of("");
         firstName = NLFirstName.of("");

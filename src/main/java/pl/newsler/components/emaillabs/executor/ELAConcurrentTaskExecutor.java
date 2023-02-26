@@ -2,17 +2,15 @@ package pl.newsler.components.emaillabs.executor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.ws.rs.core.HttpHeaders;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
-import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
@@ -23,6 +21,7 @@ import pl.newsler.commons.model.NLEmailStatus;
 import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.ELAParam;
+import pl.newsler.components.emaillabs.ELARequestPoint;
 import pl.newsler.components.emaillabs.ELAUserMail;
 import pl.newsler.components.emaillabs.IELAMailRepository;
 import pl.newsler.components.emaillabs.usecase.ELASentMailResults;
@@ -32,19 +31,15 @@ import pl.newsler.components.user.NLUser;
 import pl.newsler.internal.exception.ConfigurationException;
 import pl.newsler.security.NLIPasswordEncoder;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 
 @Slf4j
 public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
-    protected static final String BASE_URL = "https://api.emaillabs.net.pl/api";
-    protected static final String SEND_MAIL_URL = "/new_sendmail";
     protected final Queue<Pair<NLUuid, T>> queue;
     protected final IELAMailRepository mailRepository;
     private final ConcurrentTaskExecutor taskExecutor;
@@ -53,13 +48,13 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
     private final IUserRepository userRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    private final ELAParamBuilder paramBuilder;
+    private final ELARequestBuilder requestBuilder;
 
     @SuppressWarnings("java:S107")
     protected ELAConcurrentTaskExecutor(final Queue<Pair<NLUuid, T>> instantQueue, final ConcurrentTaskExecutor taskExecutor,
                                         final NLIPasswordEncoder passwordEncoder, final IELAMailRepository mailRepository,
                                         final IReceiverService receiverService, final IUserRepository userRepository,
-                                        final RestTemplate restTemplate, final ELAParamBuilder paramBuilder) {
+                                        final RestTemplate restTemplate, final ELARequestBuilder requestBuilder) {
         this.queue = instantQueue;
         this.taskExecutor = taskExecutor;
         this.passwordEncoder = passwordEncoder;
@@ -68,7 +63,7 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
         this.userRepository = userRepository;
         this.restTemplate = restTemplate;
         this.objectMapper = new ObjectMapper();
-        this.paramBuilder = paramBuilder;
+        this.requestBuilder = requestBuilder;
     }
 
     protected final void execute(final Runnable runnable) {
@@ -91,19 +86,14 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
 
     protected final ELASentMailResults call(final NLUser user, final T details) {
         log.info("Executing task {}", details.id());
-        final String userPass = passwordEncoder.decrypt(user.getAppKey().getValue()) + ":" + passwordEncoder.decrypt(user.getSecretKey().getValue());
-        final String auth = "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes(StandardCharsets.UTF_8));
+        final MultiValueMap<String, String> headers = requestBuilder.buildAuthHeaders(user);
 
-        final LinkedMultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add(HttpHeaders.AUTHORIZATION, auth);
-        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
-
-        final Map<String, String> params = paramBuilder.buildParamsMap(user, details);
+        final Map<String, String> params = requestBuilder.buildParamsMap(user, details);
         params.put(ELAParam.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
 
-        final HttpEntity<String> entity = new HttpEntity<>(paramBuilder.buildUrlEncoded(params), headers);
-        final UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(BASE_URL)
-                .path(SEND_MAIL_URL)
+        final HttpEntity<String> entity = new HttpEntity<>(requestBuilder.buildUrlEncoded(params), headers);
+        final UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(ELARequestPoint.BASE_URL)
+                .path(ELARequestPoint.SEND_MAIL_URL)
                 .build();
 
         try {

@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(NLApi.V1 + "/subscription")
 public interface ISubscriptionController {
     @PostMapping("/cancel")
-    ResponseEntity<HttpStatus> cancel(@RequestParam("token") final String cancellationToken, @RequestParam("receiverMail") final String receiverMail);
+    ResponseEntity<HttpStatus> cancel(@RequestParam("token") final String cancellationToken, @RequestParam("email") final String receiverMail);
 }

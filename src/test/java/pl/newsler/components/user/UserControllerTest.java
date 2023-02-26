@@ -4,9 +4,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 import pl.newsler.api.IUserController;
 import pl.newsler.commons.exception.GlobalRestExceptionHandler;
 import pl.newsler.commons.exception.NLError;
@@ -16,6 +18,9 @@ import pl.newsler.commons.model.NLFirstName;
 import pl.newsler.commons.model.NLLastName;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLUuid;
+import pl.newsler.components.emaillabs.StubELAMailModuleConfiguration;
+import pl.newsler.components.emaillabs.StubELAMailRepository;
+import pl.newsler.components.emaillabs.exception.ELAValidationRequestException;
 import pl.newsler.components.user.usecase.UserDeleteRequest;
 import pl.newsler.components.user.usecase.UserGetRequest;
 import pl.newsler.components.user.usecase.UserGetResponse;
@@ -33,10 +38,19 @@ class UserControllerTest {
     private final GlobalRestExceptionHandler handler = new GlobalRestExceptionHandler();
     private final TestUserFactory factory = new TestUserFactory();
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
-    private final StubUserRepository userRepositoryMock = new StubUserRepository();
+    private final StubUserRepository userRepository = new StubUserRepository();
+    private final StubELAMailRepository mailRepository = new StubELAMailRepository();
+    private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+    private final StubELAMailModuleConfiguration mailModuleConfiguration = new StubELAMailModuleConfiguration(
+            userRepository,
+            mailRepository,
+            passwordEncoder,
+            null
+    );
     private final UserModuleConfiguration configuration = new UserModuleConfiguration(
-            userRepositoryMock,
-            passwordEncoder
+            userRepository,
+            passwordEncoder,
+            mailModuleConfiguration.templateService(mailModuleConfiguration.elaParamBuilder(), restTemplate)
     );
     private final IUserCrudService service = configuration.userService();
     private final IUserController controller = new UserController(service);
@@ -68,7 +82,7 @@ class UserControllerTest {
 
     @AfterEach
     void afterEach() {
-        userRepositoryMock.deleteAll();
+        userRepository.deleteAll();
     }
 
 
@@ -111,7 +125,7 @@ class UserControllerTest {
     @Test
     void shouldUpdateUserWhenExistsAndValidData() {
         final NLUser standard = factory.standard();
-        final Optional<NLUser> optionalUser = userRepositoryMock.findById(standard.getId());
+        final Optional<NLUser> optionalUser = userRepository.findById(standard.getId());
 
         if (optionalUser.isEmpty()) {
             Assertions.fail();
@@ -164,7 +178,7 @@ class UserControllerTest {
     @Test
     void shouldDeleteUserWhenUserExistsAndCorrectData() {
         final NLUuid standardUserId = factory.standard().getId();
-        final Optional<NLUser> optionalUser = userRepositoryMock.findById(standardUserId);
+        final Optional<NLUser> optionalUser = userRepository.findById(standardUserId);
         if (optionalUser.isEmpty()) {
             Assertions.fail();
         }
@@ -176,7 +190,7 @@ class UserControllerTest {
     @Test
     void shouldNotDeleteUserAndThrowInvalidUserDataExceptionWhenBlankRequest() {
         final NLUuid standardUserId = factory.standard().getId();
-        final Optional<NLUser> optionalUser = userRepositoryMock.findById(standardUserId);
+        final Optional<NLUser> optionalUser = userRepository.findById(standardUserId);
 
         if (optionalUser.isEmpty()) {
             Assertions.fail();
@@ -195,7 +209,7 @@ class UserControllerTest {
     @Test
     void shouldNotDeleteUserAndThrowInvalidUserDataExceptionWhenIncorrectIdAndCorrectPassword() {
         final NLUuid standardUserId = factory.standard().getId();
-        final Optional<NLUser> optionalUser = userRepositoryMock.findById(standardUserId);
+        final Optional<NLUser> optionalUser = userRepository.findById(standardUserId);
 
         if (optionalUser.isEmpty()) {
             Assertions.fail();
@@ -212,7 +226,7 @@ class UserControllerTest {
     @Test
     void shouldNotDeleteUserAndThrowInvalidUserDataExceptionWhenCorrectIdAndIncorrectPassword() {
         final NLUuid standardUserId = factory.standard().getId();
-        final Optional<NLUser> optionalUser = userRepositoryMock.findById(standardUserId);
+        final Optional<NLUser> optionalUser = userRepository.findById(standardUserId);
 
         if (optionalUser.isEmpty()) {
             Assertions.fail();
@@ -232,7 +246,7 @@ class UserControllerTest {
     private void handleResponse(final UserGetRequest request, final HttpStatus expectedStatus) {
         try {
             ResponseEntity<UserGetResponse> response = controller.get(request);
-            Assertions.assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(200));
+            Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         } catch (Exception e) {
             if (e instanceof NLException nle) {
                 ResponseEntity<NLError> entity = handler.handleException(nle);
@@ -247,9 +261,11 @@ class UserControllerTest {
     private void handleResponse(final UserUpdateRequest request, final HttpStatus expectedStatus) {
         try {
             ResponseEntity<String> response = controller.update(request);
-            Assertions.assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(200));
+            Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         } catch (Exception e) {
-            if (e instanceof NLException nle) {
+            if (e instanceof ELAValidationRequestException ev) {
+              Assertions.assertNotNull(ev.response());
+            } else if (e instanceof NLException nle) {
                 ResponseEntity<NLError> entity = handler.handleException(nle);
                 Assertions.assertNotNull(entity);
                 Assertions.assertEquals(expectedStatus, entity.getStatusCode());
@@ -262,7 +278,7 @@ class UserControllerTest {
     private void handleResponse(final UserDeleteRequest request, final HttpStatus expectedStatus) {
         try {
             ResponseEntity<String> response = controller.delete(request);
-            Assertions.assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(200));
+            Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         } catch (Exception e) {
             if (e instanceof NLException nle) {
                 ResponseEntity<NLError> entity = handler.handleException(nle);

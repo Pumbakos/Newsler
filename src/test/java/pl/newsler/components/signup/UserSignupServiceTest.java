@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.web.client.RestTemplate;
 import pl.newsler.commons.exception.EmailAlreadyConfirmedException;
 import pl.newsler.commons.exception.InvalidTokenException;
 import pl.newsler.commons.exception.InvalidUserDataException;
@@ -22,6 +23,8 @@ import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLToken;
 import pl.newsler.commons.model.NLUuid;
+import pl.newsler.components.emaillabs.StubELAMailModuleConfiguration;
+import pl.newsler.components.emaillabs.StubELAMailRepository;
 import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.components.signup.usecase.UserCreateRequest;
 import pl.newsler.components.signup.usecase.UserResendTokenRequest;
@@ -50,7 +53,19 @@ class UserSignupServiceTest {
     private final StubConfirmationTokenRepository confirmationTokenRepository = new StubConfirmationTokenRepository();
     private final NLIPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final IUserRepository userRepository = new StubUserRepository();
-    private final StubUserModuleConfiguration userModuleConfiguration = new StubUserModuleConfiguration(userRepository, passwordEncoder);
+    private final StubELAMailRepository mailRepository = new StubELAMailRepository();
+    private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+    private final StubELAMailModuleConfiguration mailModuleConfiguration = new StubELAMailModuleConfiguration(
+            userRepository,
+            mailRepository,
+            passwordEncoder,
+            null
+    );
+    private final StubUserModuleConfiguration userModuleConfiguration = new StubUserModuleConfiguration(
+            userRepository,
+            passwordEncoder,
+            mailModuleConfiguration.templateService(mailModuleConfiguration.elaParamBuilder(), restTemplate)
+    );
     private final IUserCrudService crudService = userModuleConfiguration.userService();
     private final JavaMailSender mailSender = new JavaMailSenderImpl();
     private final SignupModuleConfiguration configuration = new SignupModuleConfiguration(

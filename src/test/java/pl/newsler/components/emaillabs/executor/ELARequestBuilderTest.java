@@ -33,11 +33,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-class ELAParamBuilderTest {
+class ELARequestBuilderTest {
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final StubUserRepository userRepository = new StubUserRepository();
     private final TestUserFactory factory = new TestUserFactory();
-    private final ELAParamBuilder paramBuilder = new ELAParamBuilder();
+    private final ELARequestBuilder paramBuilder = new ELARequestBuilder(passwordEncoder);
 
     @BeforeEach
     void beforeEach() throws NoSuchFieldException, IllegalAccessException {

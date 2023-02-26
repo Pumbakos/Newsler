@@ -5,16 +5,16 @@ import org.springframework.http.ResponseEntity;
 import pl.newsler.commons.exception.NLError;
 import pl.newsler.commons.exception.NLException;
 
-public class ELASendMailException extends NLException {
-    public ELASendMailException(String error, String errorMessage) {
+public class ELATemplateDeletionException extends NLException {
+    public ELATemplateDeletionException(String error, String errorMessage) {
         super(error, errorMessage);
     }
 
-    public ELASendMailException(String errorMessage) {
+    public ELATemplateDeletionException(String errorMessage) {
         super("Not provided", errorMessage);
     }
 
-    public ELASendMailException() {
+    public ELATemplateDeletionException() {
         super("Not provided", "Not specified");
     }
 

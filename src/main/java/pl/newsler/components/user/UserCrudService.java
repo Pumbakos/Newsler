@@ -3,6 +3,8 @@ package pl.newsler.components.user;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import pl.newsler.commons.exception.InvalidUserDataException;
+import pl.newsler.commons.model.NLStringValue;
+import pl.newsler.components.emaillabs.IELATemplateService;
 import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.commons.model.NLAppKey;
 import pl.newsler.commons.model.NLEmail;
@@ -28,6 +30,7 @@ import java.util.UUID;
 class UserCrudService implements IUserCrudService {
     private final IUserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
+    private final IELATemplateService templateService;
 
     @Override
     public @NotNull UserGetResponse get(final UserGetRequest request) {
@@ -107,11 +110,14 @@ class UserCrudService implements IUserCrudService {
             throw new InvalidUserDataException();
         }
 
-        final NLUser nlUser = optionalNLUser.get();
-        nlUser.setAppKey(NLAppKey.of(hash(appKey.getValue())));
-        nlUser.setSecretKey(NLSecretKey.of(hash(secretKey.getValue())));
-        nlUser.setSmtpAccount(NLSmtpAccount.of(hash(smtpAccount.getValue())));
-        userRepository.save(nlUser);
+        final NLUser user = optionalNLUser.get();
+        user.setAppKey(NLAppKey.of(hash(appKey.getValue())));
+        user.setSecretKey(NLSecretKey.of(hash(secretKey.getValue())));
+        user.setSmtpAccount(NLSmtpAccount.of(hash(smtpAccount.getValue())));
+
+        final String templateId = templateService.add(user, IELATemplateService.DEFAULT_HTML_FOOTER, IELATemplateService.DEFAULT_TEXT_FOOTER);
+        user.setFooterTemplateId(NLStringValue.of(templateId));
+        userRepository.save(user);
     }
 
     @Override

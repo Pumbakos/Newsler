@@ -2,6 +2,7 @@ package pl.newsler.components.user;
 
 import org.jetbrains.annotations.NotNull;
 import pl.newsler.commons.model.NLEmail;
+import pl.newsler.commons.model.NLToken;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.testcommons.InMemoryJpaRepository;
 
@@ -15,7 +16,7 @@ public class StubUserRepository extends InMemoryJpaRepository<NLUser, NLUuid> im
     }
 
     @Override
-    public <S extends NLUser> @NotNull S save(S entity) {
+    public <S extends NLUser> @NotNull S save(@NotNull S entity) {
         return super.save(entity);
     }
 
@@ -37,5 +38,10 @@ public class StubUserRepository extends InMemoryJpaRepository<NLUser, NLUuid> im
     @Override
     public void enableUser(final NLUuid uuid) {
         super.database.values().stream().filter(user -> user.getId().equals(uuid)).findFirst().ifPresent(user -> user.setEnabled(true));
+    }
+
+    @Override
+    public Optional<NLUser> findByCancellationToken(final NLToken token) {
+        return super.database.values().stream().filter(user -> user.getCancellationToken().equals(token)).findFirst();
     }
 }

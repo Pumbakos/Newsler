@@ -17,7 +17,7 @@ public class StubConfirmationTokenRepository extends InMemoryJpaRepository<NLCon
     }
 
     @Override
-    public <S extends NLConfirmationToken> @NotNull S save(S entity) {
+    public <S extends NLConfirmationToken> @NotNull S save(@NotNull S entity) {
         return super.save(entity);
     }
 

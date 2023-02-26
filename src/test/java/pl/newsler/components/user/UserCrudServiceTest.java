@@ -30,9 +30,9 @@ import static pl.newsler.testcommons.TestUserUtils.smtpAccount;
 
 class UserCrudServiceTest {
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
-    private final StubUserRepository userRepositoryMock = new StubUserRepository();
+    private final StubUserRepository userRepository = new StubUserRepository();
     private final UserModuleConfiguration configuration = new UserModuleConfiguration(
-            userRepositoryMock,
+            userRepository,
             passwordEncoder
     );
     private final IUserCrudService service = configuration.userService();
@@ -65,7 +65,7 @@ class UserCrudServiceTest {
 
     @AfterEach
     void afterEach() {
-        userRepositoryMock.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -180,7 +180,7 @@ class UserCrudServiceTest {
     @Test
     void shouldUpdateUserWhenExistsAndValidData() {
         final NLUser standard = factory.standard();
-        final Optional<NLUser> optionalUser = userRepositoryMock.findById(standard.getId());
+        final Optional<NLUser> optionalUser = userRepository.findById(standard.getId());
 
         if (optionalUser.isEmpty()) {
             Assertions.fail();
@@ -236,20 +236,20 @@ class UserCrudServiceTest {
     @Test
     void shouldDeleteUserWhenUserExistsAndCorrectData() {
         final NLUuid standardUserId = factory.standard().getId();
-        final Optional<NLUser> optionalUser = userRepositoryMock.findById(standardUserId);
+        final Optional<NLUser> optionalUser = userRepository.findById(standardUserId);
         if (optionalUser.isEmpty()) {
             Assertions.fail();
         }
 
         final UserDeleteRequest deleteRequest = new UserDeleteRequest(standardUserId.getValue(), factory.standard().getPassword());
         Assertions.assertDoesNotThrow(() -> service.delete(deleteRequest));
-        Assertions.assertEquals(Optional.empty(), userRepositoryMock.findById(standardUserId));
+        Assertions.assertEquals(Optional.empty(), userRepository.findById(standardUserId));
     }
 
     @Test
     void shouldNotDeleteUserAndThrowInvalidUserDataExceptionWhenBlankRequest() {
         final NLUuid standardUserId = factory.standard().getId();
-        final Optional<NLUser> optionalUser = userRepositoryMock.findById(standardUserId);
+        final Optional<NLUser> optionalUser = userRepository.findById(standardUserId);
 
         if (optionalUser.isEmpty()) {
             Assertions.fail();
@@ -263,13 +263,13 @@ class UserCrudServiceTest {
         Assertions.assertThrows(InvalidUserDataException.class, () -> service.delete(nullDataRequest));
         Assertions.assertThrows(InvalidUserDataException.class, () -> service.delete(blankDataRequest));
         Assertions.assertThrows(InvalidUserDataException.class, () -> service.delete(nullIdRequest));
-        Assertions.assertEquals(optionalUser, userRepositoryMock.findById(standardUserId));
+        Assertions.assertEquals(optionalUser, userRepository.findById(standardUserId));
     }
 
     @Test
     void shouldNotDeleteUserAndThrowInvalidUserDataExceptionWhenIncorrectIdAndCorrectPassword() {
         final NLUuid standardUserId = factory.standard().getId();
-        final Optional<NLUser> optionalUser = userRepositoryMock.findById(standardUserId);
+        final Optional<NLUser> optionalUser = userRepository.findById(standardUserId);
 
         if (optionalUser.isEmpty()) {
             Assertions.fail();
@@ -282,13 +282,13 @@ class UserCrudServiceTest {
         Assertions.assertEquals(standardUserId, user.getId());
         Assertions.assertThrows(ValidationException.class, () -> service.delete(notUuidRequest));
         Assertions.assertThrows(InvalidUserDataException.class, () -> service.delete(randomIdRequest));
-        Assertions.assertEquals(optionalUser, userRepositoryMock.findById(standardUserId));
+        Assertions.assertEquals(optionalUser, userRepository.findById(standardUserId));
     }
 
     @Test
     void shouldNotDeleteUserAndThrowInvalidUserDataExceptionWhenCorrectIdAndIncorrectPassword() {
         final NLUuid standardUserId = factory.standard().getId();
-        final Optional<NLUser> optionalUser = userRepositoryMock.findById(standardUserId);
+        final Optional<NLUser> optionalUser = userRepository.findById(standardUserId);
 
         if (optionalUser.isEmpty()) {
             Assertions.fail();
@@ -303,6 +303,6 @@ class UserCrudServiceTest {
         Assertions.assertThrows(InvalidUserDataException.class, () -> service.delete(blankPasswordRequest));
         Assertions.assertThrows(InvalidUserDataException.class, () -> service.delete(invalidPasswordRequest));
         Assertions.assertThrows(InvalidUserDataException.class, () -> service.delete(incorrectPasswordRequest));
-        Assertions.assertEquals(optionalUser, userRepositoryMock.findById(standardUserId));
+        Assertions.assertEquals(optionalUser, userRepository.findById(standardUserId));
     }
 }

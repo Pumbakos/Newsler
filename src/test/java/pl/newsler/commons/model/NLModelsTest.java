@@ -526,7 +526,9 @@ class NLModelsTest {
 
     @Test
     void shouldValidateNLToken() {
-        Assertions.assertTrue(NLToken.of(UUID.randomUUID().toString()).validate());
+        final String value = UUID.randomUUID().toString();
+        Assertions.assertTrue(NLToken.of(value).validate());
+        Assertions.assertTrue(NLToken.of(String.format("%s-%s", value, value)).validate());
     }
 
     @Test

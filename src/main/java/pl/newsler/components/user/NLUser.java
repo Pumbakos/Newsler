@@ -129,7 +129,7 @@ public class NLUser implements UserDetails {
         return Collections.singletonList(new SimpleGrantedAuthority(this.role.name()));
     }
 
-    protected NLUser() {
+    NLUser() {
         version = UserRepository.version;
         email = NLEmail.of("");
         firstName = NLFirstName.of("");

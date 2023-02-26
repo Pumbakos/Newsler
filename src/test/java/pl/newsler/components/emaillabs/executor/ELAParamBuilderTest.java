@@ -129,7 +129,7 @@ class ELAParamBuilderTest {
         final String encodedEmail = URLEncoder.encode(user.getEmail().getValue(), StandardCharsets.UTF_8);
         final String cancellationToken = user.getCancellationToken().getValue();
         final String unsubscribeText = String.format("\n\nUnsubscribe from newsletter: http://localhost:4200/subscription/cancel?token=%s&email=%s", cancellationToken, encodedEmail);
-        final String unsubscribeHtml = String.format("</br></br><pre><em><a href=\"http://localhost:4200/subscription/cancel?token=%s&email=%s\">Unsubscribe from newsletter</a></em></pre>", cancellationToken, encodedEmail);
+        final String unsubscribeHtml = String.format("</br></br><pre><em><a href=\"http://localhost:4200/subscription/cancel?token=%s&email=%s\" style=\"text-decoration: none; font-size: .6rem;\">Unsubscribe from newsletter</a></em></pre>", cancellationToken, encodedEmail);
 
         Assertions.assertNotNull(params);
         Assertions.assertTrue(params.get(ELAParam.TEXT).contains(unsubscribeText));

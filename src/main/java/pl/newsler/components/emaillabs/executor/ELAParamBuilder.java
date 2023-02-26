@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import pl.newsler.components.emaillabs.ELAParam;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.internal.NewslerDesignerServiceProperties;
-import pl.newsler.internal.NewslerServiceProperties;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -65,7 +64,7 @@ public class ELAParamBuilder {
     }
 
     private enum MessageType {
-        HTML("</br></br><pre><em><a href=\"%s://%s:%d/subscription/cancel?token=%s&email=%s\">Unsubscribe from newsletter</a></em></pre>"),
+        HTML("</br></br><pre><em><a href=\"%s://%s:%d/subscription/cancel?token=%s&email=%s\" style=\"text-decoration: none; font-size: .6rem;\">Unsubscribe from newsletter</a></em></pre>"),
         PLAIN("\n\nUnsubscribe from newsletter: %s://%s:%d/subscription/cancel?token=%s&email=%s");
 
         final String format;

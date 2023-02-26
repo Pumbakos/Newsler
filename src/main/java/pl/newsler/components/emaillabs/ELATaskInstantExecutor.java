@@ -1,6 +1,5 @@
 package pl.newsler.components.emaillabs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -11,12 +10,12 @@ import org.springframework.web.client.RestTemplate;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.executor.ELAConcurrentTaskExecutor;
 import pl.newsler.components.emaillabs.executor.ELAInstantMailDetails;
+import pl.newsler.components.emaillabs.executor.ELAParamBuilder;
 import pl.newsler.components.emaillabs.executor.IELATaskInstantExecutor;
 import pl.newsler.components.receiver.IReceiverService;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.security.NLIPasswordEncoder;
 
-import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,7 +26,7 @@ class ELATaskInstantExecutor extends ELAConcurrentTaskExecutor<ELAInstantMailDet
     ELATaskInstantExecutor(final Queue<Pair<NLUuid, ELAInstantMailDetails>> queue, final ConcurrentTaskExecutor taskExecutor,
                            final NLIPasswordEncoder passwordEncoder, final IELAMailRepository mailRepository,
                            final IReceiverService receiverService, final IUserRepository userRepository,
-                           final RestTemplate restTemplate, final ObjectMapper objectMapper) {
+                           final RestTemplate restTemplate, final ELAParamBuilder paramBuilder) {
         super(
                 queue,
                 taskExecutor,
@@ -36,7 +35,7 @@ class ELATaskInstantExecutor extends ELAConcurrentTaskExecutor<ELAInstantMailDet
                 receiverService,
                 userRepository,
                 restTemplate,
-                objectMapper
+                paramBuilder
         );
     }
 

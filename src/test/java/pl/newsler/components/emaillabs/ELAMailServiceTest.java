@@ -1,6 +1,5 @@
 package pl.newsler.components.emaillabs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,10 +47,9 @@ public class ELAMailServiceTest {
     private final IReceiverService receiverService = new StubReceiverModuleConfiguration(new StubReceiverRepository(), userRepository).receiverService();
     private final ELAMailModuleConfiguration configuration = new ELAMailModuleConfiguration(userRepository, mailRepository, passwordEncoder, receiverService);
     private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-    private final ObjectMapper mapper = configuration.objectMapper();
     private final IELAMailService service = configuration.mailService(
-            configuration.taskInstantExecutor(restTemplate, mapper),
-            configuration.taskScheduledExecutor(restTemplate, mapper)
+            configuration.taskInstantExecutor(restTemplate, configuration.elaParamBuilder()),
+            configuration.taskScheduledExecutor(restTemplate, configuration.elaParamBuilder())
     );
     private final TestUserFactory factory = new TestUserFactory();
 
@@ -127,7 +125,6 @@ public class ELAMailServiceTest {
 
         final NLUser user = users.get(0);
         final ELAScheduleMailRequest request = MailModuleUtil.createScheduledMailRequest(
-                users,
                 user,
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)),
                 ZoneId.systemDefault().toString()
@@ -146,7 +143,6 @@ public class ELAMailServiceTest {
 
         final NLUser user = users.get(0);
         final ELAScheduleMailRequest request = MailModuleUtil.createScheduledMailRequest(
-                users,
                 user,
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)),
                 "Zone"
@@ -167,7 +163,6 @@ public class ELAMailServiceTest {
         user.setEmail(NLEmail.of(TestUserUtils.email()));
 
         final ELAScheduleMailRequest request = MailModuleUtil.createScheduledMailRequest(
-                users,
                 user,
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)),
                 "Zone"
@@ -187,7 +182,6 @@ public class ELAMailServiceTest {
 
         final NLUser user = users.get(0);
         final ELAScheduleMailRequest request = MailModuleUtil.createScheduledMailRequest(
-                users,
                 user,
                 dateTime,
                 "Zone"
@@ -207,7 +201,6 @@ public class ELAMailServiceTest {
 
         final NLUser user = users.get(0);
         final ELAScheduleMailRequest request = MailModuleUtil.createScheduledMailRequest(
-                users,
                 user,
                 dateTime,
                 "Zone"

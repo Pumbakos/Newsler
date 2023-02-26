@@ -46,19 +46,20 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
     protected static final String BASE_URL = "https://api.emaillabs.net.pl/api";
     protected static final String SEND_MAIL_URL = "/new_sendmail";
     protected final Queue<Pair<NLUuid, T>> queue;
-    protected final ConcurrentTaskExecutor taskExecutor;
-    protected final NLIPasswordEncoder passwordEncoder;
     protected final IELAMailRepository mailRepository;
-    protected final IReceiverService receiverService;
-    protected final IUserRepository userRepository;
-    protected final RestTemplate restTemplate;
-    protected final ObjectMapper objectMapper;
+    private final ConcurrentTaskExecutor taskExecutor;
+    private final NLIPasswordEncoder passwordEncoder;
+    private final IReceiverService receiverService;
+    private final IUserRepository userRepository;
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
+    private final ELAParamBuilder paramBuilder;
 
     @SuppressWarnings("java:S107")
     protected ELAConcurrentTaskExecutor(final Queue<Pair<NLUuid, T>> instantQueue, final ConcurrentTaskExecutor taskExecutor,
                                         final NLIPasswordEncoder passwordEncoder, final IELAMailRepository mailRepository,
                                         final IReceiverService receiverService, final IUserRepository userRepository,
-                                        final RestTemplate restTemplate, final ObjectMapper objectMapper) {
+                                        final RestTemplate restTemplate, final ELAParamBuilder paramBuilder) {
         this.queue = instantQueue;
         this.taskExecutor = taskExecutor;
         this.passwordEncoder = passwordEncoder;
@@ -66,7 +67,8 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
         this.receiverService = receiverService;
         this.userRepository = userRepository;
         this.restTemplate = restTemplate;
-        this.objectMapper = objectMapper;
+        this.objectMapper = new ObjectMapper();
+        this.paramBuilder = paramBuilder;
     }
 
     protected final void execute(final Runnable runnable) {
@@ -96,10 +98,10 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
         headers.add(HttpHeaders.AUTHORIZATION, auth);
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 
-        final Map<String, String> params = ELAParamBuilder.buildParamsMap(user, details);
+        final Map<String, String> params = paramBuilder.buildParamsMap(user, details);
         params.put(ELAParam.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
 
-        final HttpEntity<String> entity = new HttpEntity<>(ELAParamBuilder.buildUrlEncoded(params), headers);
+        final HttpEntity<String> entity = new HttpEntity<>(paramBuilder.buildUrlEncoded(params), headers);
         final UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(BASE_URL)
                 .path(SEND_MAIL_URL)
                 .build();

@@ -20,7 +20,6 @@ import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.exception.NLError;
 import pl.newsler.commons.exception.NLException;
 import pl.newsler.commons.exception.TokenExpiredException;
-import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
 import pl.newsler.commons.model.NLId;
@@ -28,6 +27,7 @@ import pl.newsler.commons.model.NLLastName;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLToken;
+import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.components.signup.usecase.UserCreateRequest;
 import pl.newsler.components.signup.usecase.UserResendTokenRequest;
 import pl.newsler.components.user.IUserCrudService;
@@ -35,7 +35,7 @@ import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.StubUserModuleConfiguration;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.TestUserFactory;
-import pl.newsler.internal.DomainProperties;
+import pl.newsler.internal.NewslerServiceProperties;
 import pl.newsler.security.NLIPasswordEncoder;
 import pl.newsler.security.StubNLPasswordEncoder;
 
@@ -115,7 +115,7 @@ public class UserSignupControllerTest {
         final Field port = service.getClass().getDeclaredField("port");
 
         schema.setAccessible(true);
-        schema.set(service, DomainProperties.Schema.HTTP);
+        schema.set(service, NewslerServiceProperties.Schema.HTTP);
         homeDomain.setAccessible(true);
         homeDomain.set(service, "localhost");
         port.setAccessible(true);
@@ -362,7 +362,7 @@ public class UserSignupControllerTest {
         final Field port = service.getClass().getDeclaredField("port");
 
         schema.setAccessible(true);
-        schema.set(service, DomainProperties.Schema.HTTP);
+        schema.set(service, NewslerServiceProperties.Schema.HTTP);
         homeDomain.setAccessible(true);
         homeDomain.set(service, "localhost");
         port.setAccessible(true);

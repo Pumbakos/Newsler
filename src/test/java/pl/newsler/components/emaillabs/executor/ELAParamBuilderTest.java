@@ -18,10 +18,13 @@ import pl.newsler.components.emaillabs.usecase.ELAInstantMailRequest;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.TestUserFactory;
+import pl.newsler.internal.NewslerDesignerServiceProperties;
 import pl.newsler.security.StubNLPasswordEncoder;
 import pl.newsler.testcommons.TestUserUtils;
 
+import java.lang.reflect.Field;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -34,10 +37,11 @@ class ELAParamBuilderTest {
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final StubUserRepository userRepository = new StubUserRepository();
     private final TestUserFactory factory = new TestUserFactory();
+    private final ELAParamBuilder paramBuilder = new ELAParamBuilder();
 
     @BeforeEach
-    void beforeEach() {
-        NLUuid standardId = NLUuid.of(UUID.randomUUID());
+    void beforeEach() throws NoSuchFieldException, IllegalAccessException {
+        final NLUuid standardId = NLUuid.of(UUID.randomUUID());
         factory.standard().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.standard_plainPassword())));
         factory.standard().setId(standardId);
         factory.standard().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
@@ -45,7 +49,7 @@ class ELAParamBuilderTest {
         factory.standard().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
         userRepository.save(factory.standard());
 
-        NLUuid dashedId = NLUuid.of(UUID.randomUUID());
+        final NLUuid dashedId = NLUuid.of(UUID.randomUUID());
         factory.dashed().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dashed_plainPassword())));
         factory.dashed().setId(dashedId);
         factory.dashed().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
@@ -53,13 +57,23 @@ class ELAParamBuilderTest {
         factory.dashed().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
         userRepository.save(factory.dashed());
 
-        NLUuid dottedId = NLUuid.of(UUID.randomUUID());
+        final NLUuid dottedId = NLUuid.of(UUID.randomUUID());
         factory.dotted().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dotted_plainPassword())));
         factory.dotted().setId(dottedId);
         factory.dotted().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.dotted().setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.dotted().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
         userRepository.save(factory.dotted());
+
+        Field schema = paramBuilder.getClass().getDeclaredField("schema");
+        Field domain = paramBuilder.getClass().getDeclaredField("domain");
+        Field port = paramBuilder.getClass().getDeclaredField("port");
+        schema.trySetAccessible();
+        domain.trySetAccessible();
+        port.trySetAccessible();
+        schema.set(paramBuilder, NewslerDesignerServiceProperties.Schema.HTTP);
+        domain.set(paramBuilder, "localhost");
+        port.setInt(paramBuilder, 4200);
     }
 
     @AfterEach
@@ -87,7 +101,7 @@ class ELAParamBuilderTest {
         params.put(ELAParam.HTML, String.format("<pre>%s</pre>", details.message()));
         params.put(ELAParam.TEXT, details.message());
 
-        final String paramsWithUrlEncoded = ELAParamBuilder.buildUrlEncoded(params);
+        final String paramsWithUrlEncoded = paramBuilder.buildUrlEncoded(params);
         final String paramsWithoutURLEncoding = buildWithoutURLEncoding(params);
         final String decodedParamsWithUrlEncoded = Arrays
                 .stream(paramsWithUrlEncoded.split("&"))
@@ -99,10 +113,35 @@ class ELAParamBuilderTest {
         Assertions.assertEquals(paramsWithoutURLEncoding, decodedParamsWithUrlEncodedAndSpecialChars);
     }
 
+    @Test
+    void shouldAppendUnsubscribeFooterAtTheEnd() {
+        final List<NLUser> users = userRepository.findAll();
+        if (users.isEmpty()) {
+            Assertions.fail("Users empty");
+        }
+        final NLUser user = users.get(0);
+        final ELAInstantMailRequest request = MailModuleUtil.createInstantMailRequest(user);
+        final ELAInstantMailDetails details = ELAInstantMailDetails.of(request);
+
+        final Map<String, String> params = paramBuilder.buildParamsMap(user, details);
+        params.put(ELAParam.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
+
+        final String encodedEmail = URLEncoder.encode(user.getEmail().getValue(), StandardCharsets.UTF_8);
+        final String cancellationToken = user.getCancellationToken().getValue();
+        final String unsubscribeText = String.format("\n\nUnsubscribe from newsletter: http://localhost:4200/subscription/cancel?token=%s&email=%s", cancellationToken, encodedEmail);
+        final String unsubscribeHtml = String.format("</br></br><pre><em><a href=\"http://localhost:4200/subscription/cancel?token=%s&email=%s\">Unsubscribe from newsletter</a></em></pre>", cancellationToken, encodedEmail);
+
+        Assertions.assertNotNull(params);
+        Assertions.assertTrue(params.get(ELAParam.TEXT).contains(unsubscribeText));
+        Assertions.assertTrue(params.get(ELAParam.HTML).contains(unsubscribeHtml));
+        Assertions.assertFalse(params.get(ELAParam.TEXT).contains(unsubscribeHtml));
+        Assertions.assertFalse(params.get(ELAParam.HTML).contains(unsubscribeText));
+    }
+
     @ParameterizedTest
     @NullAndEmptySource
     void shouldNotBuildParams(Map<String, String> map) {
-        String params = ELAParamBuilder.buildUrlEncoded(map);
+        final String params = paramBuilder.buildUrlEncoded(map);
         Assertions.assertEquals("", params);
     }
 

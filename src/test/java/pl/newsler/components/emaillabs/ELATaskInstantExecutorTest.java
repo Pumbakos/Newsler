@@ -1,6 +1,5 @@
 package pl.newsler.components.emaillabs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -19,16 +18,12 @@ import pl.newsler.components.emaillabs.usecase.ELAInstantMailRequest;
 import pl.newsler.components.receiver.IReceiverService;
 import pl.newsler.components.receiver.StubReceiverModuleConfiguration;
 import pl.newsler.components.receiver.StubReceiverRepository;
-import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.TestUserFactory;
 import pl.newsler.security.StubNLPasswordEncoder;
 import pl.newsler.testcommons.TestUserUtils;
 
-import java.security.SecureRandom;
-import java.util.List;
 import java.util.Queue;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -39,11 +34,9 @@ class ELATaskInstantExecutorTest {
     private final IReceiverService receiverService = new StubReceiverModuleConfiguration(new StubReceiverRepository(), userRepository).receiverService();
     private final ELAMailModuleConfiguration configuration = new ELAMailModuleConfiguration(userRepository, mailRepository, passwordEncoder, receiverService);
     private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-    private final ObjectMapper mapper = configuration.objectMapper();
     private final TestUserFactory factory = new TestUserFactory();
-    private final Random random = new SecureRandom();
     private final Queue<Pair<NLUuid, ELAInstantMailDetails>> queue = new ConcurrentLinkedQueue<>();
-    private final ELATaskInstantExecutor executor = new ELATaskInstantExecutor (
+    private final ELATaskInstantExecutor executor = new ELATaskInstantExecutor(
             queue,
             new ConcurrentTaskExecutor(),
             passwordEncoder,
@@ -51,7 +44,7 @@ class ELATaskInstantExecutorTest {
             receiverService,
             userRepository,
             restTemplate,
-            mapper
+            configuration.elaParamBuilder()
     );
 
     @BeforeEach

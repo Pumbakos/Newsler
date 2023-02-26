@@ -1,7 +1,12 @@
 newsler:
-  schema: http
-  port: 8080
-  domain-name: localhost
+  service:
+    schema: http
+    port: 8080
+    domain-name: localhost
+  designer:
+    schema: http
+    port: 4200
+    domain-name: localhost
 
 server:
   error:

@@ -3,12 +3,13 @@ package pl.newsler;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import pl.newsler.internal.DomainProperties;
+import pl.newsler.internal.NewslerDesignerServiceProperties;
+import pl.newsler.internal.NewslerServiceProperties;
 import pl.newsler.internal.SpringBootStartUpPropsResolver;
 
 import java.util.Properties;
 
-@EnableConfigurationProperties(value = {DomainProperties.class})
+@EnableConfigurationProperties(value = {NewslerServiceProperties.class, NewslerDesignerServiceProperties.class})
 @SpringBootApplication
 public class NewslerApplication {
     public static void main(String[] args) {

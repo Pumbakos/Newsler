@@ -4,6 +4,7 @@ import pl.newsler.components.user.IUserRepository;
 
 public class StubReceiverModuleConfiguration {
     private final ReceiverModuleConfiguration configuration;
+
     public StubReceiverModuleConfiguration(IReceiverRepository receiverRepository, IUserRepository userRepository) {
         configuration = new ReceiverModuleConfiguration(receiverRepository, userRepository);
     }

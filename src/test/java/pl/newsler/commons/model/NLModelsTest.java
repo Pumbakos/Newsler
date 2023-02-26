@@ -285,7 +285,7 @@ class NLModelsTest {
 
     //* ---------- NLLastName ---------- *//
     @Test
-    void shouldCreatePackagePrivateNLLastName(){
+    void shouldCreatePackagePrivateNLLastName() {
         Assertions.assertDoesNotThrow(NLLastName::new);
     }
 
@@ -617,7 +617,7 @@ class NLModelsTest {
 
     //* ---------- NLVersion ---------- *//
     @Test
-    void shouldCreatePackagePrivateNLVersion(){
+    void shouldCreatePackagePrivateNLVersion() {
         Assertions.assertDoesNotThrow(NLVersion::new);
     }
 

@@ -6,15 +6,15 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
-@ConfigurationPropertiesScan
-@ConfigurationProperties("newsler")
 @Getter
 @Setter
-public class DomainProperties {
-    private Schema schema = Schema.HTTP;
+@ConfigurationPropertiesScan
+@ConfigurationProperties("newsler.designer")
+public class NewslerDesignerServiceProperties {
+    private NewslerServiceProperties.Schema schema = NewslerServiceProperties.Schema.HTTP;
     private String domainName;
     private String ip;
-    private int port = 8080;
+    private int port = 4200;
 
     public enum Schema {
         HTTPS("https"),

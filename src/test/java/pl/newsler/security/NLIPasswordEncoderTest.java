@@ -33,7 +33,7 @@ class NLIPasswordEncoderTest {
     }
 
     @Test
-    void shouldMatchBCryptedPassword(){
+    void shouldMatchBCryptedPassword() {
         String rawPassword = "qeWp0YF9MosU";
         String encoded = passwordEncoder.bCrypt().encode(rawPassword);
         Assertions.assertTrue(passwordEncoder.bCrypt().matches(rawPassword, encoded));

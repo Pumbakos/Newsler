@@ -14,7 +14,6 @@ import pl.newsler.commons.exception.EmailAlreadyConfirmedException;
 import pl.newsler.commons.exception.InvalidTokenException;
 import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.exception.TokenExpiredException;
-import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
 import pl.newsler.commons.model.NLId;
@@ -23,6 +22,7 @@ import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLToken;
 import pl.newsler.commons.model.NLUuid;
+import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.components.signup.usecase.UserCreateRequest;
 import pl.newsler.components.signup.usecase.UserResendTokenRequest;
 import pl.newsler.components.user.IUserCrudService;
@@ -30,7 +30,7 @@ import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.StubUserModuleConfiguration;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.TestUserFactory;
-import pl.newsler.internal.DomainProperties;
+import pl.newsler.internal.NewslerServiceProperties;
 import pl.newsler.security.NLIPasswordEncoder;
 import pl.newsler.security.StubNLPasswordEncoder;
 
@@ -109,7 +109,7 @@ class UserSignupServiceTest {
         final Field port = service.getClass().getDeclaredField("port");
 
         schema.setAccessible(true);
-        schema.set(service, DomainProperties.Schema.HTTP);
+        schema.set(service, NewslerServiceProperties.Schema.HTTP);
         homeDomain.setAccessible(true);
         homeDomain.set(service, "localhost");
         port.setAccessible(true);
@@ -146,7 +146,7 @@ class UserSignupServiceTest {
     }
 
     @Test
-    void shouldConfirmTokenWhenTokenValid(){
+    void shouldConfirmTokenWhenTokenValid() {
         final NLUuid uuid = factory.dashed().map().getId();
         final NLToken token = NLToken.of(UUID.randomUUID().toString());
         final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), token, uuid);
@@ -156,19 +156,19 @@ class UserSignupServiceTest {
     }
 
     @Test
-    void shouldNotConfirmTokenAndThrowInvalidTokenExceptionWhenTokenNotFound(){
+    void shouldNotConfirmTokenAndThrowInvalidTokenExceptionWhenTokenNotFound() {
         final NLToken invalidToken = NLToken.of(UUID.randomUUID().toString());
         Assertions.assertThrows(InvalidTokenException.class, () -> service.confirmToken(invalidToken));
     }
 
     @Test
-    void shouldNotConfirmTokenAndThrowInvalidTokenExceptionWhenTokenInvalid(){
+    void shouldNotConfirmTokenAndThrowInvalidTokenExceptionWhenTokenInvalid() {
         final NLToken invalidToken = NLToken.of("INVALID_TOKEN");
         Assertions.assertThrows(InvalidTokenException.class, () -> service.confirmToken(invalidToken));
     }
 
     @Test
-    void shouldNotConfirmTokenAndThrowEmailAlreadyConfirmedExceptionWhenTokenAlreadyConfirmed(){
+    void shouldNotConfirmTokenAndThrowEmailAlreadyConfirmedExceptionWhenTokenAlreadyConfirmed() {
         final NLConfirmationToken confirmationToken = confirmationTokenRepository.findAll().get(0);
         final NLToken token = confirmationToken.getToken();
         confirmationTokenRepository.updateConfirmationDate(token, LocalDateTime.now().minusMinutes(13));
@@ -177,7 +177,7 @@ class UserSignupServiceTest {
     }
 
     @Test
-    void shouldNotConfirmTokenAndThrowTokenExpiredExceptionWhenTokenExpired(){
+    void shouldNotConfirmTokenAndThrowTokenExpiredExceptionWhenTokenExpired() {
         final NLUuid uuid = factory.dashed().map().getId();
         final LocalDateTime now = LocalDateTime.now().minusMinutes(16L);
         final LocalDateTime then = now.plusMinutes(1L);
@@ -206,7 +206,7 @@ class UserSignupServiceTest {
         final UserResendTokenRequest request = new UserResendTokenRequest(email, password);
 
         schema.setAccessible(true);
-        schema.set(service, DomainProperties.Schema.HTTP);
+        schema.set(service, NewslerServiceProperties.Schema.HTTP);
         homeDomain.setAccessible(true);
         homeDomain.set(service, "localhost");
         port.setAccessible(true);
@@ -217,7 +217,7 @@ class UserSignupServiceTest {
     }
 
     @Test
-    void shouldNotResendConfirmationTokenAndThrowInvalidUserDataExceptionWhenInvalidEmail(){
+    void shouldNotResendConfirmationTokenAndThrowInvalidUserDataExceptionWhenInvalidEmail() {
         final String validEmail = factory.dashed().getEmail().getValue();
         final String invalidEmail = "invalid@email";
         final String invalidPassword = "!NValidPassword";
@@ -229,7 +229,7 @@ class UserSignupServiceTest {
     }
 
     @Test
-    void shouldNotResendConfirmationTokenAndThrowInvalidUserDataExceptionWhenEmailDoesNotMatchPassword(){
+    void shouldNotResendConfirmationTokenAndThrowInvalidUserDataExceptionWhenEmailDoesNotMatchPassword() {
         final String validEmail = factory.dashed().getEmail().getValue();
         final String invalidPassword = "Ma7Tch!ngP4$$wor3";
         final UserResendTokenRequest request = new UserResendTokenRequest(validEmail, invalidPassword);
@@ -238,7 +238,7 @@ class UserSignupServiceTest {
     }
 
     @Test
-    void shouldNotResendConfirmationTokenAndThrowInvalidUserDataExceptionWhenUserNotFound(){
+    void shouldNotResendConfirmationTokenAndThrowInvalidUserDataExceptionWhenUserNotFound() {
         final UserResendTokenRequest request = new UserResendTokenRequest("valid@email.test", "Ma77ching94$$wor3");
 
         Assertions.assertThrows(InvalidUserDataException.class, () -> service.resendConfirmationToken(request));

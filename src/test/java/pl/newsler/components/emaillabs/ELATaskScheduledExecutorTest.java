@@ -1,6 +1,5 @@
 package pl.newsler.components.emaillabs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -44,7 +43,6 @@ class ELATaskScheduledExecutorTest {
     private final IReceiverService receiverService = new StubReceiverModuleConfiguration(new StubReceiverRepository(), userRepository).receiverService();
     private final ELAMailModuleConfiguration configuration = new ELAMailModuleConfiguration(userRepository, mailRepository, passwordEncoder, receiverService);
     private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
-    private final ObjectMapper mapper = configuration.objectMapper();
     private final TestUserFactory factory = new TestUserFactory();
     private final Random random = new SecureRandom();
     private final Queue<Pair<NLUuid, ELAScheduleMailDetails>> queue = new ConcurrentLinkedQueue<>();
@@ -56,7 +54,7 @@ class ELATaskScheduledExecutorTest {
             receiverService,
             userRepository,
             restTemplate,
-            mapper
+            configuration.elaParamBuilder()
     );
 
     @BeforeEach
@@ -102,9 +100,9 @@ class ELATaskScheduledExecutorTest {
         final ZoneId zoneId = ZoneId.systemDefault();
         final NLUser user = users.get(0);
 
-        final ELAScheduleMailRequest first = MailModuleUtil.createScheduledMailRequest(users, user, now.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString());
-        final ELAScheduleMailRequest second = MailModuleUtil.createScheduledMailRequest(users, user, now.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString());
-        final ELAScheduleMailRequest third = MailModuleUtil.createScheduledMailRequest(users, user, now.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString());
+        final ELAScheduleMailRequest first = MailModuleUtil.createScheduledMailRequest(user, now.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString());
+        final ELAScheduleMailRequest second = MailModuleUtil.createScheduledMailRequest(user, now.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString());
+        final ELAScheduleMailRequest third = MailModuleUtil.createScheduledMailRequest(user, now.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString());
 
         executor.schedule(user.map().getId(), ELAScheduleMailDetails.of(first, ZonedDateTime.of(now, zoneId)));
         executor.schedule(user.map().getId(), ELAScheduleMailDetails.of(second, ZonedDateTime.of(now, zoneId)));
@@ -122,28 +120,28 @@ class ELATaskScheduledExecutorTest {
             Assertions.fail("Users empty");
         }
 
-        final LocalDateTime past = LocalDateTime.now().minusMinutes(random.nextInt(10) +3);
+        final LocalDateTime past = LocalDateTime.now().minusMinutes(random.nextInt(10) + 3);
         final ZoneId zoneId = ZoneId.of("Europe/Warsaw");
         final NLUser user = users.get(0);
 
-        final ELAScheduleMailRequest firstThatShouldBeExecuted = MailModuleUtil.createScheduledMailRequest(users, user,
+        final ELAScheduleMailRequest firstThatShouldBeExecuted = MailModuleUtil.createScheduledMailRequest(user,
                 past.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString()
         );
-        final ELAScheduleMailRequest secondThatShouldBeExecuted = MailModuleUtil.createScheduledMailRequest(users, user,
+        final ELAScheduleMailRequest secondThatShouldBeExecuted = MailModuleUtil.createScheduledMailRequest(user,
                 past.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString()
         );
-        final ELAScheduleMailRequest thirdThatShouldBeExecuted = MailModuleUtil.createScheduledMailRequest(users, user,
+        final ELAScheduleMailRequest thirdThatShouldBeExecuted = MailModuleUtil.createScheduledMailRequest(user,
                 past.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString()
         );
 
-        final LocalDateTime future = LocalDateTime.now().plusMinutes(random.nextInt(10) +3);
-        final ELAScheduleMailRequest firstThatShouldNotBeExecuted = MailModuleUtil.createScheduledMailRequest(users, user,
+        final LocalDateTime future = LocalDateTime.now().plusMinutes(random.nextInt(10) + 3);
+        final ELAScheduleMailRequest firstThatShouldNotBeExecuted = MailModuleUtil.createScheduledMailRequest(user,
                 future.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString()
         );
-        final ELAScheduleMailRequest secondThatShouldNotBeExecuted = MailModuleUtil.createScheduledMailRequest(users, user,
+        final ELAScheduleMailRequest secondThatShouldNotBeExecuted = MailModuleUtil.createScheduledMailRequest(user,
                 future.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString()
         );
-        final ELAScheduleMailRequest thirdThatShouldNotBeExecuted = MailModuleUtil.createScheduledMailRequest(users, user,
+        final ELAScheduleMailRequest thirdThatShouldNotBeExecuted = MailModuleUtil.createScheduledMailRequest(user,
                 future.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString()
         );
 

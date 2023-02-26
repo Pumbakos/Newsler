@@ -19,8 +19,6 @@ import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.receiver.IReceiverRepository;
 import pl.newsler.components.receiver.Receiver;
 import pl.newsler.components.receiver.StubReceiverRepository;
-import pl.newsler.components.subscription.exception.CancellationReceiverException;
-import pl.newsler.components.subscription.exception.CancellationTokenException;
 import pl.newsler.components.user.IUserCrudService;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.StubUserModuleConfiguration;
@@ -30,7 +28,6 @@ import pl.newsler.security.StubNLPasswordEncoder;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static pl.newsler.testcommons.TestUserUtils.email;
 import static pl.newsler.testcommons.TestUserUtils.firstName;
 import static pl.newsler.testcommons.TestUserUtils.lastName;

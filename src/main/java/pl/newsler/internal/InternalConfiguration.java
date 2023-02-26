@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 class InternalConfiguration {
     @Bean(name = "domainProperties")
-    DomainProperties domainProperties() {
-        return new DomainProperties();
+    NewslerServiceProperties domainProperties() {
+        return new NewslerServiceProperties();
     }
 }

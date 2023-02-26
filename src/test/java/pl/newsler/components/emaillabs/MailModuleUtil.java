@@ -24,10 +24,10 @@ public class MailModuleUtil {
     }
 
     @NotNull
-    public static ELAScheduleMailRequest createScheduledMailRequest(List<NLUser> users, NLUser user, String dateTime, String zoneId) {
+    public static ELAScheduleMailRequest createScheduledMailRequest(NLUser user, String dateTime, String zoneId) {
         return new ELAScheduleMailRequest(
                 user.getEmail().getValue(),
-                List.of(users.get(1).getEmail().getValue(), users.get(2).getEmail().getValue()),
+                List.of(TestUserUtils.email(), TestUserUtils.email()),
                 "MOCK TEST",
                 "MOCK TEST MESSAGE",
                 dateTime,

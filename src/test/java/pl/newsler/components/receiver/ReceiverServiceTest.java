@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import pl.newsler.commons.exception.InvalidReceiverDataException;
-import pl.newsler.components.receiver.exception.ReceiverAlreadyAssociatedWithUser;
 import pl.newsler.commons.exception.ValidationException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
@@ -16,6 +15,7 @@ import pl.newsler.commons.model.NLNickname;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.commons.model.NLVersion;
+import pl.newsler.components.receiver.exception.ReceiverAlreadyAssociatedWithUser;
 import pl.newsler.components.receiver.usecase.ReceiverCreateRequest;
 import pl.newsler.components.receiver.usecase.ReceiverGetResponse;
 import pl.newsler.components.user.IUserCrudService;
@@ -86,7 +86,7 @@ class ReceiverServiceTest {
                 factory.standard().map().getId().getValue(), email(), firstName(), firstName(), lastName()
         );
         Assertions.assertDoesNotThrow(() -> service.addReceiver(validCreateRequest, false));
-        Assertions.assertEquals(size +1, receiverRepository.findAll().size());
+        Assertions.assertEquals(size + 1, receiverRepository.findAll().size());
     }
 
     @Test

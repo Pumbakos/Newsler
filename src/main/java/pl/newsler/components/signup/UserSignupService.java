@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
         import pl.newsler.components.signup.usecase.UserResendTokenRequest;
         import pl.newsler.components.user.IUserCrudService;
         import pl.newsler.components.user.IUserRepository;
-        import pl.newsler.internal.DomainProperties;
+        import pl.newsler.internal.NewslerServiceProperties;
         import pl.newsler.security.NLIPasswordEncoder;
 
         import java.time.LocalDateTime;
@@ -37,11 +37,11 @@ class UserSignupService implements IUserSignupService {
     private final IUserRepository userRepository;
     private final IUserCrudService crudService;
     private final Random random;
-    @Value("${newsler.schema}")
-    private DomainProperties.Schema schema;
-    @Value("${newsler.domain-name}")
+    @Value("${newsler.service.schema}")
+    private NewslerServiceProperties.Schema schema;
+    @Value("${newsler.service.domain-name}")
     private String homeDomain;
-    @Value("${newsler.port}")
+    @Value("${newsler.service.port}")
     private int port;
 
     @Override

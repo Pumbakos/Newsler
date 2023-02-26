@@ -8,6 +8,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.web.client.RestTemplate;
+import pl.newsler.components.emaillabs.executor.ELAInstantMailDetails;
+import pl.newsler.components.emaillabs.executor.ELAParamBuilder;
+import pl.newsler.components.emaillabs.executor.ELAScheduleMailDetails;
 import pl.newsler.components.emaillabs.executor.IELATaskInstantExecutor;
 import pl.newsler.components.emaillabs.executor.IELATaskScheduledExecutor;
 import pl.newsler.components.receiver.IReceiverService;
@@ -35,8 +38,13 @@ class ELAMailModuleConfiguration {
         return new ObjectMapper();
     }
 
+    @Bean(name = "elaParamBuilder")
+    ELAParamBuilder elaParamBuilder() {
+        return new ELAParamBuilder();
+    }
+
     @Bean(name = "elaTaskInstantExecutor")
-    IELATaskInstantExecutor taskInstantExecutor(RestTemplate restTemplate, ObjectMapper objectMapper) {
+    IELATaskInstantExecutor taskInstantExecutor(RestTemplate restTemplate, ELAParamBuilder paramBuilder) {
         return new ELATaskInstantExecutor(
                 new ConcurrentLinkedQueue<>(),
                 new ConcurrentTaskExecutor(),
@@ -45,12 +53,12 @@ class ELAMailModuleConfiguration {
                 receiverService,
                 userRepository,
                 restTemplate,
-                objectMapper
+                paramBuilder
         );
     }
 
     @Bean(name = "elaTaskScheduledExecutor")
-    IELATaskScheduledExecutor taskScheduledExecutor(RestTemplate restTemplate, ObjectMapper objectMapper) {
+    IELATaskScheduledExecutor taskScheduledExecutor(RestTemplate restTemplate, ELAParamBuilder paramBuilder) {
         return new ELATaskScheduledExecutor(
                 new ConcurrentLinkedQueue<>(),
                 new ConcurrentTaskScheduler(),
@@ -59,7 +67,7 @@ class ELAMailModuleConfiguration {
                 receiverService,
                 userRepository,
                 restTemplate,
-                objectMapper
+                paramBuilder
         );
     }
 

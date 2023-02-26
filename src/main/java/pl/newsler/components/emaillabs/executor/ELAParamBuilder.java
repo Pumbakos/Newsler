@@ -58,7 +58,7 @@ public class ELAParamBuilder {
     }
 
     private <T extends ELAMailDetails> String buildMessage(NLUser user, T details, MessageType type) {
-        final String encodedEmail = URLEncoder.encode(user.getEmail().getValue(), StandardCharsets.UTF_8);
+        final String encodedEmail = URLEncoder.encode(user.getEmail().getValue(), StandardCharsets.UTF_8); //! fixme: receiver mail, not user's one!
         final String cancellationToken = user.getCancellationToken().getValue();
         return details.message.concat(String.format(type.format, schema, domain, port, cancellationToken, encodedEmail));
     }

@@ -12,8 +12,8 @@ class SubscriptionController implements ISubscriptionController {
     private final ISubscriptionService service;
 
     @Override
-    public ResponseEntity<HttpStatus> cancel(final String cancellationToken, final String userEmail) {
-        service.cancel(cancellationToken, userEmail);
+    public ResponseEntity<HttpStatus> cancel(final String cancellationToken, final String receiverMail) {
+        service.cancel(cancellationToken, receiverMail);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

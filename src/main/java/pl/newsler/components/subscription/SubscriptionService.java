@@ -18,9 +18,9 @@ class SubscriptionService implements ISubscriptionService {
     private final IUserRepository userRepository;
 
     @Override
-    public void cancel(final String cancellationToken, final String userEmail) throws CancellationTokenException, CancellationReceiverException {
+    public void cancel(final String cancellationToken, final String receiverMail) throws CancellationTokenException, CancellationReceiverException {
         final NLToken token = NLToken.of(cancellationToken);
-        final NLEmail email = NLEmail.of(userEmail);
+        final NLEmail email = NLEmail.of(receiverMail);
         final Optional<NLUser> optionalNLUser = userRepository.findByCancellationToken(token);
 
         if (optionalNLUser.isEmpty()) {

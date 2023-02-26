@@ -4,5 +4,5 @@ import pl.newsler.components.subscription.exception.CancellationReceiverExceptio
 import pl.newsler.components.subscription.exception.CancellationTokenException;
 
 public interface ISubscriptionService {
-    void cancel(final String cancellationToken, final String userEmail) throws CancellationTokenException, CancellationReceiverException;
+    void cancel(final String cancellationToken, final String receiverMail) throws CancellationTokenException, CancellationReceiverException;
 }

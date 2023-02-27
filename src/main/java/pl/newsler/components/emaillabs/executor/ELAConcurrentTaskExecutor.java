@@ -93,7 +93,7 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
 
         final HttpEntity<String> entity = new HttpEntity<>(requestBuilder.buildUrlEncoded(params), headers);
         final UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(ELARequestPoint.BASE_URL)
-                .path(ELARequestPoint.SEND_MAIL_URL)
+                .path(ELARequestPoint.SEND_MAIL_WITH_TEMPLATE_URL)
                 .build();
 
         try {
@@ -128,10 +128,10 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
         final String response = objectMapper.readValue(e.getMessage(), String.class);
         log.info(response);
         if (e instanceof HttpClientErrorException) {
-            return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, "", LocalDateTime.now());
+            return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, e.getMessage(), LocalDateTime.now());
         }
         if (e instanceof HttpServerErrorException) {
-            return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, "", LocalDateTime.now());
+            return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, e.getMessage(), LocalDateTime.now());
         }
 
         return ELASentMailResults.of(id, userId, NLEmailStatus.ERROR, "General error. Check data, it is likely that SMTP, APP KEY or SECRET KEY are incorrect.", LocalDateTime.now());

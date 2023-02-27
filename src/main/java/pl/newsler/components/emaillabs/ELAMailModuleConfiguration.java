@@ -36,8 +36,8 @@ class ELAMailModuleConfiguration {
         return new ObjectMapper();
     }
 
-    @Bean(name = "elaParamBuilder")
-    ELARequestBuilder elaParamBuilder() {
+    @Bean(name = "elaRequestBuilder")
+    ELARequestBuilder elaRequestBuilder() {
         return new ELARequestBuilder(passwordEncoder);
     }
 

@@ -2,12 +2,16 @@ package pl.newsler.components.emaillabs.executor;
 
 import jakarta.ws.rs.core.HttpHeaders;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import pl.newsler.components.emaillabs.ELAParam;
+import pl.newsler.components.emaillabs.ELATemplateParam;
+import pl.newsler.components.emaillabs.exception.ELAParameterBuildException;
+import pl.newsler.components.htmlremover.HtmlTagRemover;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.internal.NewslerDesignerServiceProperties;
 import pl.newsler.security.NLIPasswordEncoder;
@@ -24,7 +28,7 @@ public class ELARequestBuilder {
     @Value("${newsler.designer.schema}")
     private NewslerDesignerServiceProperties.Schema schema;
     @Value("${newsler.designer.domain-name}")
-    private String domain;
+    private String domainName;
     @Value("${newsler.designer.port}")
     private int port;
 
@@ -35,13 +39,30 @@ public class ELARequestBuilder {
         params.put(ELAParam.FROM, user.getEmail().getValue());
         params.put(ELAParam.FROM_NAME, name);
 
-        details.toAddresses.forEach(address -> params.put(String.format(ELAParam.TO, address, ""), ""));
+        final String templateId = user.getDefaultTemplateId().getValue();
+        if (StringUtils.isBlank(templateId)) {
+            throw new ELAParameterBuildException("TemplateID", "Null or empty");
+        }
 
+        final String stripedMessage = HtmlTagRemover.remove(details.message);
+        params.put(ELATemplateParam.TEMPLATE_ID, templateId);
         params.put(ELAParam.SUBJECT, details.subject());
-        params.put(ELAParam.HTML, buildMessage(user, details, MessageType.HTML));
-        params.put(ELAParam.TEXT, buildMessage(user, details, MessageType.PLAIN));
+        params.put(ELAParam.HTML, details.message);
+        params.put(ELAParam.TEXT, stripedMessage);
+        buildToAddresses(user, details, params, stripedMessage);
 
         return params;
+    }
+
+    private <T extends ELAMailDetails> void buildToAddresses(final NLUser user, final T details,
+                                                             final Map<String, String> params, final String textMessage) {
+        final String cancellationToken = user.getCancellationToken().getValue();
+        details.toAddresses.forEach(address -> {
+                    params.put(String.format(ELATemplateParam.TO_WITH_VARS, address, "messageHtml"), details.message);
+                    params.put(String.format(ELATemplateParam.TO_WITH_VARS, address, "messageText"), textMessage);
+                    params.put(String.format(ELATemplateParam.TO_WITH_VARS, address, "cancellationSection"), String.format("<p><a href=\"%s://%s:%d/subscription/cancel?token=%s&email=%s\">Unsubscribe from newsletter</a></p>", schema.getName(), domainName, port, cancellationToken, address));
+                }
+        );
     }
 
     public String buildUrlEncoded(final Map<String, String> map) {
@@ -74,22 +95,5 @@ public class ELARequestBuilder {
         headers.add(HttpHeaders.AUTHORIZATION, auth);
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
         return headers;
-    }
-
-    private <T extends ELAMailDetails> String buildMessage(NLUser user, T details, MessageType type) {
-        final String encodedEmail = URLEncoder.encode(user.getEmail().getValue(), StandardCharsets.UTF_8); //! fixme: receiver mail, not user's one!
-        final String cancellationToken = user.getCancellationToken().getValue();
-        return details.message.concat(String.format(type.format, schema, domain, port, cancellationToken, encodedEmail));
-    }
-
-    private enum MessageType {
-        HTML("</br></br><pre><em><a href=\"%s://%s:%d/subscription/cancel?token=%s&email=%s\" style=\"text-decoration: none; font-size: .6rem;\">Unsubscribe from newsletter</a></em></pre>"),
-        PLAIN("\n\nUnsubscribe from newsletter: %s://%s:%d/subscription/cancel?token=%s&email=%s");
-
-        final String format;
-
-        MessageType(final String format) {
-            this.format = format;
-        }
     }
 }

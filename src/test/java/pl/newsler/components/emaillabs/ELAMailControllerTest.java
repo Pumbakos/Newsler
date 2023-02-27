@@ -52,8 +52,8 @@ class ELAMailControllerTest {
     private final ELAMailModuleConfiguration configuration = new ELAMailModuleConfiguration(userRepository, mailRepository, passwordEncoder, receiverService);
     private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
     private final IELAMailService service = configuration.mailService(
-            configuration.taskInstantExecutor(restTemplate, configuration.elaParamBuilder()),
-            configuration.taskScheduledExecutor(restTemplate, configuration.elaParamBuilder())
+            configuration.taskInstantExecutor(restTemplate, configuration.elaRequestBuilder()),
+            configuration.taskScheduledExecutor(restTemplate, configuration.elaRequestBuilder())
     );
     private final IELAMailController controller = new ELAMailController(service);
     private final TestUserFactory factory = new TestUserFactory();

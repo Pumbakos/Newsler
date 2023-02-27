@@ -14,6 +14,7 @@ import pl.newsler.commons.model.NLLastName;
 import pl.newsler.commons.model.NLNickname;
 import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
+import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.ELAUserMail;
 import pl.newsler.components.emaillabs.IELAMailRepository;
@@ -108,10 +109,12 @@ class H2Configuration {
                     user.setAppKey(NLAppKey.of(passwordEncoder.encrypt(appKey.get())));
                     user.setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(secretKey.get())));
                     user.setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(smtp.get())));
+                    user.setDefaultTemplateId(NLStringValue.of("cda1b272"));
                 } else {
-                    user.setAppKey(NLAppKey.of(secretOrAppKey()));
-                    user.setSecretKey(NLSecretKey.of(secretOrAppKey()));
-                    user.setSmtpAccount(NLSmtpAccount.of(smtpAccount()));
+                    user.setAppKey(NLAppKey.of(passwordEncoder.encrypt(secretOrAppKey())));
+                    user.setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(secretOrAppKey())));
+                    user.setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(smtpAccount())));
+                    user.setDefaultTemplateId(NLStringValue.of("DyFv5w80"));
                 }
 
                 userRepository.save(user);

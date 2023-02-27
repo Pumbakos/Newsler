@@ -115,8 +115,8 @@ class UserCrudService implements IUserCrudService {
         user.setSecretKey(NLSecretKey.of(hash(secretKey.getValue())));
         user.setSmtpAccount(NLSmtpAccount.of(hash(smtpAccount.getValue())));
 
-        final String templateId = templateService.add(user, IELATemplateService.DEFAULT_HTML_FOOTER, IELATemplateService.DEFAULT_TEXT_FOOTER);
-        user.setFooterTemplateId(NLStringValue.of(templateId));
+        final String templateId = templateService.add(user, IELATemplateService.DEFAULT_HTML_TEMPLATE, IELATemplateService.DEFAULT_TEXT_TEMPLATE);
+        user.setDefaultTemplateId(NLStringValue.of(templateId));
         userRepository.save(user);
     }
 

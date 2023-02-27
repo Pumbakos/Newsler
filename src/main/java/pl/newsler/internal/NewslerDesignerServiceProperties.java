@@ -12,7 +12,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 @ConfigurationProperties("newsler.designer")
 public class NewslerDesignerServiceProperties {
     private NewslerServiceProperties.Schema schema = NewslerServiceProperties.Schema.HTTP;
-    private String domainName;
+    private String domainName = "localhost";
     private String ip;
     private int port = 4200;
 

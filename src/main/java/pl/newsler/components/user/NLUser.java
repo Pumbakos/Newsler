@@ -107,8 +107,8 @@ public class NLUser implements UserDetails {
     private NLToken cancellationToken;
 
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "FOOTER_TEMPLATE_ID")))
-    private NLStringValue footerTemplateId;
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "DEFAULT_TEMPLATE_ID")))
+    private NLStringValue defaultTemplateId = NLStringValue.of("");
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ROLE")

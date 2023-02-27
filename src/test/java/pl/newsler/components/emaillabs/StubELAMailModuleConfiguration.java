@@ -17,7 +17,7 @@ public class StubELAMailModuleConfiguration {
     }
 
     public ELARequestBuilder elaParamBuilder() {
-        return configuration.elaParamBuilder();
+        return configuration.elaRequestBuilder();
     }
 
     public IELATaskInstantExecutor taskInstantExecutor(RestTemplate restTemplate, ELARequestBuilder requestBuilder) {

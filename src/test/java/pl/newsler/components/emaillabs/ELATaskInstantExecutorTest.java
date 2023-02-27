@@ -44,7 +44,7 @@ class ELATaskInstantExecutorTest {
             receiverService,
             userRepository,
             restTemplate,
-            configuration.elaParamBuilder()
+            configuration.elaRequestBuilder()
     );
 
     @BeforeEach

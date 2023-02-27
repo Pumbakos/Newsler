@@ -13,7 +13,9 @@ import pl.newsler.commons.model.NLExecutionDate;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
+import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLUuid;
+import pl.newsler.components.emaillabs.executor.ELARequestBuilder;
 import pl.newsler.components.emaillabs.executor.ELAScheduleMailDetails;
 import pl.newsler.components.emaillabs.usecase.ELAScheduleMailRequest;
 import pl.newsler.components.receiver.IReceiverService;
@@ -22,9 +24,11 @@ import pl.newsler.components.receiver.StubReceiverRepository;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.TestUserFactory;
+import pl.newsler.internal.NewslerDesignerServiceProperties;
 import pl.newsler.security.StubNLPasswordEncoder;
 import pl.newsler.testcommons.TestUserUtils;
 
+import java.lang.reflect.Field;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -46,6 +50,7 @@ class ELATaskScheduledExecutorTest {
     private final TestUserFactory factory = new TestUserFactory();
     private final Random random = new SecureRandom();
     private final Queue<Pair<NLUuid, ELAScheduleMailDetails>> queue = new ConcurrentLinkedQueue<>();
+    private final ELARequestBuilder requestBuilder = configuration.elaRequestBuilder();
     private final ELATaskScheduledExecutor executor = new ELATaskScheduledExecutor(
             queue,
             new ConcurrentTaskScheduler(),
@@ -54,18 +59,18 @@ class ELATaskScheduledExecutorTest {
             receiverService,
             userRepository,
             restTemplate,
-            configuration.elaParamBuilder()
+            requestBuilder
     );
 
     @BeforeEach
-    void beforeEach() {
+    void beforeEach() throws NoSuchFieldException, IllegalAccessException {
         final NLUuid standardId = NLUuid.of(UUID.randomUUID());
         factory.standard().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.standard_plainPassword())));
         factory.standard().setId(standardId);
         factory.standard().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.standard().setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.standard().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
-        userRepository.save(factory.standard());
+        factory.standard().setDefaultTemplateId(NLStringValue.of("98djd3sa81"));
 
         final NLUuid dashedId = NLUuid.of(UUID.randomUUID());
         factory.dashed().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dashed_plainPassword())));
@@ -73,15 +78,18 @@ class ELATaskScheduledExecutorTest {
         factory.dashed().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.dashed().setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.dashed().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
-        userRepository.save(factory.dashed());
+        factory.dashed().setDefaultTemplateId(NLStringValue.of("98djd3sa81"));
 
         final NLUuid dottedId = NLUuid.of(UUID.randomUUID());
         factory.dotted().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dotted_plainPassword())));
         factory.dotted().setId(dottedId);
         factory.dotted().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.dotted().setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
+        factory.dotted().setDefaultTemplateId(NLStringValue.of("98djd3sa81"));
         factory.dotted().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
-        userRepository.save(factory.dotted());
+        userRepository.saveAll(List.of(factory.dashed(), factory.dotted(), factory.standard()));
+
+        reflectControllerFields();
     }
 
     @AfterEach
@@ -123,6 +131,7 @@ class ELATaskScheduledExecutorTest {
         final LocalDateTime past = LocalDateTime.now().minusMinutes(random.nextInt(10) + 3);
         final ZoneId zoneId = ZoneId.of("Europe/Warsaw");
         final NLUser user = users.get(0);
+        user.setDefaultTemplateId(NLStringValue.of("98djd3sa81"));
 
         final ELAScheduleMailRequest firstThatShouldBeExecuted = MailModuleUtil.createScheduledMailRequest(user,
                 past.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString()
@@ -155,5 +164,17 @@ class ELATaskScheduledExecutorTest {
 
         executor.scanQueue();
         Assertions.assertEquals(3, queue.size());
+    }
+
+    private void reflectControllerFields() throws NoSuchFieldException, IllegalAccessException {
+        final Field schema = requestBuilder.getClass().getDeclaredField("schema");
+        final Field homeDomain = requestBuilder.getClass().getDeclaredField("domainName");
+        final Field port = requestBuilder.getClass().getDeclaredField("port");
+        schema.trySetAccessible();
+        homeDomain.trySetAccessible();
+        port.trySetAccessible();
+        schema.set(requestBuilder, NewslerDesignerServiceProperties.Schema.HTTP);
+        homeDomain.set(requestBuilder, "localhost");
+        port.setInt(requestBuilder, 4200);
     }
 }

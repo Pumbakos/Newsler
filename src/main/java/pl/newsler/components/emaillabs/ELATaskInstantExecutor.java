@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.web.client.RestTemplate;
+import pl.newsler.commons.model.NLEmailStatus;
+import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.executor.ELAConcurrentTaskExecutor;
 import pl.newsler.components.emaillabs.executor.ELAInstantMailDetails;
@@ -16,8 +18,10 @@ import pl.newsler.components.receiver.IReceiverService;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.security.NLIPasswordEncoder;
 
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 @Slf4j
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -51,7 +55,6 @@ class ELATaskInstantExecutor extends ELAConcurrentTaskExecutor<ELAInstantMailDet
         }
     }
 
-    @Async
     void executeQueue() {
         try {
             super.execute(this::execute);
@@ -68,7 +71,20 @@ class ELATaskInstantExecutor extends ELAConcurrentTaskExecutor<ELAInstantMailDet
             return;
         }
 
-        getUserAndExecute(pair);
+        try {
+            getUserAndExecute(pair);
+        } catch (Exception e) {
+            final Optional<ELAUserMail> optionalELAUserMail = mailRepository
+                    .findAllByUserId(pair.getKey())
+                    .stream().filter(mail -> mail.getId().equals(pair.getValue().id()))
+                    .findFirst();
+
+            final ELAUserMail userMail;
+            userMail = optionalELAUserMail.orElseGet(() -> ELAUserMail.of(pair.getKey(), pair.getValue()));
+            userMail.setErrorMessage(NLStringValue.of("Something went wrong during preparing you mail :("));
+            userMail.setStatus(NLEmailStatus.ERROR);
+            mailRepository.save(userMail);
+        }
         execute();
     }
 }

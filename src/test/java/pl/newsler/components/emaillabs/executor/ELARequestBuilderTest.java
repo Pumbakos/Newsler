@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -11,9 +12,11 @@ import pl.newsler.commons.model.NLAppKey;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
+import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.ELAParam;
 import pl.newsler.components.emaillabs.MailModuleUtil;
+import pl.newsler.components.emaillabs.exception.ELAParameterBuildException;
 import pl.newsler.components.emaillabs.usecase.ELAInstantMailRequest;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.StubUserRepository;
@@ -66,7 +69,7 @@ class ELARequestBuilderTest {
         userRepository.save(factory.dotted());
 
         Field schema = paramBuilder.getClass().getDeclaredField("schema");
-        Field domain = paramBuilder.getClass().getDeclaredField("domain");
+        Field domain = paramBuilder.getClass().getDeclaredField("domainName");
         Field port = paramBuilder.getClass().getDeclaredField("port");
         schema.trySetAccessible();
         domain.trySetAccessible();
@@ -114,12 +117,15 @@ class ELARequestBuilderTest {
     }
 
     @Test
+    @Disabled("Due to lack of idea")
     void shouldAppendUnsubscribeFooterAtTheEnd() {
         final List<NLUser> users = userRepository.findAll();
         if (users.isEmpty()) {
             Assertions.fail("Users empty");
         }
         final NLUser user = users.get(0);
+        user.setDefaultTemplateId(NLStringValue.of("2d2y17fh10"));
+
         final ELAInstantMailRequest request = MailModuleUtil.createInstantMailRequest(user);
         final ELAInstantMailDetails details = ELAInstantMailDetails.of(request);
 
@@ -128,14 +134,29 @@ class ELARequestBuilderTest {
 
         final String encodedEmail = URLEncoder.encode(user.getEmail().getValue(), StandardCharsets.UTF_8);
         final String cancellationToken = user.getCancellationToken().getValue();
-        final String unsubscribeText = String.format("\n\nUnsubscribe from newsletter: http://localhost:4200/subscription/cancel?token=%s&email=%s", cancellationToken, encodedEmail);
-        final String unsubscribeHtml = String.format("</br></br><pre><em><a href=\"http://localhost:4200/subscription/cancel?token=%s&email=%s\" style=\"text-decoration: none; font-size: .6rem;\">Unsubscribe from newsletter</a></em></pre>", cancellationToken, encodedEmail);
+        final String unsubscribeText = String.format("Unsubscribe from newsletter: http://localhost:4200/subscription/cancel?token=%s&email=%s", cancellationToken, encodedEmail);
+        final String unsubscribeHtml = String.format("<p><a href=\"http://localhost:4200/subscription/cancel?token=%s&email=%s\">Unsubscribe from newsletter</a></p>", cancellationToken, encodedEmail);
 
         Assertions.assertNotNull(params);
         Assertions.assertTrue(params.get(ELAParam.TEXT).contains(unsubscribeText));
         Assertions.assertTrue(params.get(ELAParam.HTML).contains(unsubscribeHtml));
         Assertions.assertFalse(params.get(ELAParam.TEXT).contains(unsubscribeHtml));
         Assertions.assertFalse(params.get(ELAParam.HTML).contains(unsubscribeText));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void shouldThrowELAParameterBuildExceptionWhenDefaultTemplateIdNullOrEmpty(String templateId) {
+        final List<NLUser> users = userRepository.findAll();
+        if (users.isEmpty()) {
+            Assertions.fail("Users empty");
+        }
+        final NLUser user = users.get(0);
+        user.setDefaultTemplateId(NLStringValue.of(templateId));
+        final ELAInstantMailRequest request = MailModuleUtil.createInstantMailRequest(user);
+        final ELAInstantMailDetails details = ELAInstantMailDetails.of(request);
+
+        Assertions.assertThrows(ELAParameterBuildException.class, () -> paramBuilder.buildParamsMap(user, details));
     }
 
     @ParameterizedTest

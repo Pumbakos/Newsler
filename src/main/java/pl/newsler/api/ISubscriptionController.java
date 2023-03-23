@@ -1,13 +1,17 @@
 package pl.newsler.api;
 
+import jakarta.ws.rs.QueryParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
-@RequestMapping(NLApi.V1 + "/subscription")
+@RequestMapping(NLApi.V1 + "/api/subscription")
 public interface ISubscriptionController {
-    @PostMapping("/cancel")
-    ResponseEntity<HttpStatus> cancel(@RequestParam("token") final String cancellationToken, @RequestParam("email") final String receiverMail);
+//    @PostMapping
+//    ResponseEntity<HttpStatus> subscribe();
+
+    @DeleteMapping("/cancel")
+    ResponseEntity<HttpStatus> cancel(@QueryParam("token") final String cancellationToken, @QueryParam("email") final String receiverMail);
 }

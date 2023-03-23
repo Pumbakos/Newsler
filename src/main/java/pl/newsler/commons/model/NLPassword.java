@@ -19,7 +19,7 @@ public class NLPassword implements NLModel {
     private final String value;
 
     public boolean validate() {
-        return StringUtils.isNotBlank(value) && value.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{12,}$");
+        return StringUtils.isNotBlank(value) && value.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{12,256}$");
     }
 
     @Override

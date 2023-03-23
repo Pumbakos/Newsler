@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -18,7 +19,6 @@ import org.springframework.web.client.RestTemplate;
 import pl.newsler.api.IUserSignupController;
 import pl.newsler.commons.exception.GlobalRestExceptionHandler;
 import pl.newsler.commons.exception.InvalidUserDataException;
-import pl.newsler.commons.exception.NLError;
 import pl.newsler.commons.exception.NLException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
@@ -88,21 +88,21 @@ public class UserSignupControllerTest {
 
     @BeforeEach
     void beforeEach() {
-        factory.standard().setId(
+        factory.standard().setUuid(
                 crudService.create(
                         NLFirstName.of(factory.standard().getFirstName().getValue()),
                         NLLastName.of(factory.standard().getLastName().getValue()),
                         NLEmail.of(factory.standard().getEmail().getValue()),
                         NLPassword.of(factory.standard().getNLPassword().getValue())
                 ));
-        factory.dashed().setId(
+        factory.dashed().setUuid(
                 crudService.create(
                         NLFirstName.of(factory.dashed().getFirstName().getValue()),
                         NLLastName.of(factory.dashed().getLastName().getValue()),
                         NLEmail.of(factory.dashed().getEmail().getValue()),
                         NLPassword.of(factory.dashed().getNLPassword().getValue())
                 ));
-        factory.dotted().setId(
+        factory.dotted().setUuid(
                 crudService.create(
                         NLFirstName.of(factory.dotted().getFirstName().getValue()),
                         NLLastName.of(factory.dotted().getLastName().getValue()),
@@ -153,10 +153,9 @@ public class UserSignupControllerTest {
             controller.signup(null);
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                final ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail("Not a desired exception type! Expected: <InvalidUserDataException> but was" + e.getClass().getName());
             }
@@ -172,10 +171,9 @@ public class UserSignupControllerTest {
             controller.signup(request);
         } catch (NLException e) {
             if (e instanceof UserAlreadyExistsException ex) {
-                final ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail("Not a desired exception type! Expected: <UserAlreadyExistsException> but was" + e.getClass().getName());
             }
@@ -190,10 +188,9 @@ public class UserSignupControllerTest {
             controller.signup(request);
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                final ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail("Not a desired exception type! Expected: <InvalidUserDataException> but was" + e.getClass().getName());
             }
@@ -208,10 +205,9 @@ public class UserSignupControllerTest {
             controller.signup(request);
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                final ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail("Not a desired exception type! Expected: <InvalidUserDataException> but was" + e.getClass().getName());
             }
@@ -226,10 +222,9 @@ public class UserSignupControllerTest {
             controller.signup(request);
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                final ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail("Not a desired exception type! Expected: <InvalidUserDataException> but was" + e.getClass().getName());
             }
@@ -244,10 +239,9 @@ public class UserSignupControllerTest {
             controller.signup(request);
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                final ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail("Not a desired exception type! Expected: <InvalidUserDataException> but was" + e.getClass().getName());
             }
@@ -409,10 +403,9 @@ public class UserSignupControllerTest {
             controller.resendToken(null);
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                final ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail(String.format("Not a desired exception type! Expected: <InvalidUserDataException> but was <%s>", e.getClass().getSimpleName()));
             }
@@ -425,10 +418,9 @@ public class UserSignupControllerTest {
             controller.resendToken(new UserResendTokenRequest("", ""));
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                final ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail(String.format("Not a desired exception type! Expected: <InvalidUserDataException> but was <%s>", e.getClass().getSimpleName()));
             }
@@ -441,10 +433,9 @@ public class UserSignupControllerTest {
             controller.resendToken(new UserResendTokenRequest("  ", "  "));
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                final ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail(String.format("Not a desired exception type! Expected: <InvalidUserDataException> but was <%s>", e.getClass().getSimpleName()));
             }
@@ -457,10 +448,9 @@ public class UserSignupControllerTest {
             controller.resendToken(new UserResendTokenRequest("invalid@email", factory.dashed_plainPassword()));
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                final ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail(String.format("Not a desired exception type! Expected: <InvalidUserDataException> but was <%s>", e.getClass().getSimpleName()));
             }
@@ -473,10 +463,9 @@ public class UserSignupControllerTest {
             controller.resendToken(new UserResendTokenRequest(email(), "invalidPA$$word"));
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                final ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail(String.format("Not a desired exception type! Expected: <InvalidUserDataException> but was <%s>", e.getClass().getSimpleName()));
             }
@@ -489,10 +478,9 @@ public class UserSignupControllerTest {
             controller.resendToken(new UserResendTokenRequest(factory.dotted().getEmail().getValue(), factory.standard_plainPassword()));
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                final ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail(String.format("Not a desired exception type! Expected: <InvalidUserDataException> but was <%s>", e.getClass().getSimpleName()));
             }
@@ -505,10 +493,9 @@ public class UserSignupControllerTest {
             controller.resendToken(new UserResendTokenRequest("valid@email.test", factory.standard_plainPassword()));
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                final ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail(String.format("Not a desired exception type! Expected: <InvalidUserDataException> but was <%s>", e.getClass().getSimpleName()));
             }

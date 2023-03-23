@@ -13,7 +13,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.model.NLAppKey;
@@ -57,21 +56,21 @@ class ELATemplateServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        factory.standard().setId(
+        factory.standard().setUuid(
                 userCrudService.create(
                         NLFirstName.of(factory.standard().getFirstName().getValue()),
                         NLLastName.of(factory.standard().getLastName().getValue()),
                         NLEmail.of(factory.standard().getEmail().getValue()),
                         NLPassword.of(factory.standard().getNLPassword().getValue())
                 ));
-        factory.dashed().setId(
+        factory.dashed().setUuid(
                 userCrudService.create(
                         NLFirstName.of(factory.dashed().getFirstName().getValue()),
                         NLLastName.of(factory.dashed().getLastName().getValue()),
                         NLEmail.of(factory.dashed().getEmail().getValue()),
                         NLPassword.of(factory.dashed().getNLPassword().getValue())
                 ));
-        factory.dotted().setId(
+        factory.dotted().setUuid(
                 userCrudService.create(
                         NLFirstName.of(factory.dotted().getFirstName().getValue()),
                         NLLastName.of(factory.dotted().getLastName().getValue()),

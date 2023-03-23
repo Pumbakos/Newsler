@@ -44,17 +44,17 @@ class JWTModuleTest {
     void beforeEach() {
         NLUuid standardId = NLUuid.of(UUID.randomUUID());
         factory.standard().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.standard_plainPassword())));
-        factory.standard().setId(standardId);
+        factory.standard().setUuid(standardId);
         userRepository.save(factory.standard());
 
         NLUuid dashedId = NLUuid.of(UUID.randomUUID());
         factory.dashed().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dashed_plainPassword())));
-        factory.dashed().setId(dashedId);
+        factory.dashed().setUuid(dashedId);
         userRepository.save(factory.dashed());
 
         NLUuid dottedId = NLUuid.of(UUID.randomUUID());
         factory.dotted().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dotted_plainPassword())));
-        factory.dotted().setId(dottedId);
+        factory.dotted().setUuid(dottedId);
         userRepository.save(factory.dotted());
     }
 

@@ -46,7 +46,10 @@ class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() // temporarily authenticated via JWT
                 )
-                .addFilterBefore(new JWTFilter("/v1/api/auth/", manager, userDetailService, jwtUtility), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(
+                        new JWTFilter(manager, userDetailService, jwtUtility, "/v1/api/auth/", "/v1/api/subscription/cancel"),
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }

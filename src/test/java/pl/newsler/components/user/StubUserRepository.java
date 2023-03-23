@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class StubUserRepository extends InMemoryJpaRepository<NLUser, NLUuid> implements IUserRepository {
     public StubUserRepository() {
-        super(NLUser::getId);
+        super(NLUser::getUuid);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class StubUserRepository extends InMemoryJpaRepository<NLUser, NLUuid> im
 
     @Override
     public void enableUser(final NLUuid uuid) {
-        super.database.values().stream().filter(user -> user.getId().equals(uuid)).findFirst().ifPresent(user -> user.setEnabled(true));
+        super.database.values().stream().filter(user -> user.getUuid().equals(uuid)).findFirst().ifPresent(user -> user.setEnabled(true));
     }
 
     @Override

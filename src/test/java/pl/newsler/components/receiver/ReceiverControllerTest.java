@@ -8,11 +8,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import pl.newsler.api.IReceiverController;
 import pl.newsler.commons.exception.GlobalRestExceptionHandler;
-import pl.newsler.commons.exception.NLError;
 import pl.newsler.commons.exception.NLException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
@@ -71,7 +71,7 @@ class ReceiverControllerTest {
                 NLEmail.of(factory.standard().getEmail().getValue()),
                 NLPassword.of(factory.standard().getNLPassword().getValue())
         );
-        factory.standard().setId(uuid);
+        factory.standard().setUuid(uuid);
 
         receiverRepository.save(new Receiver(
                 NLUuid.of(UUID.randomUUID()), NLVersion.of("0.0.0TEST"), uuid, NLEmail.of(email()),
@@ -125,15 +125,15 @@ class ReceiverControllerTest {
         try {
             controller.addReceiver(invalidCreateRequest);
         } catch (NLException e) {
-            ResponseEntity<NLError> response = handler.handleException(e);
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            ProblemDetail detail = handler.handleException(e);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), detail.getStatus());
         }
 
         try {
             controller.addReceiver(invalidCreateRequestModelsNull);
         } catch (NLException e) {
-            ResponseEntity<NLError> response = handler.handleException(e);
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            ProblemDetail detail = handler.handleException(e);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), detail.getStatus());
         }
     }
 
@@ -142,8 +142,8 @@ class ReceiverControllerTest {
         try {
             controller.addReceiver(null);
         } catch (NLException e) {
-            ResponseEntity<NLError> response = handler.handleException(e);
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            ProblemDetail detail = handler.handleException(e);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), detail.getStatus());
         }
     }
 
@@ -154,8 +154,8 @@ class ReceiverControllerTest {
         try {
             controller.addReceiver(nullCreateRequest);
         } catch (NLException e) {
-            ResponseEntity<NLError> response = handler.handleException(e);
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            ProblemDetail detail = handler.handleException(e);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), detail.getStatus());
         }
     }
 
@@ -166,8 +166,8 @@ class ReceiverControllerTest {
         try {
             controller.addReceiver(emptyCreateRequest);
         } catch (NLException e) {
-            ResponseEntity<NLError> response = handler.handleException(e);
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            ProblemDetail detail = handler.handleException(e);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), detail.getStatus());
         }
     }
 
@@ -178,8 +178,8 @@ class ReceiverControllerTest {
         try {
             controller.addReceiver(validCreateRequest);
         } catch (NLException e) {
-            ResponseEntity<NLError> response = handler.handleException(e);
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            ProblemDetail detail = handler.handleException(e);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), detail.getStatus());
         }
     }
 
@@ -200,8 +200,8 @@ class ReceiverControllerTest {
         try {
             controller.fetchAllUserReceivers(uuid);
         } catch (NLException e) {
-            ResponseEntity<NLError> response = handler.handleException(e);
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            ProblemDetail detail = handler.handleException(e);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), detail.getStatus());
         }
     }
 
@@ -210,8 +210,8 @@ class ReceiverControllerTest {
         try {
             controller.fetchAllUserReceivers("uuid");
         } catch (NLException e) {
-            ResponseEntity<NLError> response = handler.handleException(e);
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            ProblemDetail detail = handler.handleException(e);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), detail.getStatus());
         }
     }
 
@@ -221,8 +221,8 @@ class ReceiverControllerTest {
         try {
             controller.fetchAllUserReceivers(uuid);
         } catch (NLException e) {
-            ResponseEntity<NLError> response = handler.handleException(e);
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            ProblemDetail detail = handler.handleException(e);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), detail.getStatus());
         }
     }
 
@@ -231,8 +231,8 @@ class ReceiverControllerTest {
         try {
             controller.fetchAllUserReceivers("  ");
         } catch (NLException e) {
-            ResponseEntity<NLError> response = handler.handleException(e);
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            ProblemDetail detail = handler.handleException(e);
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), detail.getStatus());
         }
     }
 }

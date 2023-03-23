@@ -48,8 +48,8 @@ public class NLUser implements UserDetails {
 
     @Getter(AccessLevel.PACKAGE)
     @EmbeddedId
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ID")))
-    private NLUuid id;
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "UUID")))
+    private NLUuid uuid;
 
     @Getter(AccessLevel.PACKAGE)
     @Embedded
@@ -65,9 +65,8 @@ public class NLUser implements UserDetails {
      * i.e "name = Microsoft Corporation", "name = EmailLabs" <br/>
      * <strong>not</strong> "name = Microsoft", lastName = "Corporation"
      */
-
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "FIRST_NAME")))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "FIRST_NAME", nullable = false)))
     private NLFirstName firstName;
 
     @Embedded
@@ -173,7 +172,7 @@ public class NLUser implements UserDetails {
 
     public NLDUser map() {
         return NLDUser.builder()
-                .id(id)
+                .id(uuid)
                 .email(email)
                 .name(firstName)
                 .lastName(lastName)
@@ -188,7 +187,7 @@ public class NLUser implements UserDetails {
     }
 
     public UserGetResponse truncate() {
-        return new UserGetResponse(id.getValue(), email.getValue(), firstName.getValue(), lastName.getValue(), smtpAccount.getValue(), secretKey.getValue(), appKey.getValue());
+        return new UserGetResponse(uuid.getValue(), email.getValue(), firstName.getValue(), lastName.getValue(), smtpAccount.getValue(), secretKey.getValue(), appKey.getValue());
     }
 
     @Override
@@ -204,7 +203,7 @@ public class NLUser implements UserDetails {
         final NLUser nlUser = (NLUser) o;
 
         return new EqualsBuilder()
-                .append(id, nlUser.id)
+                .append(uuid, nlUser.uuid)
                 .append(version, nlUser.version)
                 .append(email, nlUser.email)
                 .append(firstName, nlUser.firstName)
@@ -222,7 +221,7 @@ public class NLUser implements UserDetails {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(id).append(version)
+                .append(uuid).append(version)
                 .append(email)
                 .append(firstName)
                 .append(password)

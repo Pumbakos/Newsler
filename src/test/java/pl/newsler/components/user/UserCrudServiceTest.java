@@ -54,21 +54,21 @@ class UserCrudServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        factory.standard().setId(
+        factory.standard().setUuid(
                 service.create(
                         NLFirstName.of(factory.standard().getFirstName().getValue()),
                         NLLastName.of(factory.standard().getLastName().getValue()),
                         NLEmail.of(factory.standard().getEmail().getValue()),
                         NLPassword.of(factory.standard().getNLPassword().getValue())
                 ));
-        factory.dashed().setId(
+        factory.dashed().setUuid(
                 service.create(
                         NLFirstName.of(factory.dashed().getFirstName().getValue()),
                         NLLastName.of(factory.dashed().getLastName().getValue()),
                         NLEmail.of(factory.dashed().getEmail().getValue()),
                         NLPassword.of(factory.dashed().getNLPassword().getValue())
                 ));
-        factory.dotted().setId(
+        factory.dotted().setUuid(
                 service.create(
                         NLFirstName.of(factory.dotted().getFirstName().getValue()),
                         NLLastName.of(factory.dotted().getLastName().getValue()),
@@ -194,7 +194,7 @@ class UserCrudServiceTest {
     @Test
     void shouldUpdateUserWhenExistsAndValidData() {
         final NLUser standard = factory.standard();
-        final Optional<NLUser> optionalUser = userRepository.findById(standard.getId());
+        final Optional<NLUser> optionalUser = userRepository.findById(standard.getUuid());
 
         if (optionalUser.isEmpty()) {
             Assertions.fail();
@@ -249,7 +249,7 @@ class UserCrudServiceTest {
 
     @Test
     void shouldDeleteUserWhenUserExistsAndCorrectData() {
-        final NLUuid standardUserId = factory.standard().getId();
+        final NLUuid standardUserId = factory.standard().getUuid();
         final Optional<NLUser> optionalUser = userRepository.findById(standardUserId);
         if (optionalUser.isEmpty()) {
             Assertions.fail();
@@ -262,7 +262,7 @@ class UserCrudServiceTest {
 
     @Test
     void shouldNotDeleteUserAndThrowInvalidUserDataExceptionWhenBlankRequest() {
-        final NLUuid standardUserId = factory.standard().getId();
+        final NLUuid standardUserId = factory.standard().getUuid();
         final Optional<NLUser> optionalUser = userRepository.findById(standardUserId);
 
         if (optionalUser.isEmpty()) {
@@ -282,7 +282,7 @@ class UserCrudServiceTest {
 
     @Test
     void shouldNotDeleteUserAndThrowInvalidUserDataExceptionWhenIncorrectIdAndCorrectPassword() {
-        final NLUuid standardUserId = factory.standard().getId();
+        final NLUuid standardUserId = factory.standard().getUuid();
         final Optional<NLUser> optionalUser = userRepository.findById(standardUserId);
 
         if (optionalUser.isEmpty()) {
@@ -293,7 +293,7 @@ class UserCrudServiceTest {
         final UserDeleteRequest notUuidRequest = new UserDeleteRequest("nnw5970167SGikIAq2IbEU7126927", user.getPassword());
         final UserDeleteRequest randomIdRequest = new UserDeleteRequest(UUID.randomUUID().toString(), factory.standard().getPassword());
 
-        Assertions.assertEquals(standardUserId, user.getId());
+        Assertions.assertEquals(standardUserId, user.getUuid());
         Assertions.assertThrows(ValidationException.class, () -> service.delete(notUuidRequest));
         Assertions.assertThrows(InvalidUserDataException.class, () -> service.delete(randomIdRequest));
         Assertions.assertEquals(optionalUser, userRepository.findById(standardUserId));
@@ -301,7 +301,7 @@ class UserCrudServiceTest {
 
     @Test
     void shouldNotDeleteUserAndThrowInvalidUserDataExceptionWhenCorrectIdAndIncorrectPassword() {
-        final NLUuid standardUserId = factory.standard().getId();
+        final NLUuid standardUserId = factory.standard().getUuid();
         final Optional<NLUser> optionalUser = userRepository.findById(standardUserId);
 
         if (optionalUser.isEmpty()) {

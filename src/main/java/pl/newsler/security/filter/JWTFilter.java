@@ -40,20 +40,25 @@ public class JWTFilter extends OncePerRequestFilter {
     private final AuthenticationManager authenticationManager;
     private final AuthUserDetailService authUserDetailService;
     private final JWTUtility utility;
-    private final String filterNotProcessingUrl;
+    private final String[] notProcessingUrls;
 
     /**
      * Creates a new instance with a default filterProcessesUrl and an
      * {@link AuthenticationManager}
      *
-     * @param filterNotProcessingUrl the default value for <tt>filterProcessesUrl</tt>.
+     * @param notProcessingUrls urls to be omitted by <tt>JWTFilter</tt>
      * @param authenticationManager  the {@link AuthenticationManager} used to authenticate an {@link Authentication} object. Cannot be null.
      * @param authUserDetailService  {@link org.springframework.security.core.userdetails.UserDetailsService}
      */
-    public JWTFilter(@NotNull String filterNotProcessingUrl, @NotNull AuthenticationManager authenticationManager,
-                     @NotNull AuthUserDetailService authUserDetailService, @NotNull JWTUtility utility) {
+    public JWTFilter(@NotNull AuthenticationManager authenticationManager,
+                     @NotNull AuthUserDetailService authUserDetailService, @NotNull JWTUtility utility,
+                     String... notProcessingUrls) {
         super();
-        this.filterNotProcessingUrl = filterNotProcessingUrl;
+        if (StringUtils.isAllBlank(notProcessingUrls)) {
+            this.notProcessingUrls = new String[]{};
+        } else {
+            this.notProcessingUrls = notProcessingUrls;
+        }
         this.authenticationManager = authenticationManager;
         this.authUserDetailService = authUserDetailService;
         this.utility = utility;
@@ -61,9 +66,11 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain chain) throws ServletException, IOException {
-        if (request.getRequestURI().contains(filterNotProcessingUrl)) {
-            chain.doFilter(request, response);
-            return;
+        for (final String url : notProcessingUrls) {
+            if (request.getRequestURI().contains(url)) {
+                chain.doFilter(request, response);
+                return;
+            }
         }
 
         final String header = request.getHeader(HttpHeaders.AUTHORIZATION);

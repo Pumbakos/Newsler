@@ -33,20 +33,20 @@ import java.io.Serializable;
 public class Receiver implements Serializable {
     @Getter(AccessLevel.PACKAGE)
     @EmbeddedId
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "UUID")))
-    private NLUuid id;
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "UUID", nullable = false, unique = true, updatable = false)))
+    private NLUuid uuid;
 
     @Getter(AccessLevel.PACKAGE)
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "VERSION")))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "VERSION", nullable = false)))
     private NLVersion version = IReceiverRepository.version;
 
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "USER_ID")))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "USER_UUID", nullable = false, updatable = false)))
     private NLUuid userUuid;
 
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "EMAIL")))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "EMAIL", nullable = false)))
     private NLEmail email;
 
     @Embedded
@@ -61,7 +61,7 @@ public class Receiver implements Serializable {
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "LAST_NAME")))
     private NLLastName lastName;
 
-    @Column(name = "AUTO_SAVED")
+    @Column(name = "AUTO_SAVED", nullable = false)
     private boolean autoSaved;
 
     public Receiver(final NLUuid userUuid, final NLEmail email, final NLNickname nickname, final NLFirstName firstName, final NLLastName lastName, boolean autoSaved) {

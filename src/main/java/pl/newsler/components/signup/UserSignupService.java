@@ -81,7 +81,7 @@ class UserSignupService implements IUserSignupService {
         }
 
         confirmationTokenService.setConfirmationDate(token);
-        enableUser(confirmationToken.getUserId());
+        enableUser(confirmationToken.getUserUuid());
 
         return NLStringValue.of("Email confirmed");
     }

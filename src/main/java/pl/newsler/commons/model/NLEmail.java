@@ -21,7 +21,9 @@ public class NLEmail implements NLModel, Serializable {
     private final String value;
 
     public boolean validate() {
-        return StringUtils.isNotBlank(value) && value.matches("^[\\w!#$%&’*+/=?`{|}~^-]+(?:\\.[\\w!#$%&’*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$");
+        return StringUtils.isNotBlank(value) &&
+                value.matches("^[\\w!#$%&’*+/=?`{|}~^-]+(?:\\.[\\w!#$%&’*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$") &&
+                value.length() < 256;
     }
 
     @Override

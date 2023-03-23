@@ -6,11 +6,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import pl.newsler.api.ISubscriptionController;
 import pl.newsler.commons.exception.GlobalRestExceptionHandler;
-import pl.newsler.commons.exception.NLError;
 import pl.newsler.commons.exception.NLException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
@@ -65,21 +65,21 @@ class SubscriptionControllerTest {
                 mailModuleConfiguration.templateService(mailModuleConfiguration.elaParamBuilder(), restTemplate)
         );
         final IUserCrudService userCrudService = userModuleConfiguration.userService();
-        factory.standard().setId(
+        factory.standard().setUuid(
                 userCrudService.create(
                         NLFirstName.of(factory.standard().getFirstName().getValue()),
                         NLLastName.of(factory.standard().getLastName().getValue()),
                         NLEmail.of(factory.standard().getEmail().getValue()),
                         NLPassword.of(factory.standard().getNLPassword().getValue())
                 ));
-        factory.dashed().setId(
+        factory.dashed().setUuid(
                 userCrudService.create(
                         NLFirstName.of(factory.dashed().getFirstName().getValue()),
                         NLLastName.of(factory.dashed().getLastName().getValue()),
                         NLEmail.of(factory.dashed().getEmail().getValue()),
                         NLPassword.of(factory.dashed().getNLPassword().getValue())
                 ));
-        factory.dotted().setId(
+        factory.dotted().setUuid(
                 userCrudService.create(
                         NLFirstName.of(factory.dotted().getFirstName().getValue()),
                         NLLastName.of(factory.dotted().getLastName().getValue()),
@@ -144,9 +144,9 @@ class SubscriptionControllerTest {
             service.cancel(cancellationToken, email);
             Assertions.fail();
         } catch (NLException e) {
-            final ResponseEntity<NLError> response = handler.handleException(e);
-            Assertions.assertNotNull(response.getBody());
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            ProblemDetail detail = handler.handleException(e);
+            Assertions.assertNotNull(detail);
+            Assertions.assertEquals(400, detail.getStatus());
             Assertions.assertEquals(2, receiverRepository.findAll().size());
         }
     }
@@ -177,9 +177,9 @@ class SubscriptionControllerTest {
             service.cancel(cancellationToken, notAssociatedEmail);
             Assertions.fail();
         } catch (NLException e) {
-            final ResponseEntity<NLError> response = handler.handleException(e);
-            Assertions.assertNotNull(response.getBody());
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            ProblemDetail detail = handler.handleException(e);
+            Assertions.assertNotNull(detail);
+            Assertions.assertEquals(400, detail.getStatus());
             Assertions.assertEquals(2, receiverRepository.findAll().size());
         }
     }

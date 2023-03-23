@@ -32,6 +32,7 @@ import java.lang.reflect.Field;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -66,7 +67,7 @@ class ELATaskScheduledExecutorTest {
     void beforeEach() throws NoSuchFieldException, IllegalAccessException {
         final NLUuid standardId = NLUuid.of(UUID.randomUUID());
         factory.standard().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.standard_plainPassword())));
-        factory.standard().setId(standardId);
+        factory.standard().setUuid(standardId);
         factory.standard().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.standard().setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.standard().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
@@ -74,7 +75,7 @@ class ELATaskScheduledExecutorTest {
 
         final NLUuid dashedId = NLUuid.of(UUID.randomUUID());
         factory.dashed().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dashed_plainPassword())));
-        factory.dashed().setId(dashedId);
+        factory.dashed().setUuid(dashedId);
         factory.dashed().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.dashed().setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.dashed().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
@@ -82,7 +83,7 @@ class ELATaskScheduledExecutorTest {
 
         final NLUuid dottedId = NLUuid.of(UUID.randomUUID());
         factory.dotted().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dotted_plainPassword())));
-        factory.dotted().setId(dottedId);
+        factory.dotted().setUuid(dottedId);
         factory.dotted().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.dotted().setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.dotted().setDefaultTemplateId(NLStringValue.of("98djd3sa81"));
@@ -108,9 +109,9 @@ class ELATaskScheduledExecutorTest {
         final ZoneId zoneId = ZoneId.systemDefault();
         final NLUser user = users.get(0);
 
-        final ELAScheduleMailRequest first = MailModuleUtil.createScheduledMailRequest(user, now.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString());
-        final ELAScheduleMailRequest second = MailModuleUtil.createScheduledMailRequest(user, now.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString());
-        final ELAScheduleMailRequest third = MailModuleUtil.createScheduledMailRequest(user, now.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString());
+        final ELAScheduleMailRequest first = MailModuleUtil.createScheduledMailRequest(user, now.toInstant(ZoneOffset.UTC).toEpochMilli(), zoneId.toString());
+        final ELAScheduleMailRequest second = MailModuleUtil.createScheduledMailRequest(user, now.toInstant(ZoneOffset.UTC).toEpochMilli(), zoneId.toString());
+        final ELAScheduleMailRequest third = MailModuleUtil.createScheduledMailRequest(user, now.toInstant(ZoneOffset.UTC).toEpochMilli(), zoneId.toString());
 
         executor.schedule(user.map().getId(), ELAScheduleMailDetails.of(first, ZonedDateTime.of(now, zoneId)));
         executor.schedule(user.map().getId(), ELAScheduleMailDetails.of(second, ZonedDateTime.of(now, zoneId)));
@@ -134,24 +135,24 @@ class ELATaskScheduledExecutorTest {
         user.setDefaultTemplateId(NLStringValue.of("98djd3sa81"));
 
         final ELAScheduleMailRequest firstThatShouldBeExecuted = MailModuleUtil.createScheduledMailRequest(user,
-                past.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString()
+                past.toInstant(ZoneOffset.UTC).toEpochMilli(), zoneId.toString()
         );
         final ELAScheduleMailRequest secondThatShouldBeExecuted = MailModuleUtil.createScheduledMailRequest(user,
-                past.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString()
+                past.toInstant(ZoneOffset.UTC).toEpochMilli(), zoneId.toString()
         );
         final ELAScheduleMailRequest thirdThatShouldBeExecuted = MailModuleUtil.createScheduledMailRequest(user,
-                past.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString()
+                past.toInstant(ZoneOffset.UTC).toEpochMilli(), zoneId.toString()
         );
 
         final LocalDateTime future = LocalDateTime.now().plusMinutes(random.nextInt(10) + 3);
         final ELAScheduleMailRequest firstThatShouldNotBeExecuted = MailModuleUtil.createScheduledMailRequest(user,
-                future.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString()
+                future.toInstant(ZoneOffset.UTC).toEpochMilli(), zoneId.toString()
         );
         final ELAScheduleMailRequest secondThatShouldNotBeExecuted = MailModuleUtil.createScheduledMailRequest(user,
-                future.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString()
+                future.toInstant(ZoneOffset.UTC).toEpochMilli(), zoneId.toString()
         );
         final ELAScheduleMailRequest thirdThatShouldNotBeExecuted = MailModuleUtil.createScheduledMailRequest(user,
-                future.format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)), zoneId.toString()
+                future.toInstant(ZoneOffset.UTC).toEpochMilli(), zoneId.toString()
         );
 
         executor.schedule(user.map().getId(), ELAScheduleMailDetails.of(firstThatShouldBeExecuted, ZonedDateTime.of(past, zoneId)));

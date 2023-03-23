@@ -82,21 +82,21 @@ class UserSignupServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        factory.standard().setId(
+        factory.standard().setUuid(
                 crudService.create(
                         NLFirstName.of(factory.standard().getFirstName().getValue()),
                         NLLastName.of(factory.standard().getLastName().getValue()),
                         NLEmail.of(factory.standard().getEmail().getValue()),
                         NLPassword.of(factory.standard().getNLPassword().getValue())
                 ));
-        factory.dashed().setId(
+        factory.dashed().setUuid(
                 crudService.create(
                         NLFirstName.of(factory.dashed().getFirstName().getValue()),
                         NLLastName.of(factory.dashed().getLastName().getValue()),
                         NLEmail.of(factory.dashed().getEmail().getValue()),
                         NLPassword.of(factory.dashed().getNLPassword().getValue())
                 ));
-        factory.dotted().setId(
+        factory.dotted().setUuid(
                 crudService.create(
                         NLFirstName.of(factory.dotted().getFirstName().getValue()),
                         NLLastName.of(factory.dotted().getLastName().getValue()),
@@ -199,7 +199,7 @@ class UserSignupServiceTest {
         final NLToken token = NLToken.of(UUID.randomUUID().toString());
 
         final NLConfirmationToken confirmationToken = new NLConfirmationToken();
-        confirmationToken.setUserId(uuid);
+        confirmationToken.setUserUuid(uuid);
         confirmationToken.setId(NLId.of(725414413L));
         confirmationToken.setCreationDate(now);
         confirmationToken.setExpirationDate(then);

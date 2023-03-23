@@ -82,8 +82,8 @@ class UserCrudService implements IUserCrudService {
         user.setEmail(email);
         user.setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(password.getValue())));
         user.setRole(NLUserType.USER);
-        user.setId(NLUuid.of(UUID.randomUUID()));
-        return userRepository.save(user).getId();
+        user.setUuid(NLUuid.of(UUID.randomUUID()));
+        return userRepository.save(user).getUuid();
     }
 
     @Override
@@ -141,7 +141,7 @@ class UserCrudService implements IUserCrudService {
             throw new InvalidUserDataException();
         }
 
-        userRepository.deleteById(user.getId());
+        userRepository.deleteById(user.getUuid());
     }
 
     private boolean isDataOk(final NLModel first, final NLModel second, final NLModel third) {

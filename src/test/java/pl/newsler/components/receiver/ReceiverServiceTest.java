@@ -68,7 +68,7 @@ class ReceiverServiceTest {
                 NLEmail.of(factory.standard().getEmail().getValue()),
                 NLPassword.of(factory.standard().getNLPassword().getValue())
         );
-        factory.standard().setId(uuid);
+        factory.standard().setUuid(uuid);
 
         receiverRepository.save(new Receiver(
                 NLUuid.of(UUID.randomUUID()), NLVersion.of("0.0.0TEST"), uuid, NLEmail.of(email()),

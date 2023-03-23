@@ -40,15 +40,15 @@ public class NLConfirmationToken {
 
     @NotNull
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "TOKEN", nullable = false, columnDefinition = "VARCHAR(255)")))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "TOKEN", nullable = false, unique = true, columnDefinition = "VARCHAR(255)")))
     private NLToken token;
 
     @NotNull
-    @Column(name = "CREATION_DATE", nullable = false, columnDefinition = "TIMESTAMP")
+    @Column(name = "CREATION_DATE", nullable = false, updatable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime creationDate;
 
     @NotNull
-    @Column(name = "EXPIRATION_DATE", nullable = false, columnDefinition = "TIMESTAMP")
+    @Column(name = "EXPIRATION_DATE", nullable = false, updatable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime expirationDate;
 
     @Column(name = "CONFIRMATION_DATE", columnDefinition = "TIMESTAMP")
@@ -56,14 +56,14 @@ public class NLConfirmationToken {
 
     @NotNull
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "USER_ID", nullable = false)))
-    private NLUuid userId;
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "USER_UUID", nullable = false)))
+    private NLUuid userUuid;
 
-    NLConfirmationToken(final NLId id, final NLToken token, final NLUuid userId) {
+    NLConfirmationToken(final NLId id, final NLToken token, final NLUuid userUuid) {
         this.id = id;
         this.token = token;
         this.creationDate = LocalDateTime.now();
         this.expirationDate = creationDate.plusMinutes(15L);
-        this.userId = userId;
+        this.userUuid = userUuid;
     }
 }

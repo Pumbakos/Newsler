@@ -23,6 +23,6 @@ interface ConfirmationTokenRepositoryJpa extends JpaRepository<NLConfirmationTok
 
     @Transactional
     @Modifying
-    @Query("UPDATE NLConfirmationToken c SET c.expirationDate = current_timestamp WHERE c.userId = :userId AND c.confirmationDate IS NULL")
-    boolean updateTokenExpired(@Param("userId") NLUuid userId);
+    @Query("UPDATE NLConfirmationToken c SET c.expirationDate = current_timestamp WHERE c.userUuid = :userId AND c.confirmationDate IS NULL")
+    int updateTokenExpired(@Param("userId") NLUuid userId);
 }

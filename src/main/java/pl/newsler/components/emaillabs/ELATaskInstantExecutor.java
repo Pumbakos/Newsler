@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 import pl.newsler.commons.model.NLEmailStatus;
@@ -21,7 +20,6 @@ import pl.newsler.security.NLIPasswordEncoder;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
 
 @Slf4j
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -76,7 +74,7 @@ class ELATaskInstantExecutor extends ELAConcurrentTaskExecutor<ELAInstantMailDet
         } catch (Exception e) {
             final Optional<ELAUserMail> optionalELAUserMail = mailRepository
                     .findAllByUserId(pair.getKey())
-                    .stream().filter(mail -> mail.getId().equals(pair.getValue().id()))
+                    .stream().filter(mail -> mail.getUuid().equals(pair.getValue().id()))
                     .findFirst();
 
             final ELAUserMail userMail;

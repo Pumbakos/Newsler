@@ -8,7 +8,7 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TimeResolver {
     /**
-     * @return next dateTime rounded to fifth minute
+     * @return next timestamp rounded to fifth minute
      */
     static ZonedDateTime getStartTime(ZonedDateTime now) {
         final String dateTime = now.toString();

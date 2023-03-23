@@ -20,22 +20,22 @@ import static pl.newsler.internal.PropType.SERVER_SSL_KEYSTORE_PASSWORD;
 import static pl.newsler.internal.PropType.SERVER_SSL_KEYSTORE_TYPE;
 
 /**
- * Set up security properties {@link PropType}. Promotes CLI args over system env ones
+ * Set up security properties {@link PropType}. Promotes CLI args over environmental variables
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SpringBootStartUpPropsResolver {
     private static final Properties props = new Properties();
 
     public static Properties resolve(@NotNull final String[] args) {
-        String ksSysEnv = getenv(NEWSLER_SSL_KEYSTORE_FILE);
-        String kpSysEnv = getenv(NEWSLER_SSL_KEYSTORE_PASSWORD);
-        String ktSysEnv = getenv(NEWSLER_SSL_KEYSTORE_TYPE);
-        String kaSysEnv = getenv(NEWSLER_SSL_KEYSTORE_ALIAS);
+        final String ksSysEnv = getenv(NEWSLER_SSL_KEYSTORE_FILE);
+        final String kpSysEnv = getenv(NEWSLER_SSL_KEYSTORE_PASSWORD);
+        final String ktSysEnv = getenv(NEWSLER_SSL_KEYSTORE_TYPE);
+        final String kaSysEnv = getenv(NEWSLER_SSL_KEYSTORE_ALIAS);
 
-        String ksArg = Arrays.stream(args).filter(arg -> arg.contains(NEWSLER_SSL_KEYSTORE_FILE.value())).findFirst().orElse("");
-        String kpArg = Arrays.stream(args).filter(arg -> arg.contains(NEWSLER_SSL_KEYSTORE_PASSWORD.value())).findFirst().orElse("");
-        String ktArg = Arrays.stream(args).filter(arg -> arg.contains(NEWSLER_SSL_KEYSTORE_TYPE.value())).findFirst().orElse("");
-        String kaArg = Arrays.stream(args).filter(arg -> arg.contains(NEWSLER_SSL_KEYSTORE_ALIAS.value())).findFirst().orElse("");
+        final String ksArg = Arrays.stream(args).filter(arg -> arg.contains(NEWSLER_SSL_KEYSTORE_FILE.value())).findFirst().orElse("");
+        final String kpArg = Arrays.stream(args).filter(arg -> arg.contains(NEWSLER_SSL_KEYSTORE_PASSWORD.value())).findFirst().orElse("");
+        final String ktArg = Arrays.stream(args).filter(arg -> arg.contains(NEWSLER_SSL_KEYSTORE_TYPE.value())).findFirst().orElse("");
+        final String kaArg = Arrays.stream(args).filter(arg -> arg.contains(NEWSLER_SSL_KEYSTORE_ALIAS.value())).findFirst().orElse("");
 
         if (!StringUtils.isAllEmpty(ksArg, kpArg, ktArg, kaArg)) {
             resolveProperties(props, ksArg.split("=")[1], kpArg.split("=")[1], ktArg.split("=")[1], kaArg.split("=")[1]);

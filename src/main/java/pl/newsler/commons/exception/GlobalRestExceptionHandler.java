@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalRestExceptionHandler {
-    @ExceptionHandler(value = {NLException.class})
-    public ResponseEntity<NLError> handleException(@NotNull final NLException ex) {
-        return ex.response();
+    @ExceptionHandler
+    public ProblemDetail handleException(@NotNull final NLException ex) {
+        final ProblemDetail detail = ProblemDetail.forStatusAndDetail(ex.response().getStatusCode(), ex.errorMessage == null ? "Not provided" : ex.errorMessage);
+        detail.setProperty(ex.error, ex.errorMessage);
+        return detail;
     }
 
     @ExceptionHandler({NullPointerException.class, IllegalArgumentException.class, IllegalStateException.class})

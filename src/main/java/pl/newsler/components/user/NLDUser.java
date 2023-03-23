@@ -32,7 +32,7 @@ public class NLDUser {
 
     public static NLDUser of(NLUser user) {
         return NLDUser.builder()
-                .id(user.getId())
+                .id(user.getUuid())
                 .email(user.getEmail())
                 .name(user.getFirstName())
                 .lastName(user.getLastName())
@@ -48,7 +48,7 @@ public class NLDUser {
 
     public NLUser toUser() {
         final NLUser user = new NLUser();
-        user.setId(id);
+        user.setUuid(id);
         user.setEmail(email);
         user.setFirstName(name);
         user.setLastName(lastName);

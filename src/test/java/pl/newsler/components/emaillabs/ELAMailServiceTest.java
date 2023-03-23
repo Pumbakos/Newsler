@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.springframework.web.client.RestTemplate;
@@ -34,6 +35,7 @@ import pl.newsler.testcommons.TestUserUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +43,7 @@ import java.util.UUID;
 import static pl.newsler.components.emaillabs.MailModuleUtil.createInstantMailRequest;
 
 public class ELAMailServiceTest {
+    private static final int TIME_OFFSET = 100_000;
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final StubELAMailRepository mailRepository = new StubELAMailRepository();
     private final StubUserRepository userRepository = new StubUserRepository();
@@ -57,7 +60,7 @@ public class ELAMailServiceTest {
     void beforeEach() {
         final NLUuid standardId = NLUuid.of(UUID.randomUUID());
         factory.standard().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.standard_plainPassword())));
-        factory.standard().setId(standardId);
+        factory.standard().setUuid(standardId);
         factory.standard().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.standard().setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.standard().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
@@ -65,7 +68,7 @@ public class ELAMailServiceTest {
 
         final NLUuid dashedId = NLUuid.of(UUID.randomUUID());
         factory.dashed().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dashed_plainPassword())));
-        factory.dashed().setId(dashedId);
+        factory.dashed().setUuid(dashedId);
         factory.dashed().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.dashed().setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.dashed().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
@@ -73,7 +76,7 @@ public class ELAMailServiceTest {
 
         final NLUuid dottedId = NLUuid.of(UUID.randomUUID());
         factory.dotted().setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(factory.dotted_plainPassword())));
-        factory.dotted().setId(dottedId);
+        factory.dotted().setUuid(dottedId);
         factory.dotted().setAppKey(NLAppKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.dotted().setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(TestUserUtils.secretOrAppKey())));
         factory.dotted().setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(TestUserUtils.smtpAccount())));
@@ -126,7 +129,7 @@ public class ELAMailServiceTest {
         final NLUser user = users.get(0);
         final ELAScheduleMailRequest request = MailModuleUtil.createScheduledMailRequest(
                 user,
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)),
+                System.currentTimeMillis() + TIME_OFFSET,
                 ZoneId.systemDefault().toString()
         );
 
@@ -144,7 +147,7 @@ public class ELAMailServiceTest {
         final NLUser user = users.get(0);
         final ELAScheduleMailRequest request = MailModuleUtil.createScheduledMailRequest(
                 user,
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)),
+                System.currentTimeMillis() + TIME_OFFSET,
                 "Zone"
         );
 
@@ -164,7 +167,7 @@ public class ELAMailServiceTest {
 
         final ELAScheduleMailRequest request = MailModuleUtil.createScheduledMailRequest(
                 user,
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN)),
+                System.currentTimeMillis() + TIME_OFFSET,
                 "Zone"
         );
 
@@ -173,8 +176,8 @@ public class ELAMailServiceTest {
     }
 
     @ParameterizedTest
-    @NullAndEmptySource
-    void shouldNotScheduleMailAndThrowInvalidDateExceptionWhenDateTimeBlank(String dateTime) {
+    @ValueSource(longs = {0, -1})
+    void shouldNotScheduleMailAndThrowInvalidDateExceptionWhenDateTimeBlank(Long timestamp) {
         final List<NLUser> users = userRepository.findAll();
         if (users.isEmpty()) {
             Assertions.fail("Users empty");
@@ -183,17 +186,17 @@ public class ELAMailServiceTest {
         final NLUser user = users.get(0);
         final ELAScheduleMailRequest request = MailModuleUtil.createScheduledMailRequest(
                 user,
-                dateTime,
+                timestamp,
                 "Zone"
         );
 
-        Assertions.assertThrows(InvalidDateException.class, () -> service.schedule(request));
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.schedule(request));
         Assertions.assertEquals(0, mailRepository.findAll().size());
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"2023-02-22T23:54:00", "22-02-2023 23:54:00"})
-    void shouldNotScheduleMailAndThrowInvalidDateExceptionWhenInvalidDate_DateTimeException(String dateTime) {
+    @ValueSource(longs = {16796, 16770177})
+    void shouldNotScheduleMailAndThrowInvalidDateExceptionWhenInvalidDate_DateTimeException(Long timestamp) {
         final List<NLUser> users = userRepository.findAll();
         if (users.isEmpty()) {
             Assertions.fail("Users empty");
@@ -202,7 +205,7 @@ public class ELAMailServiceTest {
         final NLUser user = users.get(0);
         final ELAScheduleMailRequest request = MailModuleUtil.createScheduledMailRequest(
                 user,
-                dateTime,
+                timestamp,
                 "Zone"
         );
 

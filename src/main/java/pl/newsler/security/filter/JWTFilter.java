@@ -19,14 +19,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
-import pl.newsler.commons.exception.InvalidTokenException;
-import pl.newsler.commons.exception.UnauthorizedException;
 import pl.newsler.auth.AuthUserDetailService;
 import pl.newsler.auth.JWTClaim;
 import pl.newsler.auth.JWTUtility;
+import pl.newsler.commons.exception.InvalidTokenException;
+import pl.newsler.commons.exception.InvalidUserDataException;
+import pl.newsler.commons.exception.UnauthorizedException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.components.user.NLUser;
-import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.security.NLAuthenticationToken;
 import pl.newsler.security.NLCredentials;
 import pl.newsler.security.NLPrincipal;
@@ -46,9 +46,9 @@ public class JWTFilter extends OncePerRequestFilter {
      * Creates a new instance with a default filterProcessesUrl and an
      * {@link AuthenticationManager}
      *
-     * @param notProcessingUrls urls to be omitted by <tt>JWTFilter</tt>
-     * @param authenticationManager  the {@link AuthenticationManager} used to authenticate an {@link Authentication} object. Cannot be null.
-     * @param authUserDetailService  {@link org.springframework.security.core.userdetails.UserDetailsService}
+     * @param notProcessingUrls     urls to be omitted by <tt>JWTFilter</tt>
+     * @param authenticationManager the {@link AuthenticationManager} used to authenticate an {@link Authentication} object. Cannot be null.
+     * @param authUserDetailService {@link org.springframework.security.core.userdetails.UserDetailsService}
      */
     public JWTFilter(@NotNull AuthenticationManager authenticationManager,
                      @NotNull AuthUserDetailService authUserDetailService, @NotNull JWTUtility utility,
@@ -66,11 +66,10 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain chain) throws ServletException, IOException {
-        for (final String url : notProcessingUrls) {
-            if (request.getRequestURI().contains(url)) {
-                chain.doFilter(request, response);
-                return;
-            }
+        boolean isUrlOnBlacklist = isUrlOnBlacklist(request);
+        if (isUrlOnBlacklist) {
+            chain.doFilter(request, response);
+            return;
         }
 
         final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -84,6 +83,15 @@ public class JWTFilter extends OncePerRequestFilter {
         performAuthentication(authentication);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         chain.doFilter(request, response);
+    }
+
+    private boolean isUrlOnBlacklist(final @NotNull HttpServletRequest request) {
+        for (final String url : notProcessingUrls) {
+            if (request.getRequestURI().contains(url)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void performAuthentication(@NotNull NLAuthenticationToken authentication) {

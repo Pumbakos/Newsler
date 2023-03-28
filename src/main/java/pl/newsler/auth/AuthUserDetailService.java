@@ -13,16 +13,18 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 public class AuthUserDetailService implements UserDetailsService {
+
+    public static final String AUTHORITIES_CLAIM_NAME = "roles";
     private final IUserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        NLEmail nlEmail = NLEmail.of(email);
+        final NLEmail nlEmail = NLEmail.of(email);
         if (!nlEmail.validate()) {
             throw new InvalidUserDataException();
         }
 
-        Optional<NLUser> optionalUser = userRepository.findByEmail(nlEmail);
+        final Optional<NLUser> optionalUser = userRepository.findByEmail(nlEmail);
         if (optionalUser.isEmpty()) {
             throw new InvalidUserDataException();
         }

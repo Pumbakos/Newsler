@@ -1,6 +1,9 @@
 package pl.newsler.auth;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import pl.newsler.commons.exception.UnauthorizedException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.components.user.IUserRepository;
@@ -10,33 +13,51 @@ import pl.newsler.security.NLIPasswordEncoder;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static pl.newsler.auth.AuthUserDetailService.AUTHORITIES_CLAIM_NAME;
 
 @RequiredArgsConstructor
 class JWTAuthService implements IJWTAuthService {
     private final IUserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
+    private final AuthUserDetailService authService;
     private final JWTUtility jwtUtility;
 
     @Override
     public String generateJWT(UserAuthModel userAuthModel) throws UnauthorizedException {
         final String email = userAuthModel.email();
         final NLEmail nlEmail = NLEmail.of(email);
+
         if (!nlEmail.validate()) {
             throw new UnauthorizedException("email", "invalid");
         }
 
-        final Optional<NLUser> optionalUser = userRepository.findByEmail(nlEmail);
-        if (optionalUser.isEmpty()) {
+        final UserDetails userDetails;
+        try {
+            userDetails = authService.loadUserByUsername(email);
+        } catch (UsernameNotFoundException e) {
             throw new UnauthorizedException("User's credentials not valid", "Token not generated");
         }
 
-        NLUser user = optionalUser.get();
-        if (!credentialsValid(user, userAuthModel)) {
-            throw new UnauthorizedException("User's credentials invalid", "Token not generated");
-        }
+//        if (passwordEncoder.bCrypt().matches(userAuthModel.password(), userDetails.getPassword())) {
+//            Map<String, String> claims = new HashMap<>();
+//            claims.put("email", email);
+//
+//            String authorities = userDetails.getAuthorities().stream()
+//                    .map(GrantedAuthority::getAuthority)
+//                    .collect(Collectors.joining(" "));
+//            claims.put(AUTHORITIES_CLAIM_NAME, authorities);
+//            claims.put("userId", String.valueOf(1));
+//
+//            String jwt = jwtHelper.createJwtForClaims(username, claims);
+//            return new LoginResult(jwt);
+//        }
 
-        return generateToken(user);
+        return generateToken((NLUser) userDetails);
     }
 
     private boolean credentialsValid(NLUser user, UserAuthModel userAuthModel) {

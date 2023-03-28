@@ -96,7 +96,7 @@ class SubscriptionControllerTest {
     @Test
     void shouldCancelSubscriptionWhenCancellationTokenValid() {
         final NLEmail email = NLEmail.of(email());
-        final NLUuid uuid = factory.standard().map().getId();
+        final NLUuid uuid = factory.standard().map().getUuid();
         receiverRepository.save(
                 new Receiver(NLUuid.of(UUID.randomUUID()), IReceiverRepository.version,
                         uuid, email, NLNickname.of(firstName()),
@@ -122,7 +122,7 @@ class SubscriptionControllerTest {
     @Test
     void shouldNotCancelSubscriptionWhenCancellationTokenInvalid() {
         final NLUser user = factory.standard();
-        final NLUuid uuid = user.map().getId();
+        final NLUuid uuid = user.map().getUuid();
         final String cancellationToken = user.getCancellationToken().getValue();
         final String email = email();
 
@@ -154,7 +154,7 @@ class SubscriptionControllerTest {
     @Test
     void shouldNotCancelSubscriptionWhenCancellationTokenValidButUserEmailNotAssociatedWithUser() {
         final NLEmail email = NLEmail.of(email());
-        final NLUuid uuid = factory.standard().map().getId();
+        final NLUuid uuid = factory.standard().map().getUuid();
         receiverRepository.save(
                 new Receiver(NLUuid.of(UUID.randomUUID()), IReceiverRepository.version,
                         uuid, email, NLNickname.of(firstName()),

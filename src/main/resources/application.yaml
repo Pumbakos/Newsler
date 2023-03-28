@@ -7,6 +7,11 @@ newsler:
     schema: http
     port: 4200
     domain-name: localhost
+  security:
+    jwt:
+      key-store-path: 'D:\Desktop\Newsler\keystore.jks'
+      key-store-password: 'ePQ&F7LZDww%dNz7FFiFVBP$56%eufy7jhvxz$6*P7a$vzzPVG&efJhtqGrapM*@Kec7vq@trqNKJzukrTMxF6Ux'
+      key-alias: 'jwtsigning'
 
 server:
   error:

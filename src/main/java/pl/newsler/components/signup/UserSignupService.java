@@ -101,9 +101,9 @@ class UserSignupService implements IUserSignupService {
                         throw new InvalidUserDataException(errorMessage);
                     }
 
-                    if (confirmationTokenService.setTokenExpired(user.map().getId())) {
+                    if (confirmationTokenService.setTokenExpired(user.map().getUuid())) {
                         final NLToken token = generateToken();
-                        createConfirmationToken(user.map().getId(), token);
+                        createConfirmationToken(user.map().getUuid(), token);
                         final String link = createLink(token.getValue());
 
                         emailConfirmationSender.send(

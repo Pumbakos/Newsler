@@ -56,8 +56,7 @@ class SecurityConfiguration {
                         new JWTFilter(manager, userDetailService, jwtUtility),
                         UsernamePasswordAuthenticationFilter.class
                 )
-//                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
-                ;
+                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
 
         return http.build();
     }
@@ -69,7 +68,6 @@ class SecurityConfiguration {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        // https://medium.com/swlh/stateless-jwt-authentication-with-spring-boot-a-better-approach-1f5dbae6c30f
         return web -> web.ignoring().requestMatchers(AUTH_BLACKLIST);
     }
 }

@@ -107,9 +107,9 @@ class UserSignupServiceTest {
         final String standardToken = UUID.randomUUID().toString();
         final String dashedToken = UUID.randomUUID().toString();
         final String dottedToken = UUID.randomUUID().toString();
-        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(standardToken), factory.standard().map().getId()));
-        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dashedToken), factory.dashed().map().getId()));
-        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dottedToken), factory.dotted().map().getId()));
+        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(standardToken), factory.standard().map().getUuid()));
+        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dashedToken), factory.dashed().map().getUuid()));
+        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dottedToken), factory.dotted().map().getUuid()));
     }
 
     @AfterEach
@@ -162,7 +162,7 @@ class UserSignupServiceTest {
 
     @Test
     void shouldConfirmTokenWhenTokenValid() {
-        final NLUuid uuid = factory.dashed().map().getId();
+        final NLUuid uuid = factory.dashed().map().getUuid();
         final NLToken token = NLToken.of(UUID.randomUUID().toString());
         final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), token, uuid);
         confirmationTokenRepository.save(confirmationToken);
@@ -193,7 +193,7 @@ class UserSignupServiceTest {
 
     @Test
     void shouldNotConfirmTokenAndThrowTokenExpiredExceptionWhenTokenExpired() {
-        final NLUuid uuid = factory.dashed().map().getId();
+        final NLUuid uuid = factory.dashed().map().getUuid();
         final LocalDateTime now = LocalDateTime.now().minusMinutes(16L);
         final LocalDateTime then = now.plusMinutes(1L);
         final NLToken token = NLToken.of(UUID.randomUUID().toString());

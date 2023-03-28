@@ -172,7 +172,7 @@ public class NLUser implements UserDetails {
 
     public NLDUser map() {
         return NLDUser.builder()
-                .id(uuid)
+                .uuid(uuid)
                 .email(email)
                 .name(firstName)
                 .lastName(lastName)
@@ -184,6 +184,10 @@ public class NLUser implements UserDetails {
                 .credentialsNonExpired(false)
                 .enabled(enabled)
                 .build();
+    }
+
+    public boolean isUserActive() {
+        return this.isEnabled() && this.isCredentialsNonExpired() && this.isAccountNonExpired();
     }
 
     public UserGetResponse truncate() {

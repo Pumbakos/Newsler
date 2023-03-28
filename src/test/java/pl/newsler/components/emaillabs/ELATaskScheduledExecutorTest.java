@@ -9,7 +9,6 @@ import org.mockito.Mockito;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.web.client.RestTemplate;
 import pl.newsler.commons.model.NLAppKey;
-import pl.newsler.commons.model.NLExecutionDate;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
@@ -34,7 +33,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Queue;
 import java.util.Random;
@@ -113,9 +111,9 @@ class ELATaskScheduledExecutorTest {
         final ELAScheduleMailRequest second = MailModuleUtil.createScheduledMailRequest(user, now.toInstant(ZoneOffset.UTC).toEpochMilli(), zoneId.toString());
         final ELAScheduleMailRequest third = MailModuleUtil.createScheduledMailRequest(user, now.toInstant(ZoneOffset.UTC).toEpochMilli(), zoneId.toString());
 
-        executor.schedule(user.map().getId(), ELAScheduleMailDetails.of(first, ZonedDateTime.of(now, zoneId)));
-        executor.schedule(user.map().getId(), ELAScheduleMailDetails.of(second, ZonedDateTime.of(now, zoneId)));
-        executor.schedule(user.map().getId(), ELAScheduleMailDetails.of(third, ZonedDateTime.of(now, zoneId)));
+        executor.schedule(user.map().getUuid(), ELAScheduleMailDetails.of(first, ZonedDateTime.of(now, zoneId)));
+        executor.schedule(user.map().getUuid(), ELAScheduleMailDetails.of(second, ZonedDateTime.of(now, zoneId)));
+        executor.schedule(user.map().getUuid(), ELAScheduleMailDetails.of(third, ZonedDateTime.of(now, zoneId)));
         Assertions.assertEquals(3, queue.size());
 
         executor.scanQueue();
@@ -155,12 +153,12 @@ class ELATaskScheduledExecutorTest {
                 future.toInstant(ZoneOffset.UTC).toEpochMilli(), zoneId.toString()
         );
 
-        executor.schedule(user.map().getId(), ELAScheduleMailDetails.of(firstThatShouldBeExecuted, ZonedDateTime.of(past, zoneId)));
-        executor.schedule(user.map().getId(), ELAScheduleMailDetails.of(firstThatShouldNotBeExecuted, ZonedDateTime.of(future, zoneId)));
-        executor.schedule(user.map().getId(), ELAScheduleMailDetails.of(secondThatShouldBeExecuted, ZonedDateTime.of(past, zoneId)));
-        executor.schedule(user.map().getId(), ELAScheduleMailDetails.of(secondThatShouldNotBeExecuted, ZonedDateTime.of(future, zoneId)));
-        executor.schedule(user.map().getId(), ELAScheduleMailDetails.of(thirdThatShouldBeExecuted, ZonedDateTime.of(past, zoneId)));
-        executor.schedule(user.map().getId(), ELAScheduleMailDetails.of(thirdThatShouldNotBeExecuted, ZonedDateTime.of(future, zoneId)));
+        executor.schedule(user.map().getUuid(), ELAScheduleMailDetails.of(firstThatShouldBeExecuted, ZonedDateTime.of(past, zoneId)));
+        executor.schedule(user.map().getUuid(), ELAScheduleMailDetails.of(firstThatShouldNotBeExecuted, ZonedDateTime.of(future, zoneId)));
+        executor.schedule(user.map().getUuid(), ELAScheduleMailDetails.of(secondThatShouldBeExecuted, ZonedDateTime.of(past, zoneId)));
+        executor.schedule(user.map().getUuid(), ELAScheduleMailDetails.of(secondThatShouldNotBeExecuted, ZonedDateTime.of(future, zoneId)));
+        executor.schedule(user.map().getUuid(), ELAScheduleMailDetails.of(thirdThatShouldBeExecuted, ZonedDateTime.of(past, zoneId)));
+        executor.schedule(user.map().getUuid(), ELAScheduleMailDetails.of(thirdThatShouldNotBeExecuted, ZonedDateTime.of(future, zoneId)));
         Assertions.assertEquals(6, queue.size());
 
         executor.scanQueue();

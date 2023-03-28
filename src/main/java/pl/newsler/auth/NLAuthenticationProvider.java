@@ -22,8 +22,8 @@ public class NLAuthenticationProvider implements AuthenticationProvider {
             return token;
         }
 
-        NLPrincipal principal = (NLPrincipal) authentication.getPrincipal();
-        Optional<NLUser> optionalUser = userRepository.findByEmail(principal.getEmail());
+        final NLPrincipal principal = (NLPrincipal) authentication.getPrincipal();
+        final Optional<NLUser> optionalUser = userRepository.findByEmail(principal.getEmail());
 
         if (optionalUser.isPresent()) {
             return new NLAuthenticationToken(authentication);

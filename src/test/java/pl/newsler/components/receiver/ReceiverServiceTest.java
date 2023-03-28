@@ -96,7 +96,7 @@ class ReceiverServiceTest {
     void shouldAddReceiverWhenDataValid() {
         final int size = receiverRepository.findAll().size();
         final ReceiverCreateRequest validCreateRequest = new ReceiverCreateRequest(
-                factory.standard().map().getId().getValue(), email(), firstName(), firstName(), lastName()
+                factory.standard().map().getUuid().getValue(), email(), firstName(), firstName(), lastName()
         );
         Assertions.assertDoesNotThrow(() -> service.addReceiver(validCreateRequest, false));
         Assertions.assertEquals(size + 1, receiverRepository.findAll().size());
@@ -106,14 +106,14 @@ class ReceiverServiceTest {
     void shouldNotAddReceiverWhenDataInvalid() {
         final int size = receiverRepository.findAll().size();
         final ReceiverCreateRequest invalidCreateRequest = new ReceiverCreateRequest(
-                factory.standard().map().getId().getValue(),
+                factory.standard().map().getUuid().getValue(),
                 username(),
                 username(),
                 username(),
                 username()
         );
         final ReceiverCreateRequest invalidCreateRequestModelsNull = new ReceiverCreateRequest(
-                factory.standard().map().getId().getValue(), null, null, null, null
+                factory.standard().map().getUuid().getValue(), null, null, null, null
         );
 
         Assertions.assertThrows(InvalidReceiverDataException.class, () -> service.addReceiver(invalidCreateRequest, false));
@@ -159,7 +159,7 @@ class ReceiverServiceTest {
     @Test
     void shouldNotAddReceiverWhenReceiverAlreadyAssociatedWithUserAndWasNotAutoSaved() {
         final ReceiverCreateRequest validCreateRequest = new ReceiverCreateRequest(
-                factory.standard().map().getId().getValue(), email(), firstName(), firstName(), lastName()
+                factory.standard().map().getUuid().getValue(), email(), firstName(), firstName(), lastName()
         );
         service.addReceiver(validCreateRequest, false);
         final int size = receiverRepository.findAll().size();
@@ -171,7 +171,7 @@ class ReceiverServiceTest {
     @Test
     void shouldNotAddReceiverWhenReceiverAlreadyAssociatedWithUserAndWasAutoSaved() {
         final ReceiverCreateRequest validCreateRequest = new ReceiverCreateRequest(
-                factory.standard().map().getId().getValue(), email(), firstName(), firstName(), lastName()
+                factory.standard().map().getUuid().getValue(), email(), firstName(), firstName(), lastName()
         );
         service.addReceiver(validCreateRequest, false);
         final int size = receiverRepository.findAll().size();
@@ -185,7 +185,7 @@ class ReceiverServiceTest {
         final int size = receiverRepository.findAll().size();
         final AtomicReference<List<ReceiverGetResponse>> fetchedReceivers = new AtomicReference<>(null);
 
-        Assertions.assertDoesNotThrow(() -> fetchedReceivers.set(service.fetchAllUserReceivers(factory.standard().map().getId().getValue())));
+        Assertions.assertDoesNotThrow(() -> fetchedReceivers.set(service.fetchAllUserReceivers(factory.standard().map().getUuid().getValue())));
         Assertions.assertEquals(size, fetchedReceivers.get().size());
     }
 

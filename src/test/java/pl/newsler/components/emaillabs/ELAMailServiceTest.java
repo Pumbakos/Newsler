@@ -5,15 +5,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.springframework.web.client.RestTemplate;
 import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.model.NLAppKey;
 import pl.newsler.commons.model.NLEmail;
-import pl.newsler.commons.model.NLExecutionDate;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
@@ -33,10 +30,7 @@ import pl.newsler.components.user.TestUserFactory;
 import pl.newsler.security.StubNLPasswordEncoder;
 import pl.newsler.testcommons.TestUserUtils;
 
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -225,11 +219,11 @@ public class ELAMailServiceTest {
         final ELAInstantMailRequest second = createInstantMailRequest(user);
         final ELAInstantMailRequest third = createInstantMailRequest(user);
 
-        mailRepository.save(ELAUserMail.of(user.map().getId(), ELAInstantMailDetails.of(first)));
-        mailRepository.save(ELAUserMail.of(user.map().getId(), ELAInstantMailDetails.of(second)));
-        mailRepository.save(ELAUserMail.of(user.map().getId(), ELAInstantMailDetails.of(third)));
+        mailRepository.save(ELAUserMail.of(user.map().getUuid(), ELAInstantMailDetails.of(first)));
+        mailRepository.save(ELAUserMail.of(user.map().getUuid(), ELAInstantMailDetails.of(second)));
+        mailRepository.save(ELAUserMail.of(user.map().getUuid(), ELAInstantMailDetails.of(third)));
 
-        final List<ELAGetMailResponse> fetchMails = service.fetchAllMails(user.map().getId());
+        final List<ELAGetMailResponse> fetchMails = service.fetchAllMails(user.map().getUuid());
         Assertions.assertNotNull(fetchMails);
         Assertions.assertEquals(3, fetchMails.size());
     }

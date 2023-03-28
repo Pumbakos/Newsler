@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.h2.tools.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -63,30 +64,30 @@ class H2Configuration {
         //no need to define custom exception
     CommandLineRunner saveUsers(IUserSignupService signupService, IUserRepository userRepository, IConfirmationTokenRepository tokenRepository) {
         return args -> {
-            final AtomicReference<String> appKey = new AtomicReference<>();
-            final AtomicReference<String> secretKey = new AtomicReference<>();
-            final AtomicReference<String> smtp = new AtomicReference<>();
-            final AtomicReference<String> email = new AtomicReference<>();
+            final AtomicReference<String> appKeyRef = new AtomicReference<>();
+            final AtomicReference<String> secretKeyRef = new AtomicReference<>();
+            final AtomicReference<String> smtpRed = new AtomicReference<>();
+            final AtomicReference<String> emailRed = new AtomicReference<>();
 
             try {
-                appKey.set(System.getenv("NEWSLER_APP_KEY"));
-                secretKey.set(System.getenv("NEWSLER_SECRET_KEY"));
-                smtp.set(System.getenv("NEWSLER_SMTP"));
-                email.set(System.getenv("NEWSLER_EMAIL"));
+                appKeyRef.set(System.getenv("NEWSLER_APP_KEY"));
+                secretKeyRef.set(System.getenv("NEWSLER_SECRET_KEY"));
+                smtpRed.set(System.getenv("NEWSLER_SMTP"));
+                emailRed.set(System.getenv("NEWSLER_EMAIL"));
 
-                if (envVariablesNotNull(appKey, secretKey, smtp, email)) {
+                if (envVariablesNotNull(appKeyRef, secretKeyRef, smtpRed, emailRed)) {
                     throw new Exception();
                 }
             } catch (Exception e) {
-                appKey.set(secretOrAppKey());
-                secretKey.set(secretOrAppKey());
-                smtp.set(smtpAccount());
-                email.set("newslerowsky@app.co.devenv");
+                appKeyRef.set(secretOrAppKey());
+                secretKeyRef.set(secretOrAppKey());
+                smtpRed.set(smtpAccount());
+                emailRed.set("newslerowsky@app.co.devenv");
             }
             signupService.singUp(
                     new UserCreateRequest("Aizholat",
                             "Newsler",
-                            email.get(),
+                            emailRed.get(),
                             "Pa$$word7hat^match3$"
                     )
             );
@@ -105,10 +106,10 @@ class H2Configuration {
                 saveUserMails(user);
                 saveUserReceivers(user);
 
-                if (user.getEmail().getValue().equals(email.get())) {
-                    user.setAppKey(NLAppKey.of(passwordEncoder.encrypt(appKey.get())));
-                    user.setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(secretKey.get())));
-                    user.setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(smtp.get())));
+                if (user.getEmail().getValue().equals(emailRed.get())) {
+                    user.setAppKey(NLAppKey.of(passwordEncoder.encrypt(appKeyRef.get())));
+                    user.setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(secretKeyRef.get())));
+                    user.setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(smtpRed.get())));
                     user.setDefaultTemplateId(NLStringValue.of("cda1b272"));
                 } else {
                     user.setAppKey(NLAppKey.of(passwordEncoder.encrypt(secretOrAppKey())));
@@ -127,7 +128,7 @@ class H2Configuration {
             receiverRepository.save(new Receiver(
                     NLUuid.of(UUID.randomUUID()),
                     IReceiverRepository.version,
-                    user.map().getId(),
+                    user.map().getUuid(),
                     NLEmail.of(fullEmail()),
                     NLNickname.of(firstName()),
                     NLFirstName.of(firstName()),
@@ -139,7 +140,7 @@ class H2Configuration {
 
     private void saveUserMails(final NLUser user) {
         for (int i = 0; i < random.nextInt(9) + 5; i++) {
-            mailRepository.save(ELAUserMail.of(user.map().getId(), ELAInstantMailDetails.of(H2Util.createMailSendRequest(user.getEmail().getValue()))));
+            mailRepository.save(ELAUserMail.of(user.map().getUuid(), ELAInstantMailDetails.of(H2Util.createMailSendRequest(user.getEmail().getValue()))));
         }
     }
 

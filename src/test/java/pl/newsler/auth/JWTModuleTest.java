@@ -38,7 +38,7 @@ class JWTModuleTest {
     private final IJWTAuthController controller = new JWTAuthController(service);
     private final TestUserFactory factory = new TestUserFactory();
     private final ObjectEncoder encoder = new ObjectEncoder(passwordEncoder);
-    final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
+    final JWTVerifier verifier = JWT.require(utility.rsa384()).build();
 
     @BeforeEach
     void beforeEach() {
@@ -132,7 +132,7 @@ class JWTModuleTest {
         final NLUser standardUser = factory.standard();
         Assertions.assertDoesNotThrow(() -> userDetailsService.loadUserByUsername(standardUser.getEmail().getValue()));
 
-        final Optional<NLUser> optionalNLUser = userRepository.findById(standardUser.map().getId());
+        final Optional<NLUser> optionalNLUser = userRepository.findById(standardUser.map().getUuid());
         if (optionalNLUser.isEmpty()) {
             Assertions.fail();
         }

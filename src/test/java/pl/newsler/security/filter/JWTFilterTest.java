@@ -51,7 +51,7 @@ class JWTFilterTest {
     private final JWTUtility utility = configuration.jwtUtility();
     private final IJWTAuthService service = configuration.jwtAuthService(utility);
     private final TestUserFactory factory = new TestUserFactory();
-    private final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
+    private final JWTVerifier verifier = JWT.require(utility.rsa384()).build();
     private final JWTFilter filter = new JWTFilter(authenticationManager, configuration.databaseUserDetailService(), utility, "/v1/api/auth/", "/v1/api/subscription/cancel");
 
     @BeforeEach
@@ -91,8 +91,8 @@ class JWTFilterTest {
         Assertions.assertEquals(String.valueOf(JWTClaim.JWT_ID), decodedJWT.getId());
         Assertions.assertEquals(JWTClaim.ISSUER, decodedJWT.getIssuer());
         Assertions.assertEquals(standardUser.getEmail().getValue(), decodedJWT.getClaim(JWTClaim.EMAIL).asString());
-        Assertions.assertEquals(standardUser.getFirstName().getValue(), decodedJWT.getClaim(JWTClaim.NAME).asString());
-        Assertions.assertEquals(standardUser.getRole().toString(), decodedJWT.getClaim(JWTClaim.ROLE).asString());
+        Assertions.assertEquals(standardUser.getFirstName().getValue(), decodedJWT.getClaim(JWTClaim.UUID).asString());
+        Assertions.assertEquals(standardUser.getRole().toString(), decodedJWT.getClaim(JWTClaim.AUTHORITIES).asString());
     }
 
     @Test
@@ -215,9 +215,9 @@ class JWTFilterTest {
                 .withIssuedAt(now)
                 .withExpiresAt(now.plus(60L, ChronoUnit.MINUTES))
                 .withClaim(JWTClaim.EMAIL, email)
-                .withClaim(JWTClaim.NAME, name)
-                .withClaim(JWTClaim.ROLE, role)
-                .sign(utility.hmac384());
+                .withClaim(JWTClaim.UUID, name)
+                .withClaim(JWTClaim.AUTHORITIES, role)
+                .sign(utility.rsa384());
     }
 
     private String generateToken(String issuer, String email, String name, String role) {
@@ -229,8 +229,8 @@ class JWTFilterTest {
                 .withIssuedAt(now)
                 .withExpiresAt(now.plus(60L, ChronoUnit.MINUTES))
                 .withClaim(JWTClaim.EMAIL, email)
-                .withClaim(JWTClaim.NAME, name)
-                .withClaim(JWTClaim.ROLE, role)
+                .withClaim(JWTClaim.UUID, name)
+                .withClaim(JWTClaim.AUTHORITIES, role)
                 .sign(hmac384());
     }
 }

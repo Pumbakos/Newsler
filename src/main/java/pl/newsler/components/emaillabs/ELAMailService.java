@@ -46,7 +46,7 @@ class ELAMailService implements IELAMailService {
             throw new InvalidUserDataException();
         }
 
-        instantExecutor.queue(optionalUser.get().map().getId(), ELAInstantMailDetails.of(request));
+        instantExecutor.queue(optionalUser.get().map().getUuid(), ELAInstantMailDetails.of(request));
     }
 
     @Override
@@ -72,7 +72,7 @@ class ELAMailService implements IELAMailService {
             boolean contains = availableZoneIds.contains(request.zone());
 
             scheduledExecutor.schedule(
-                    optionalUser.get().map().getId(),
+                    optionalUser.get().map().getUuid(),
                     ELAScheduleMailDetails.of(request, time.atZone(ZoneId.of(contains ? request.zone() : "Europe/Warsaw")))
             );
         } catch (DateTimeException e) {

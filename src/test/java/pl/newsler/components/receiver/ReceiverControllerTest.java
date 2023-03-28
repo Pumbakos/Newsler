@@ -98,7 +98,7 @@ class ReceiverControllerTest {
     @Test
     void shouldAddReceiverWhenDataValid() {
         final ReceiverCreateRequest validCreateRequest = new ReceiverCreateRequest(
-                factory.standard().map().getId().getValue(), email(), firstName(), firstName(), lastName()
+                factory.standard().map().getUuid().getValue(), email(), firstName(), firstName(), lastName()
         );
 
         try {
@@ -112,14 +112,14 @@ class ReceiverControllerTest {
     @Test
     void shouldNotAddReceiverWhenDataInvalid() {
         final ReceiverCreateRequest invalidCreateRequest = new ReceiverCreateRequest(
-                factory.standard().map().getId().getValue(),
+                factory.standard().map().getUuid().getValue(),
                 username(),
                 username(),
                 username(),
                 username()
         );
         final ReceiverCreateRequest invalidCreateRequestModelsNull = new ReceiverCreateRequest(
-                factory.standard().map().getId().getValue(), null, null, null, null
+                factory.standard().map().getUuid().getValue(), null, null, null, null
         );
 
         try {
@@ -186,7 +186,7 @@ class ReceiverControllerTest {
     @Test
     void shouldFetchAllUserReceiversWhenUserUuidValidAndUserExists() {
         try {
-            ResponseEntity<List<ReceiverGetResponse>> response = controller.fetchAllUserReceivers(factory.standard().map().getId().getValue());
+            ResponseEntity<List<ReceiverGetResponse>> response = controller.fetchAllUserReceivers(factory.standard().map().getUuid().getValue());
             Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         } catch (NLException e) {
             Assertions.fail();

@@ -21,11 +21,11 @@ class SecurityModelsTest {
         dotted.setUuid(NLUuid.of(UUID.randomUUID()));
         NLUser dashed = factory.dashed();
         dashed.setUuid(NLUuid.of(UUID.randomUUID()));
-        NLPrincipal dashedPrincipal = new NLPrincipal(dotted.map().getId(), dotted.getEmail(), dotted.getFirstName());
-        NLPrincipal dottedPrincipal = new NLPrincipal(dashed.map().getId(), dashed.getEmail(), dashed.getFirstName());
+        NLPrincipal dashedPrincipal = new NLPrincipal(dotted.map().getUuid(), dotted.getEmail(), dotted.getFirstName());
+        NLPrincipal dottedPrincipal = new NLPrincipal(dashed.map().getUuid(), dashed.getEmail(), dashed.getFirstName());
 
         Assertions.assertNotNull(dottedPrincipal);
-        Assertions.assertEquals(dottedPrincipal, new NLPrincipal(dashed.map().getId(), dashed.getEmail(), dashed.getFirstName()));
+        Assertions.assertEquals(dottedPrincipal, new NLPrincipal(dashed.map().getUuid(), dashed.getEmail(), dashed.getFirstName()));
         Assertions.assertEquals(dottedPrincipal.toString(), dottedPrincipal.toString());
         Assertions.assertEquals(dottedPrincipal.hashCode(), dottedPrincipal.hashCode());
         Assertions.assertNotEquals(dottedPrincipal.getId(), dashedPrincipal.getId());

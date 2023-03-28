@@ -113,9 +113,9 @@ public class UserSignupControllerTest {
         final String standardToken = UUID.randomUUID().toString();
         final String dashedToken = UUID.randomUUID().toString();
         final String dottedToken = UUID.randomUUID().toString();
-        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(standardToken), factory.standard().map().getId()));
-        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dashedToken), factory.dashed().map().getId()));
-        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dottedToken), factory.dotted().map().getId()));
+        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(standardToken), factory.standard().map().getUuid()));
+        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dashedToken), factory.dashed().map().getUuid()));
+        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dottedToken), factory.dotted().map().getUuid()));
     }
 
     @AfterEach
@@ -252,7 +252,7 @@ public class UserSignupControllerTest {
     void shouldReturn200OkAndConfirmTokenWhenTokenConfirmed() throws NoSuchFieldException, IllegalAccessException {
         reflectControllerFields();
         final String token = UUID.randomUUID().toString();
-        final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(token), factory.dotted().map().getId());
+        final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(token), factory.dotted().map().getUuid());
         confirmationTokenRepository.save(confirmationToken);
 
         final ResponseEntity<NLStringValue> response = controller.confirm(token);
@@ -335,7 +335,7 @@ public class UserSignupControllerTest {
     void shouldReturn401UnauthorizedAndNotConfirmTokenWhenTokenAlreadyConfirmed() throws NoSuchFieldException, IllegalAccessException {
         reflectControllerFields();
         final String token = UUID.randomUUID().toString();
-        final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(token), factory.dotted().map().getId());
+        final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(token), factory.dotted().map().getUuid());
         confirmationTokenRepository.save(confirmationToken);
         confirmationTokenRepository.updateConfirmationDate(confirmationToken.getToken(), LocalDateTime.now());
 
@@ -354,7 +354,7 @@ public class UserSignupControllerTest {
     void shouldReturn401UnauthorizedAndNotConfirmTokenWhenTokenExpired() throws NoSuchFieldException, IllegalAccessException {
         reflectControllerFields();
         final String token = UUID.randomUUID().toString();
-        final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(token), factory.dotted().map().getId());
+        final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(token), factory.dotted().map().getUuid());
         final LocalDateTime now = LocalDateTime.now().minusMinutes(16L);
         final LocalDateTime then = now.plusMinutes(1L);
         confirmationToken.setCreationDate(now);

@@ -33,9 +33,7 @@ import pl.newsler.components.user.TestUserFactory;
 import pl.newsler.security.StubNLPasswordEncoder;
 import pl.newsler.testcommons.TestUserUtils;
 
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -265,7 +263,7 @@ class ELAMailControllerTest {
         controller.queueAndExecute(second);
         controller.queueAndExecute(third);
 
-        final ResponseEntity<List<ELAGetMailResponse>> entity = controller.fetchAllMails(user.map().getId().getValue());
+        final ResponseEntity<List<ELAGetMailResponse>> entity = controller.fetchAllMails(user.map().getUuid().getValue());
         Assertions.assertNotNull(entity);
         Assertions.assertNotNull(entity.getBody());
         Assertions.assertEquals(mailRepository.findAll().get(0).toResponse(user.getEmail().getValue()), entity.getBody().get(0));

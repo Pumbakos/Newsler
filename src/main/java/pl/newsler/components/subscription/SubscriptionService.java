@@ -27,7 +27,7 @@ class SubscriptionService implements ISubscriptionService {
             throw new CancellationTokenException("Cancellation token", "Not associated with user");
         }
         final NLUser user = optionalNLUser.get();
-        final Optional<Receiver> optionalReceiver = receiverRepository.findByUserUuidAndEmail(user.map().getId(), email);
+        final Optional<Receiver> optionalReceiver = receiverRepository.findByUserUuidAndEmail(user.map().getUuid(), email);
 
         if (optionalReceiver.isEmpty()) {
             throw new CancellationReceiverException("Receiver's email", "Not associated with user");

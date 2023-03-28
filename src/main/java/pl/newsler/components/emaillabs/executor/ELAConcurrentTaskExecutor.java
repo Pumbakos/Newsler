@@ -99,10 +99,10 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
         try {
             final ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUri(), HttpMethod.POST, entity, String.class);
             log.info("MAIL {} SENT", details.id());
-            return handleResponse(response, details, user.map().getId());
+            return handleResponse(response, details, user.map().getUuid());
         } catch (RestClientException e) {
             log.info("MAIL {} ERROR", details.id());
-            return handleException(details.id(), user.map().getId(), e);
+            return handleException(details.id(), user.map().getUuid(), e);
         }
     }
 
@@ -147,7 +147,7 @@ public abstract class ELAConcurrentTaskExecutor<T extends ELAMailDetails> {
     }
 
     protected void execution(final T details, final NLUser user) {
-        final NLUuid uuid = user.map().getId();
+        final NLUuid uuid = user.map().getUuid();
         addReceiverIfNotExist(details, uuid);
         final ELASentMailResults results = call(user, details);
         final Optional<ELAUserMail> optionalUserMail = mailRepository.findById(results.getId());

@@ -81,7 +81,7 @@ class NLUserTest {
         NLDUser nldUser = NLDUser.of(standardUser);
         Assertions.assertNotNull(nldUser);
         Assertions.assertNotNull(nldUser.toString());
-        Assertions.assertEquals(standardUser.getUuid(), nldUser.getId());
+        Assertions.assertEquals(standardUser.getUuid(), nldUser.getUuid());
         Assertions.assertEquals(standardUser.getEmail(), nldUser.getEmail());
         Assertions.assertEquals(standardUser.getFirstName(), nldUser.getName());
         Assertions.assertEquals(standardUser.getLastName(), nldUser.getLastName());

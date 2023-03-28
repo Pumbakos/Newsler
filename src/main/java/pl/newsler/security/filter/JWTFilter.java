@@ -120,7 +120,7 @@ public class JWTFilter extends OncePerRequestFilter {
         if (JWTResolver.resolveJWT(jwt, user)) {
             final NLPrincipal principal = createPrincipal(user);
             final NLCredentials credentials = createCredentials(user);
-            final Set<SimpleGrantedAuthority> roles = Collections.singleton(new SimpleGrantedAuthority(jwt.getClaim(JWTClaim.ROLE).asString()));
+            final Set<SimpleGrantedAuthority> roles = Collections.singleton(new SimpleGrantedAuthority(jwt.getClaim(JWTClaim.AUTHORITIES).asString()));
 
             return new NLAuthenticationToken(principal, credentials, roles);
         }
@@ -128,7 +128,7 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     private @NotNull DecodedJWT verifyToken(@NotNull String authToken) {
-        final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
+        final JWTVerifier verifier = JWT.require(utility.rsa384()).build();
         try {
             return verifier.verify(authToken);
         } catch (JWTVerificationException e) {
@@ -137,7 +137,7 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     private @NotNull NLPrincipal createPrincipal(@NotNull NLUser user) {
-        return new NLPrincipal(user.map().getId(), user.getEmail(), user.getFirstName());
+        return new NLPrincipal(user.map().getUuid(), user.getEmail(), user.getFirstName());
     }
 
     private @NotNull NLCredentials createCredentials(@NotNull NLUser user) {

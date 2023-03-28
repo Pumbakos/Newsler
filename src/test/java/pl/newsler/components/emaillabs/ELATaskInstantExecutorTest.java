@@ -86,9 +86,9 @@ class ELATaskInstantExecutorTest {
         final ELAInstantMailRequest third = MailModuleUtil.createInstantMailRequest(factory.dotted());
 
         Assertions.assertEquals(0, mailRepository.findAll().size());
-        Assertions.assertDoesNotThrow(() -> executor.queue(factory.standard().map().getId(), ELAInstantMailDetails.of(first)));
-        Assertions.assertDoesNotThrow(() -> executor.queue(factory.dashed().map().getId(), ELAInstantMailDetails.of(second)));
-        Assertions.assertDoesNotThrow(() -> executor.queue(factory.dotted().map().getId(), ELAInstantMailDetails.of(third)));
+        Assertions.assertDoesNotThrow(() -> executor.queue(factory.standard().map().getUuid(), ELAInstantMailDetails.of(first)));
+        Assertions.assertDoesNotThrow(() -> executor.queue(factory.dashed().map().getUuid(), ELAInstantMailDetails.of(second)));
+        Assertions.assertDoesNotThrow(() -> executor.queue(factory.dotted().map().getUuid(), ELAInstantMailDetails.of(third)));
         Assertions.assertEquals(3, mailRepository.findAll().size());
     }
 }

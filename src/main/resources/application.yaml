@@ -8,10 +8,17 @@ newsler:
     port: 4200
     domain-name: localhost
   security:
-    jwt:
-      key-store-path: 'D:\Desktop\Newsler\keystore.jks'
-      key-store-password: 'ePQ&F7LZDww%dNz7FFiFVBP$56%eufy7jhvxz$6*P7a$vzzPVG&efJhtqGrapM*@Kec7vq@trqNKJzukrTMxF6Ux'
-      key-alias: 'jwtsigning'
+    keystore:
+      key-store-type: ${ksType}
+      key-store-path: ${ksPath}
+      key-store-password: ${ksPass}
+      key-alias: ${ksAlias}
+      protection-password-phrase: ${ksPPPhrase}
+      encode-key-salt: ${ksEncKeySaltAlias}
+      app-key-alias: ${ksAppKeyAlias}
+      secret-key-alias: ${ksSecretKeyAlias}
+      smtp-alias: ${ksSmtpAlias}
+      email-alias: ${ksEmailAlias}
 
 server:
   error:

@@ -34,13 +34,16 @@ class JWTConfiguration {
     private final IUserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
 
-    @Value("${newsler.security.jwt.key-store-path}")
+    @Value("${newsler.security.keystore.key-store-type}")
+    private String keyStoreType;
+
+    @Value("${newsler.security.keystore.key-store-path}")
     private String keyStorePath;
 
-    @Value("${newsler.security.jwt.key-store-password}")
+    @Value("${newsler.security.keystore.key-store-password}")
     private String keyStorePassword;
 
-    @Value("${newsler.security.jwt.key-alias}")
+    @Value("${newsler.security.keystore.key-alias}")
     private String keyAlias;
 
     @Bean(name = "jwtUtility")
@@ -63,10 +66,10 @@ class JWTConfiguration {
         return new AuthUserDetailService(userRepository);
     }
 
-    @Bean
+    @Bean(name = "keyStore")
     KeyStore keyStore() {
         try {
-            final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            final KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             final InputStream resourceAsStream = new FileInputStream(keyStorePath);
             keyStore.load(resourceAsStream, keyStorePassword.toCharArray());
             return keyStore;
@@ -77,7 +80,7 @@ class JWTConfiguration {
         throw new IllegalArgumentException("Unable to load keystore");
     }
 
-    @Bean
+    @Bean(name = "jwtSigningKey")
     RSAPrivateKey jwtSigningKey(KeyStore keyStore) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
         final Key key = keyStore.getKey(keyAlias, keyStorePassword.toCharArray());
         if (key instanceof RSAPrivateKey rsaKey) {
@@ -87,7 +90,7 @@ class JWTConfiguration {
         throw new IllegalArgumentException("Unable to load private key");
     }
 
-    @Bean
+    @Bean(name = "jwtValidationKey")
     RSAPublicKey jwtValidationKey(KeyStore keyStore) {
         try {
             final Certificate certificate = keyStore.getCertificate(keyAlias);
@@ -103,7 +106,7 @@ class JWTConfiguration {
         throw new IllegalArgumentException("Unable to load RSA public key");
     }
 
-    @Bean
+    @Bean(name = "jwtDecoder")
     JwtDecoder jwtDecoder(RSAPublicKey publicKey) {
         return NimbusJwtDecoder.withPublicKey(publicKey).build();
     }

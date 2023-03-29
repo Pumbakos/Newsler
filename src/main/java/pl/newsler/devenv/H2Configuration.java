@@ -27,6 +27,7 @@ import pl.newsler.components.signup.IUserSignupService;
 import pl.newsler.components.signup.usecase.UserCreateRequest;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
+import pl.newsler.security.NLIKeyProvider;
 import pl.newsler.security.NLIPasswordEncoder;
 
 import java.security.SecureRandom;
@@ -53,6 +54,15 @@ class H2Configuration {
     private final IELAMailRepository mailRepository;
     private final IReceiverRepository receiverRepository;
     private final NLIPasswordEncoder passwordEncoder;
+    private final NLIKeyProvider keyProvider;
+    @Value("${newsler.security.keystore.app-key-alias}")
+    private String appKeyAlias;
+    @Value("${newsler.security.keystore.secret-key-alias}")
+    private String secretKeyAlias;
+    @Value("${newsler.security.keystore.smtp-alias}")
+    private String smtpAlias;
+    @Value("${newsler.security.keystore.email-alias}")
+    private String emailAlias;
 
     @Bean(initMethod = "start", destroyMethod = "stop")
     public Server h2Server() throws SQLException {
@@ -63,31 +73,39 @@ class H2Configuration {
     @SuppressWarnings("java:S112")
         //no need to define custom exception
     CommandLineRunner saveUsers(IUserSignupService signupService, IUserRepository userRepository, IConfirmationTokenRepository tokenRepository) {
+        final AtomicReference<String> appKeyRef = new AtomicReference<>();
+        final AtomicReference<String> secretKeyRef = new AtomicReference<>();
+        final AtomicReference<String> smtpRef = new AtomicReference<>();
+        final AtomicReference<String> emailRef = new AtomicReference<>();
+
         return args -> {
-            final AtomicReference<String> appKeyRef = new AtomicReference<>();
-            final AtomicReference<String> secretKeyRef = new AtomicReference<>();
-            final AtomicReference<String> smtpRed = new AtomicReference<>();
-            final AtomicReference<String> emailRed = new AtomicReference<>();
+            if (keyProvider != null) {
+                appKeyRef.set(new String(keyProvider.getKey(appKeyAlias)));
+                secretKeyRef.set(new String(keyProvider.getKey(secretKeyAlias)));
+                smtpRef.set(new String(keyProvider.getKey(smtpAlias)));
+                emailRef.set(new String(keyProvider.getKey(emailAlias)));
+            } else {
+                try {
+                    appKeyRef.set(System.getenv("NEWSLER_APP_KEY"));
+                    secretKeyRef.set(System.getenv("NEWSLER_SECRET_KEY"));
+                    smtpRef.set(System.getenv("NEWSLER_SMTP"));
+                    emailRef.set(System.getenv("NEWSLER_EMAIL"));
 
-            try {
-                appKeyRef.set(System.getenv("NEWSLER_APP_KEY"));
-                secretKeyRef.set(System.getenv("NEWSLER_SECRET_KEY"));
-                smtpRed.set(System.getenv("NEWSLER_SMTP"));
-                emailRed.set(System.getenv("NEWSLER_EMAIL"));
-
-                if (envVariablesNotNull(appKeyRef, secretKeyRef, smtpRed, emailRed)) {
-                    throw new Exception();
+                    if (envVariablesNotNull(appKeyRef, secretKeyRef, smtpRef, emailRef)) {
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    appKeyRef.set(secretOrAppKey());
+                    secretKeyRef.set(secretOrAppKey());
+                    smtpRef.set(smtpAccount());
+                    emailRef.set("newslerowsky@app.co.devenv");
                 }
-            } catch (Exception e) {
-                appKeyRef.set(secretOrAppKey());
-                secretKeyRef.set(secretOrAppKey());
-                smtpRed.set(smtpAccount());
-                emailRed.set("newslerowsky@app.co.devenv");
             }
+
             signupService.singUp(
                     new UserCreateRequest("Aizholat",
                             "Newsler",
-                            emailRed.get(),
+                            emailRef.get(),
                             "Pa$$word7hat^match3$"
                     )
             );
@@ -106,10 +124,10 @@ class H2Configuration {
                 saveUserMails(user);
                 saveUserReceivers(user);
 
-                if (user.getEmail().getValue().equals(emailRed.get())) {
+                if (user.getEmail().getValue().equals(emailRef.get())) {
                     user.setAppKey(NLAppKey.of(passwordEncoder.encrypt(appKeyRef.get())));
                     user.setSecretKey(NLSecretKey.of(passwordEncoder.encrypt(secretKeyRef.get())));
-                    user.setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(smtpRed.get())));
+                    user.setSmtpAccount(NLSmtpAccount.of(passwordEncoder.encrypt(smtpRef.get())));
                     user.setDefaultTemplateId(NLStringValue.of("cda1b272"));
                 } else {
                     user.setAppKey(NLAppKey.of(passwordEncoder.encrypt(secretOrAppKey())));

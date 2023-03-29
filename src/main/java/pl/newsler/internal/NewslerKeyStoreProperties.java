@@ -1,4 +1,4 @@
-package pl.newsler.devenv;
+package pl.newsler.internal;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,11 +8,12 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 @Getter
 @Setter
 @ConfigurationPropertiesScan
-@ConfigurationProperties("newsler.devenv.emaillabs.h2")
-public class NewslerH2Properties {
+@ConfigurationProperties("newsler.security.keystore")
+public class NewslerKeyStoreProperties {
     private String keyStoreType;
     private String keyStorePath;
     private String keyStorePassword;
+    private String keyAlias;
     /**
      * Protection Password to obtain secret key entry.
      */

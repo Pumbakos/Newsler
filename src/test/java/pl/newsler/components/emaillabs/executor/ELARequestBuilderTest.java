@@ -137,7 +137,7 @@ class ELARequestBuilderTest {
         params.put(ELAParam.SMTP_ACCOUNT, passwordEncoder.decrypt(user.getSmtpAccount().getValue()));
 
         final String encodedEmail = URLEncoder.encode(user.getEmail().getValue(), StandardCharsets.UTF_8);
-        final String cancellationToken = user.getCancellationToken().getValue();
+        final String cancellationToken = user.getSubscriptionToken().getValue();
         final String unsubscribeText = String.format("Unsubscribe from newsletter: http://localhost:4200/subscription/cancel?token=%s&email=%s", cancellationToken, encodedEmail);
         final String unsubscribeHtml = String.format("<p><a href=\"http://localhost:4200/subscription/cancel?token=%s&email=%s\">Unsubscribe from newsletter</a></p>", cancellationToken, encodedEmail);
 

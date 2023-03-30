@@ -5,16 +5,16 @@ import org.springframework.http.ResponseEntity;
 import pl.newsler.commons.exception.NLError;
 import pl.newsler.commons.exception.NLException;
 
-public class CancellationTokenException extends NLException {
-    public CancellationTokenException(String error, String errorMessage) {
+public class SubscriptionTokenException extends NLException {
+    public SubscriptionTokenException(String error, String errorMessage) {
         super(error, errorMessage);
     }
 
-    public CancellationTokenException(String errorMessage) {
+    public SubscriptionTokenException(String errorMessage) {
         super("Not provided", errorMessage);
     }
 
-    public CancellationTokenException() {
+    public SubscriptionTokenException() {
         super("Not provided", "Not specified");
     }
 

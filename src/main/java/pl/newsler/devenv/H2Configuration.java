@@ -110,17 +110,20 @@ class H2Configuration {
             }
 
             signupService.singUp(
-                    new UserCreateRequest("Aizholat",
+                    new UserCreateRequest(
+                            "Aizholat",
                             "Newsler",
                             emailRef.get(),
                             "Pa$$word7hat^match3$"
                     )
             );
 
+            final String testUserMail = "just.test@dev-newsler.pl";
             signupService.singUp(
-                    new UserCreateRequest(firstName(),
-                            lastName(),
-                            String.format("%s@%s.com", username(), domain()),
+                    new UserCreateRequest(
+                            "TestUser",
+                            "JustForTests",
+                            testUserMail,
                             "op@Q7#9FtE$%0X^#UZ"
                     )
             );
@@ -145,6 +148,10 @@ class H2Configuration {
 
                 userRepository.save(user);
             }
+
+            userRepository.findByEmail(NLEmail.of(testUserMail)).ifPresent(user -> {
+                user.setEnabled(true);
+            });
         };
     }
 

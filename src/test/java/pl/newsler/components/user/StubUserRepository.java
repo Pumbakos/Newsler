@@ -41,7 +41,7 @@ public class StubUserRepository extends InMemoryJpaRepository<NLUser, NLUuid> im
     }
 
     @Override
-    public Optional<NLUser> findByCancellationToken(final NLToken token) {
-        return super.database.values().stream().filter(user -> user.getCancellationToken().equals(token)).findFirst();
+    public Optional<NLUser> findBySubscriptionToken(final NLToken token) {
+        return super.database.values().stream().filter(user -> user.getSubscriptionToken().equals(token)).findFirst();
     }
 }

@@ -19,7 +19,7 @@ import pl.newsler.commons.model.NLUuid;
 import pl.newsler.commons.model.NLVersion;
 import pl.newsler.components.emaillabs.StubELAMailModuleConfiguration;
 import pl.newsler.components.emaillabs.StubELAMailRepository;
-import pl.newsler.components.receiver.exception.ReceiverAlreadyAssociatedWithUser;
+import pl.newsler.components.receiver.exception.ReceiverAlreadySubscribedException;
 import pl.newsler.components.receiver.usecase.ReceiverCreateRequest;
 import pl.newsler.components.receiver.usecase.ReceiverGetResponse;
 import pl.newsler.components.user.IUserCrudService;
@@ -164,7 +164,7 @@ class ReceiverServiceTest {
         service.addReceiver(validCreateRequest, false);
         final int size = receiverRepository.findAll().size();
 
-        Assertions.assertThrows(ReceiverAlreadyAssociatedWithUser.class, () -> service.addReceiver(validCreateRequest, false));
+        Assertions.assertThrows(ReceiverAlreadySubscribedException.class, () -> service.addReceiver(validCreateRequest, false));
         Assertions.assertEquals(size, receiverRepository.findAll().size());
     }
 
@@ -176,7 +176,7 @@ class ReceiverServiceTest {
         service.addReceiver(validCreateRequest, false);
         final int size = receiverRepository.findAll().size();
 
-        Assertions.assertThrows(ReceiverAlreadyAssociatedWithUser.class, () -> service.addReceiver(validCreateRequest, true));
+        Assertions.assertThrows(ReceiverAlreadySubscribedException.class, () -> service.addReceiver(validCreateRequest, true));
         Assertions.assertEquals(size, receiverRepository.findAll().size());
     }
 

@@ -102,8 +102,8 @@ public class NLUser implements UserDetails {
     private NLSmtpAccount smtpAccount;
 
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "CANCELLATION_TOKEN")))
-    private NLToken cancellationToken;
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SUBSCRIPTION_TOKEN")))
+    private NLToken subscriptionToken;
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "DEFAULT_TEMPLATE_ID")))
@@ -142,7 +142,7 @@ public class NLUser implements UserDetails {
         appKey = NLAppKey.of("");
         secretKey = NLSecretKey.of("");
         smtpAccount = NLSmtpAccount.of("");
-        cancellationToken = NLToken.of(UUID.randomUUID().toString().concat("-").concat(UUID.randomUUID().toString()));
+        subscriptionToken = NLToken.of(UUID.randomUUID().toString().concat("-").concat(UUID.randomUUID().toString()));
     }
 
     @Override

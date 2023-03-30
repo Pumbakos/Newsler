@@ -11,7 +11,7 @@ import pl.newsler.commons.model.NLNickname;
 import pl.newsler.commons.model.NLUserType;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.commons.utillity.ObjectUtils;
-import pl.newsler.components.receiver.exception.ReceiverAlreadyAssociatedWithUser;
+import pl.newsler.components.receiver.exception.ReceiverAlreadySubscribedException;
 import pl.newsler.components.receiver.usecase.ReceiverCreateRequest;
 import pl.newsler.components.receiver.usecase.ReceiverGetResponse;
 import pl.newsler.components.user.IUserRepository;
@@ -44,7 +44,7 @@ class ReceiverService implements IReceiverService {
                 receiver.setAutoSaved(false);
                 receiverRepository.save(receiver);
             }
-            throw new ReceiverAlreadyAssociatedWithUser();
+            throw new ReceiverAlreadySubscribedException();
         }
 
         final NLNickname nickname = NLNickname.of(request.nickname());

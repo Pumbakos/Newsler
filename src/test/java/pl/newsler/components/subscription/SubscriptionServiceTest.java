@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.web.client.RestTemplate;
+import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
 import pl.newsler.commons.model.NLLastName;
@@ -17,8 +18,9 @@ import pl.newsler.components.emaillabs.StubELAMailRepository;
 import pl.newsler.components.receiver.IReceiverRepository;
 import pl.newsler.components.receiver.Receiver;
 import pl.newsler.components.receiver.StubReceiverRepository;
+import pl.newsler.components.receiver.exception.ReceiverAlreadySubscribedException;
 import pl.newsler.components.subscription.exception.CancellationReceiverException;
-import pl.newsler.components.subscription.exception.CancellationTokenException;
+import pl.newsler.components.subscription.exception.SubscriptionTokenException;
 import pl.newsler.components.user.IUserCrudService;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.StubUserModuleConfiguration;
@@ -86,10 +88,64 @@ class SubscriptionServiceTest {
     @AfterEach
     void afterEach() {
         userRepository.deleteAll();
+        receiverRepository.deleteAll();
     }
 
     @Test
-    void shouldCancelSubscriptionWhenCancellationTokenValid() {
+    void shouldSubscribeUserWhenValidSubscriptionTokenAndReceiverEmail() {
+        final NLUuid uuid = factory.standard().map().getUuid();
+        final NLUser user = userRepository.findById(uuid).get();
+        final String subscriptionToken = user.getSubscriptionToken().getValue();
+
+        Assertions.assertEquals(0, receiverRepository.findAll().size());
+        Assertions.assertDoesNotThrow(() -> service.subscribe(subscriptionToken, email()));
+        Assertions.assertEquals(1, receiverRepository.findAll().size());
+    }
+
+    @Test
+    void shouldNotSubscribeUserWhenValidSubscriptionTokenAndReceiverEmailButAlreadySubscribed() {
+        final NLUuid uuid = factory.standard().map().getUuid();
+
+        final Receiver receiver = receiverRepository.save(
+                new Receiver(NLUuid.of(UUID.randomUUID()), IReceiverRepository.version,
+                        uuid, NLEmail.of(email()), NLNickname.of(firstName()),
+                        NLFirstName.of(firstName()), NLLastName.of(lastName()), false
+                )
+        );
+        Assertions.assertEquals(1, receiverRepository.findAll().size());
+
+        final NLUser user = userRepository.findById(uuid).get();
+        final String subscriptionToken = user.getSubscriptionToken().getValue();
+
+        final String receiverMail = receiver.getEmail().getValue();
+        Assertions.assertThrows(ReceiverAlreadySubscribedException.class, () -> service.subscribe(subscriptionToken, receiverMail));
+        Assertions.assertEquals(1, receiverRepository.findAll().size());
+    }
+
+    @Test
+    void shouldNotSubscribeUserWhenInvalidSubscriptionToken() {
+        final String subscriptionToken = UUID.randomUUID().toString().concat("-").concat(UUID.randomUUID().toString());
+        final String email = email();
+        Assertions.assertThrows(SubscriptionTokenException.class, () -> service.subscribe(subscriptionToken, email));
+        Assertions.assertEquals(0, receiverRepository.findAll().size());
+    }
+
+    @Test
+    void shouldNotSubscribeUserWhenInvalidReceiverEmail() {
+        final String subscriptionToken = UUID.randomUUID().toString().concat("-").concat(UUID.randomUUID().toString());
+        Assertions.assertThrows(InvalidUserDataException.class, () -> service.subscribe(subscriptionToken, "email"));
+        Assertions.assertEquals(0, receiverRepository.findAll().size());
+    }
+
+    @Test
+    void shouldNotSubscribeUserWhenValidSubscriptionToken() {
+        final String email = email();
+        Assertions.assertThrows(SubscriptionTokenException.class, () -> service.subscribe("subscriptionToken", email));
+        Assertions.assertEquals(0, receiverRepository.findAll().size());
+    }
+
+    @Test
+    void shouldCancelSubscriptionWhenSubscriptionTokenValid() {
         final NLEmail email = NLEmail.of(email());
         final NLUuid uuid = factory.standard().map().getUuid();
         receiverRepository.save(
@@ -107,15 +163,15 @@ class SubscriptionServiceTest {
         Assertions.assertEquals(2, receiverRepository.findAll().size());
         final NLUser user = userRepository.findById(uuid).get();
 
-        Assertions.assertDoesNotThrow(() -> service.cancel(user.getCancellationToken().getValue(), email.getValue()));
+        Assertions.assertDoesNotThrow(() -> service.cancel(user.getSubscriptionToken().getValue(), email.getValue()));
         Assertions.assertEquals(1, receiverRepository.findAll().size());
     }
 
     @Test
-    void shouldNotCancelSubscriptionWhenCancellationTokenInvalid() {
+    void shouldNotCancelSubscriptionWhenSubscriptionTokenInvalid() {
         final NLUser user = factory.standard();
         final NLUuid uuid = user.map().getUuid();
-        final String cancellationToken = user.getCancellationToken().getValue();
+        final String cancellationToken = user.getSubscriptionToken().getValue();
         final String email = email();
 
         receiverRepository.save(
@@ -132,12 +188,12 @@ class SubscriptionServiceTest {
         );
 
         Assertions.assertEquals(2, receiverRepository.findAll().size());
-        Assertions.assertThrows(CancellationTokenException.class, () -> service.cancel(cancellationToken, email));
+        Assertions.assertThrows(SubscriptionTokenException.class, () -> service.cancel(cancellationToken, email));
         Assertions.assertEquals(2, receiverRepository.findAll().size());
     }
 
     @Test
-    void shouldNotCancelSubscriptionWhenCancellationTokenValidButUserEmailNotAssociatedWithUser() {
+    void shouldNotCancelSubscriptionWhenSubscriptionTokenValidButUserEmailNotAssociatedWithUser() {
         final NLEmail email = NLEmail.of(email());
         final NLUuid uuid = factory.standard().map().getUuid();
 
@@ -156,10 +212,10 @@ class SubscriptionServiceTest {
         Assertions.assertEquals(2, receiverRepository.findAll().size());
 
         final NLUser user = userRepository.findById(uuid).get();
-        final String cancellationToken = user.getCancellationToken().getValue();
+        final String subscriptionToken = user.getSubscriptionToken().getValue();
         final String notAssociatedEmail = email();
 
-        Assertions.assertThrows(CancellationReceiverException.class, () -> service.cancel(cancellationToken, notAssociatedEmail));
+        Assertions.assertThrows(CancellationReceiverException.class, () -> service.cancel(subscriptionToken, notAssociatedEmail));
         Assertions.assertEquals(2, receiverRepository.findAll().size());
     }
 }

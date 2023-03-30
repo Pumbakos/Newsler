@@ -15,11 +15,11 @@ interface UserRepositoryJpa extends JpaRepository<NLUser, NLUuid>, UserRepositor
     @Query(value = "SELECT u FROM NLUser u where u.email=:email")
     Optional<NLUser> findByEmail(@Param("email") NLEmail email);
 
-    @Query(value = "SELECT u FROM NLUser u where u.cancellationToken=:token")
-    Optional<NLUser> findByCancellationToken(@Param("token") NLToken token);
+    @Query(value = "SELECT u FROM NLUser u where u.subscriptionToken=:token")
+    Optional<NLUser> findBySubscriptionToken(@Param("token") NLToken token);
 
     @Transactional
     @Modifying
-    @Query("UPDATE NLUser u SET u.enabled = TRUE WHERE u.id = :uuid")
+    @Query("UPDATE NLUser u SET u.enabled = TRUE WHERE u.uuid = :uuid")
     void enableUser(@Param("uuid") NLUuid uuid);
 }

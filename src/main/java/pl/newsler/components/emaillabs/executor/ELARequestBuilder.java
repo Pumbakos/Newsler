@@ -56,7 +56,7 @@ public class ELARequestBuilder {
 
     private <T extends ELAMailDetails> void buildToAddresses(final NLUser user, final T details,
                                                              final Map<String, String> params, final String textMessage) {
-        final String cancellationToken = user.getCancellationToken().getValue();
+        final String cancellationToken = user.getSubscriptionToken().getValue();
         details.toAddresses.forEach(address -> {
                     params.put(String.format(ELATemplateParam.TO_WITH_VARS, address, "messageHtml"), details.message);
                     params.put(String.format(ELATemplateParam.TO_WITH_VARS, address, "messageText"), textMessage);

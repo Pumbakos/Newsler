@@ -20,16 +20,19 @@ import pl.newsler.auth.JWTClaim;
 import pl.newsler.auth.JWTUtility;
 import pl.newsler.auth.StubJWTConfiguration;
 import pl.newsler.auth.UserAuthModel;
+import pl.newsler.commons.TestConfigurationException;
 import pl.newsler.commons.exception.InvalidTokenException;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.user.NLUser;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.TestUserFactory;
-import pl.newsler.security.NLPublicAlias;
-import pl.newsler.security.StubNLIKeyProvider;
 import pl.newsler.security.StubNLPasswordEncoder;
+import pl.newsler.testcommons.environment.KeyStorePropsStrategy;
 
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -44,15 +47,14 @@ import static pl.newsler.testcommons.TestUserUtils.username;
 @SuppressWarnings({"java:S5778"})
 class JWTFilterTest {
     private final StubUserRepository userRepository = new StubUserRepository();
-    private final StubNLIKeyProvider keyProvider = new StubNLIKeyProvider();
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final StubAuthenticationManager authenticationManager = new StubAuthenticationManager();
-    private final StubJWTConfiguration configuration = new StubJWTConfiguration(userRepository, keyProvider, passwordEncoder);
+    private final StubJWTConfiguration configuration = new StubJWTConfiguration(userRepository, passwordEncoder, new KeyStorePropsStrategy());
     private final JWTUtility utility = configuration.jwtUtility();
     private final IJWTAuthService service = configuration.jwtAuthService(utility);
     private final TestUserFactory factory = new TestUserFactory();
     private final JWTVerifier verifier = JWT.require(utility.rsa384()).build();
-    private final JWTFilter filter = new JWTFilter(authenticationManager, configuration.databaseUserDetailService(), utility, "/v1/api/auth/", "/v1/api/subscription/cancel");
+    private final JWTFilter filter = new JWTFilter(authenticationManager, configuration.authUserDetailService(), utility, "/v1/api/auth/", "/v1/api/subscription/cancel");
 
     @BeforeEach
     void beforeEach() {
@@ -91,7 +93,7 @@ class JWTFilterTest {
         Assertions.assertEquals(String.valueOf(JWTClaim.JWT_ID), decodedJWT.getId());
         Assertions.assertEquals(JWTClaim.ISSUER, decodedJWT.getIssuer());
         Assertions.assertEquals(standardUser.getEmail().getValue(), decodedJWT.getClaim(JWTClaim.EMAIL).asString());
-        Assertions.assertEquals(standardUser.getFirstName().getValue(), decodedJWT.getClaim(JWTClaim.UUID).asString());
+        Assertions.assertEquals(standardUser.map().getUuid().getValue(), decodedJWT.getClaim(JWTClaim.UUID).asString());
         Assertions.assertEquals(standardUser.getRole().toString(), decodedJWT.getClaim(JWTClaim.AUTHORITIES).asString());
     }
 
@@ -203,12 +205,16 @@ class JWTFilterTest {
         }
     }
 
-    private Algorithm hmac384() {
-        return Algorithm.HMAC384(keyProvider.getKey(NLPublicAlias.PE_PASSWORD));
+    private Algorithm rsa384() {
+        try {
+            return Algorithm.RSA384(configuration.jwtValidationKey(), configuration.jwtSigningKey());
+        } catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException e) {
+            throw new TestConfigurationException(e);
+        }
     }
 
     private String generateToken(Instant now, String jwtId, String keyId, String issuer, String email, String name, String role) {
-        return utility.builder()
+        return utility.builder(email)
                 .withJWTId(jwtId)
                 .withKeyId(keyId)
                 .withIssuer(issuer)
@@ -224,13 +230,13 @@ class JWTFilterTest {
         final Instant now = Instant.now();
         return JWT.create()
                 .withJWTId(String.valueOf(JWTClaim.JWT_ID))
-                .withKeyId(hmac384().getSigningKeyId())
+                .withKeyId(rsa384().getSigningKeyId())
                 .withIssuer(issuer)
                 .withIssuedAt(now)
                 .withExpiresAt(now.plus(60L, ChronoUnit.MINUTES))
                 .withClaim(JWTClaim.EMAIL, email)
                 .withClaim(JWTClaim.UUID, name)
                 .withClaim(JWTClaim.AUTHORITIES, role)
-                .sign(hmac384());
+                .sign(rsa384());
     }
 }

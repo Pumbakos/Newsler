@@ -2,18 +2,14 @@ package pl.newsler.auth;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.IssuerUriCondition;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.KeyValueCondition;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
@@ -58,11 +54,11 @@ class OAuth2ResourceServerJwtConfiguration {
         @Bean
         @ConditionalOnProperty(name = "spring.security.oauth2.resourceserver.jwt.jwk-set-uri")
         JwtDecoder jwtDecoderByJwkKeySetUri() {
-            NimbusJwtDecoder nimbusJwtDecoder = NimbusJwtDecoder.withJwkSetUri(this.properties.getJwkSetUri())
+            final NimbusJwtDecoder nimbusJwtDecoder = NimbusJwtDecoder.withJwkSetUri(this.properties.getJwkSetUri())
                     .jwsAlgorithms(this::jwsAlgorithms)
                     .build();
-            String issuerUri = this.properties.getIssuerUri();
-            Supplier<OAuth2TokenValidator<Jwt>> defaultValidator = (issuerUri != null)
+            final String issuerUri = this.properties.getIssuerUri();
+            final Supplier<OAuth2TokenValidator<Jwt>> defaultValidator = (issuerUri != null)
                     ? () -> JwtValidators.createDefaultWithIssuer(issuerUri) : JwtValidators::createDefault;
             nimbusJwtDecoder.setJwtValidator(getValidators(defaultValidator));
             return nimbusJwtDecoder;
@@ -75,12 +71,12 @@ class OAuth2ResourceServerJwtConfiguration {
         }
 
         private OAuth2TokenValidator<Jwt> getValidators(Supplier<OAuth2TokenValidator<Jwt>> defaultValidator) {
-            OAuth2TokenValidator<Jwt> defaultValidators = defaultValidator.get();
-            List<String> audiences = this.properties.getAudiences();
+            final OAuth2TokenValidator<Jwt> defaultValidators = defaultValidator.get();
+            final List<String> audiences = this.properties.getAudiences();
             if (CollectionUtils.isEmpty(audiences)) {
                 return defaultValidators;
             }
-            List<OAuth2TokenValidator<Jwt>> validators = new ArrayList<>();
+            final List<OAuth2TokenValidator<Jwt>> validators = new ArrayList<>();
             validators.add(defaultValidators);
             validators.add(new JwtClaimValidator<List<String>>(JwtClaimNames.AUD,
                     (aud) -> aud != null && !Collections.disjoint(aud, audiences)));
@@ -90,9 +86,9 @@ class OAuth2ResourceServerJwtConfiguration {
         @Bean
         @Conditional(KeyValueCondition.class)
         JwtDecoder jwtDecoderByPublicKeyValue() throws Exception {
-            RSAPublicKey publicKey = (RSAPublicKey) KeyFactory.getInstance("RSA")
+            final RSAPublicKey publicKey = (RSAPublicKey) KeyFactory.getInstance("RSA")
                     .generatePublic(new X509EncodedKeySpec(getKeySpec(this.properties.readPublicKey())));
-            NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(publicKey)
+            final NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(publicKey)
                     .signatureAlgorithm(SignatureAlgorithm.from(exactlyOneAlgorithm()))
                     .build();
             jwtDecoder.setJwtValidator(getValidators(JwtValidators::createDefault));
@@ -105,7 +101,7 @@ class OAuth2ResourceServerJwtConfiguration {
         }
 
         private String exactlyOneAlgorithm() {
-            List<String> algorithms = this.properties.getJwsAlgorithms();
+            final List<String> algorithms = this.properties.getJwsAlgorithms();
             int count = (algorithms != null) ? algorithms.size() : 0;
             if (count != 1) {
                 throw new IllegalStateException(
@@ -124,18 +120,6 @@ class OAuth2ResourceServerJwtConfiguration {
                 jwtDecoder.setJwtValidator(getValidators(() -> JwtValidators.createDefaultWithIssuer(issuerUri)));
                 return jwtDecoder;
             });
-        }
-    }
-
-    @Configuration(proxyBeanMethods = false)
-    @ConditionalOnDefaultWebSecurity
-    static class OAuth2SecurityFilterChainConfiguration {
-        @Bean
-        @ConditionalOnBean(JwtDecoder.class)
-        SecurityFilterChain jwtSecurityFilterChain(HttpSecurity http) throws Exception {
-            http.authorizeHttpRequests((requests) -> requests.anyRequest().authenticated());
-            http.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
-            return http.build();
         }
     }
 }

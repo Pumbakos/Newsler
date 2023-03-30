@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.IReceiverController;
-import pl.newsler.components.receiver.usecase.ReceiverGetResponse;
 import pl.newsler.components.receiver.usecase.ReceiverCreateRequest;
+import pl.newsler.components.receiver.usecase.ReceiverGetResponse;
 
 import java.util.List;
 

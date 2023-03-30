@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 public class JWTClaim {
     public static final String ISSUER = "Newsler";
     public static final String AUTHORITIES = "authorities";
-    public static final String EMAIL = "email";
+    public static final String EMAIL = "username";
     public static final String UUID = "uuid";
     public static final char[] JWT_ID = new char[]{
             67, 100, 103, 97, 98, 110, 37, 35, 73, 43, 47, 57, 61, 107, 51, 69, 69,

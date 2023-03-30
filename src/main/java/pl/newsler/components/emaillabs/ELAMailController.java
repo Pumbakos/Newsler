@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pl.newsler.api.IELAMailController;
+import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.exception.InvalidDateException;
 import pl.newsler.components.emaillabs.usecase.ELAGetMailResponse;
 import pl.newsler.components.emaillabs.usecase.ELAInstantMailRequest;
-import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.components.emaillabs.usecase.ELAScheduleMailRequest;
 
 import java.util.List;

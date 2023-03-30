@@ -23,7 +23,7 @@ public class ELASendWithTemplate {
     @JsonIgnore
     private String key;
 
-    public void appendReceiverEmail(NLEmail email){
+    public void appendReceiverEmail(NLEmail email) {
         key = email.getValue();
         to.put(key, new HashMap<>());
     }

@@ -12,7 +12,7 @@ class KeystoreLoader implements FixedResourceLoader {
     @Override
     public InputStream getResource() throws FileNotFoundException {
         try {
-            return new FileInputStream(ResourceUtils.getFile("classpath:keystore/keystore.p12"));
+            return new FileInputStream(ResourceUtils.getFile("D:\\Desktop\\Newsler\\keystore.p12"));
         } catch (FileNotFoundException e) {
             throw new FileNotFoundException();
         }
@@ -20,7 +20,7 @@ class KeystoreLoader implements FixedResourceLoader {
 
     public File getResourceAsFile() throws FileNotFoundException {
         try {
-            return ResourceUtils.getFile("classpath:keystore/keystore.p12");
+            return ResourceUtils.getFile("D:\\Desktop\\Newsler\\keystore.p12");
         } catch (FileNotFoundException e) {
             throw new FileNotFoundException();
         }

@@ -3,7 +3,6 @@ package pl.newsler;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import pl.newsler.devenv.NewslerH2Properties;
 import pl.newsler.internal.NewslerDesignerServiceProperties;
 import pl.newsler.internal.NewslerKeyStoreProperties;
 import pl.newsler.internal.NewslerServiceProperties;
@@ -13,7 +12,7 @@ import java.util.Properties;
 
 @EnableConfigurationProperties(value = {
         NewslerServiceProperties.class, NewslerDesignerServiceProperties.class,
-        NewslerKeyStoreProperties.class, NewslerH2Properties.class
+        NewslerKeyStoreProperties.class
 })
 @SpringBootApplication
 public class NewslerApplication {

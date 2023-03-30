@@ -2,9 +2,9 @@ package pl.newsler.security;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
-import pl.newsler.security.exception.AlgorithmInitializationException;
 import pl.newsler.commons.exception.DecryptionException;
 import pl.newsler.commons.exception.EncryptionException;
+import pl.newsler.security.exception.AlgorithmInitializationException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -61,17 +61,32 @@ final class NLKeyStore {
         }
     }
 
-//    public static void main(String[] args) throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException {
-//        NLKeyStore store = new NLKeyStore(
-//                "PKCS12",
-//                "D:\\Desktop\\Newsler\\Newsler\\src\\main\\resources\\keystore\\keystore.p12",
-//                "7>Oz\"}bdQM<,~J|[{wT>Ww/5<",
-//                "PyWDS6nbS3X0ztuG1YZ9DhTIBp0HnmugsmfcpPT6XRNoAdRPFLFc258NkLNIe3hFWOZUUHIVWFoEuX4AFcNElOvYQBiSFXpirsK3uDyrN4ziGlKxSTiqYL6jQC6huEao",
-//                "yPjTXiROwkvhuhxyddSIiYVlBsWTi4mnj6zUPcCgCK4RkJMBc88ZcQGOj5byoTGhygTFtiA25NB8INVCts1V3gOd0mLrA2qRMNK1LytlYPj3croHPTgHytrfV0X8auUj"
-//        );
+    public static void main(String[] args) throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException {
+        NLKeyStore store = new NLKeyStore(
+                "PKCS12",
+                "D:\\Desktop\\Newsler\\keystore.p12",
+                "7>Oz\"}bdQM<,~J|[{wT>Ww/5<",
+                "PyWDS6nbS3X0ztuG1YZ9DhTIBp0HnmugsmfcpPT6XRNoAdRPFLFc258NkLNIe3hFWOZUUHIVWFoEuX4AFcNElOvYQBiSFXpirsK3uDyrN4ziGlKxSTiqYL6jQC6huEao",
+                "yPjTXiROwkvhuhxyddSIiYVlBsWTi4mnj6zUPcCgCK4RkJMBc88ZcQGOj5byoTGhygTFtiA25NB8INVCts1V3gOd0mLrA2qRMNK1LytlYPj3croHPTgHytrfV0X8auUj"
+        );
 //
-//        byte[] appKey = store.getKey("newsler_app_key");
-//    }
+//        store.setKey("newsler.service.schema", "http");
+//        store.setKey("newsler.service.port", "8080");
+//        store.setKey("newsler.service.domain-name", "localhost");
+//        store.setKey("newsler.designer.schema", "http");
+//        store.setKey("newsler.designer.port", "4200");
+//        store.setKey("newsler.designer.domain-name", "localhost");
+//        store.setKey("newsler.security.keystore.key-store-type", "PKCS12");
+//        store.setKey("newsler.security.keystore.key-store-path", "newslertest.p12");
+//        store.setKey("newsler.security.keystore.key-store-password", "4u85oGTKF5nX3cw#2j!My*gP");
+//        store.setKey("newsler.security.keystore.key-alias", "newslertest");
+        store.setKey("newsler.security.keystore.protection-password-phrase", "PyWDS6nbS3X0ztuG1YZ9DhTIBp0HnmugsmfcpPT6XRNoAdRPFLFc258NkLNIe3hFWOZUUHIVWFoEuX4AFcNElOvYQBiSFXpirsK3uDyrN4ziGlKxSTiqYL6jQC6huEao");
+        store.setKey("newsler.security.keystore.encode-key-salt", "yPjTXiROwkvhuhxyddSIiYVlBsWTi4mnj6zUPcCgCK4RkJMBc88ZcQGOj5byoTGhygTFtiA25NB8INVCts1V3gOd0mLrA2qRMNK1LytlYPj3croHPTgHytrfV0X8auUj");
+//        store.setKey("newsler.security.keystore.app-key-alias", "newsler_test_app_key_alias");
+//        store.setKey("newsler.security.keystore.secret-key-alias", "newsler_test_secret_key_alias");
+//        store.setKey("newsler.security.keystore.smtp-alias", "newsler_test_smtp_alias");
+//        store.setKey("newsler.security.keystore.email-alias", "newsler_test_email_alias");
+    }
 
     void setKey(String alias, String key) {
         try {

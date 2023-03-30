@@ -19,6 +19,7 @@ public class NLAuthenticationProvider implements AuthenticationProvider {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         if (authentication instanceof NLAuthenticationToken token && token.isValidated()) {
+            authentication.setAuthenticated(true);
             return token;
         }
 
@@ -26,7 +27,10 @@ public class NLAuthenticationProvider implements AuthenticationProvider {
         final Optional<NLUser> optionalUser = userRepository.findByEmail(principal.getEmail());
 
         if (optionalUser.isPresent()) {
-            return new NLAuthenticationToken(authentication);
+            final NLAuthenticationToken token = new NLAuthenticationToken(authentication);
+            token.setAuthenticated(true);
+            token.setValidated(true);
+            return token;
         }
         throw new BadCredentialsException("Incorrect credentials. Not authenticated.");
     }

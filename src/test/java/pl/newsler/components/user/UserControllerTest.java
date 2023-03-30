@@ -263,7 +263,7 @@ class UserControllerTest {
             Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         } catch (Exception e) {
             if (e instanceof ELAValidationRequestException ev) {
-              Assertions.assertNotNull(ev.response());
+                Assertions.assertNotNull(ev.response());
             } else if (e instanceof NLException nle) {
                 ProblemDetail detail = handler.handleException(nle);
                 Assertions.assertNotNull(detail);

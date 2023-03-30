@@ -1,13 +1,11 @@
 package pl.newsler.devenv;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.h2.tools.Server;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import pl.newsler.commons.model.NLAppKey;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
@@ -27,6 +25,7 @@ import pl.newsler.components.signup.IUserSignupService;
 import pl.newsler.components.signup.usecase.UserCreateRequest;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
+import pl.newsler.internal.PropertiesUtil;
 import pl.newsler.security.NLIKeyProvider;
 import pl.newsler.security.NLIPasswordEncoder;
 
@@ -48,21 +47,28 @@ import static pl.newsler.devenv.H2Util.username;
 
 @Slf4j
 @Configuration(proxyBeanMethods = false)
-@RequiredArgsConstructor
 class H2Configuration {
     private static final Random random = new SecureRandom();
     private final IELAMailRepository mailRepository;
     private final IReceiverRepository receiverRepository;
     private final NLIPasswordEncoder passwordEncoder;
     private final NLIKeyProvider keyProvider;
-    @Value("${newsler.security.keystore.app-key-alias}")
-    private String appKeyAlias;
-    @Value("${newsler.security.keystore.secret-key-alias}")
-    private String secretKeyAlias;
-    @Value("${newsler.security.keystore.smtp-alias}")
-    private String smtpAlias;
-    @Value("${newsler.security.keystore.email-alias}")
-    private String emailAlias;
+    private final String appKeyAlias;
+    private final String secretKeyAlias;
+    private final String smtpAlias;
+    private final String emailAlias;
+
+    H2Configuration(final IELAMailRepository mailRepository, final IReceiverRepository receiverRepository,
+                    final NLIPasswordEncoder passwordEncoder, final NLIKeyProvider keyProvider, final Environment env) {
+        this.mailRepository = mailRepository;
+        this.receiverRepository = receiverRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.keyProvider = keyProvider;
+        appKeyAlias = env.getProperty("newsler.security.keystore.app-key-alias");
+        secretKeyAlias = env.getProperty("newsler.security.keystore.secret-key-alias");
+        smtpAlias = env.getProperty("newsler.security.keystore.smtp-alias");
+        emailAlias = env.getProperty("newsler.security.keystore.email-alias");
+    }
 
     @Bean(initMethod = "start", destroyMethod = "stop")
     public Server h2Server() throws SQLException {
@@ -72,14 +78,15 @@ class H2Configuration {
     @Bean
     @SuppressWarnings("java:S112")
         //no need to define custom exception
-    CommandLineRunner saveUsers(IUserSignupService signupService, IUserRepository userRepository, IConfirmationTokenRepository tokenRepository) {
+    CommandLineRunner saveUsers(final IUserSignupService signupService, final IUserRepository userRepository,
+                                final IConfirmationTokenRepository tokenRepository) {
         final AtomicReference<String> appKeyRef = new AtomicReference<>();
         final AtomicReference<String> secretKeyRef = new AtomicReference<>();
         final AtomicReference<String> smtpRef = new AtomicReference<>();
         final AtomicReference<String> emailRef = new AtomicReference<>();
 
         return args -> {
-            if (keyProvider != null) {
+            if (PropertiesUtil.arePropsSet(appKeyAlias, secretKeyAlias, smtpAlias, emailAlias)) {
                 appKeyRef.set(new String(keyProvider.getKey(appKeyAlias)));
                 secretKeyRef.set(new String(keyProvider.getKey(secretKeyAlias)));
                 smtpRef.set(new String(keyProvider.getKey(smtpAlias)));
@@ -91,7 +98,7 @@ class H2Configuration {
                     smtpRef.set(System.getenv("NEWSLER_SMTP"));
                     emailRef.set(System.getenv("NEWSLER_EMAIL"));
 
-                    if (envVariablesNotNull(appKeyRef, secretKeyRef, smtpRef, emailRef)) {
+                    if (!PropertiesUtil.arePropsSet(appKeyRef.get(), secretKeyRef.get(), smtpRef.get(), emailRef.get())) {
                         throw new Exception();
                     }
                 } catch (Exception e) {
@@ -160,19 +167,5 @@ class H2Configuration {
         for (int i = 0; i < random.nextInt(9) + 5; i++) {
             mailRepository.save(ELAUserMail.of(user.map().getUuid(), ELAInstantMailDetails.of(H2Util.createMailSendRequest(user.getEmail().getValue()))));
         }
-    }
-
-    private boolean envVariablesNotNull(
-            AtomicReference<String> appKey,
-            AtomicReference<String> secretKey,
-            AtomicReference<String> smtp,
-            AtomicReference<String> email
-    ) {
-        return (
-                StringUtils.isBlank(appKey.get())
-                        || StringUtils.isBlank(secretKey.get())
-                        || StringUtils.isBlank(smtp.get())
-                        || StringUtils.isBlank(email.get())
-        );
     }
 }

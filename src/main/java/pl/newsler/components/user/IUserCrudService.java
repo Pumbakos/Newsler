@@ -2,12 +2,12 @@ package pl.newsler.components.user;
 
 import jakarta.validation.constraints.NotNull;
 import pl.newsler.commons.exception.InvalidUserDataException;
-import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
-import pl.newsler.commons.model.NLUuid;
 import pl.newsler.commons.model.NLLastName;
 import pl.newsler.commons.model.NLPassword;
+import pl.newsler.commons.model.NLUuid;
+import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.components.user.usecase.UserDeleteRequest;
 import pl.newsler.components.user.usecase.UserGetRequest;
 import pl.newsler.components.user.usecase.UserGetResponse;

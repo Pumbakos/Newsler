@@ -1,33 +1,33 @@
 package pl.newsler.components.signup;
 
 import lombok.RequiredArgsConstructor;
-        import org.jetbrains.annotations.NotNull;
-        import org.springframework.beans.factory.annotation.Value;
-        import pl.newsler.commons.exception.EmailAlreadyConfirmedException;
-        import pl.newsler.commons.exception.InvalidTokenException;
-        import pl.newsler.commons.exception.InvalidUserDataException;
-        import pl.newsler.commons.exception.TokenExpiredException;
-        import pl.newsler.components.signup.exception.UserAlreadyExistsException;
-        import pl.newsler.commons.model.NLEmail;
-        import pl.newsler.commons.model.NLFirstName;
-        import pl.newsler.commons.model.NLId;
-        import pl.newsler.commons.model.NLLastName;
-        import pl.newsler.commons.model.NLName;
-        import pl.newsler.commons.model.NLPassword;
-        import pl.newsler.commons.model.NLStringValue;
-        import pl.newsler.commons.model.NLToken;
-        import pl.newsler.commons.model.NLUuid;
-        import pl.newsler.components.signup.usecase.UserCreateRequest;
-        import pl.newsler.components.signup.usecase.UserResendTokenRequest;
-        import pl.newsler.components.user.IUserCrudService;
-        import pl.newsler.components.user.IUserRepository;
-        import pl.newsler.internal.NewslerServiceProperties;
-        import pl.newsler.security.NLIPasswordEncoder;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
+import pl.newsler.commons.exception.EmailAlreadyConfirmedException;
+import pl.newsler.commons.exception.InvalidTokenException;
+import pl.newsler.commons.exception.InvalidUserDataException;
+import pl.newsler.commons.exception.TokenExpiredException;
+import pl.newsler.commons.model.NLEmail;
+import pl.newsler.commons.model.NLFirstName;
+import pl.newsler.commons.model.NLId;
+import pl.newsler.commons.model.NLLastName;
+import pl.newsler.commons.model.NLName;
+import pl.newsler.commons.model.NLPassword;
+import pl.newsler.commons.model.NLStringValue;
+import pl.newsler.commons.model.NLToken;
+import pl.newsler.commons.model.NLUuid;
+import pl.newsler.components.signup.exception.UserAlreadyExistsException;
+import pl.newsler.components.signup.usecase.UserCreateRequest;
+import pl.newsler.components.signup.usecase.UserResendTokenRequest;
+import pl.newsler.components.user.IUserCrudService;
+import pl.newsler.components.user.IUserRepository;
+import pl.newsler.internal.NewslerServiceProperties;
+import pl.newsler.security.NLIPasswordEncoder;
 
-        import java.time.LocalDateTime;
-        import java.util.Locale;
-        import java.util.Random;
-        import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.Locale;
+import java.util.Random;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 class UserSignupService implements IUserSignupService {

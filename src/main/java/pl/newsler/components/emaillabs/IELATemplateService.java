@@ -7,8 +7,8 @@ import pl.newsler.components.user.NLUser;
 public interface IELATemplateService {
     String DEFAULT_HTML_TEMPLATE = """
             {{message}}
-            
-            
+                        
+                        
             {{cancellationSection}}
             """;
     String DEFAULT_TEXT_TEMPLATE = """
@@ -18,6 +18,7 @@ public interface IELATemplateService {
                         
             Unsubscribe from newsletter: {{cancellationLink}}
             """;
+
     String add(NLUser user, String html, String text) throws ELAValidationRequestException;
 
     void remove(NLUser user, String templateId) throws ELATemplateDeletionException;

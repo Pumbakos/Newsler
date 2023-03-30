@@ -2,10 +2,14 @@ package pl.newsler.security;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.env.Environment;
 import pl.newsler.commons.exception.EncryptionException;
+import pl.newsler.testcommons.environment.KeyStorePropsStrategy;
+import pl.newsler.testcommons.environment.StubEnvironment;
 
 class NLIPasswordEncoderTest {
-    private final NLPasswordEncoderConfiguration configuration = new NLPasswordEncoderConfiguration();
+    private final Environment env = new StubEnvironment(new KeyStorePropsStrategy());
+    private final NLPasswordEncoderConfiguration configuration = new NLPasswordEncoderConfiguration(new StubNLIKeyProvider(env), env);
     private final NLPasswordEncoder passwordEncoder = configuration.passwordEncoder(configuration.bCryptPasswordEncoder());
 
     @Test

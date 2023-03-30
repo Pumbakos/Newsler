@@ -25,10 +25,14 @@ import pl.newsler.internal.NewslerDesignerServiceProperties;
 import pl.newsler.security.StubNLPasswordEncoder;
 import pl.newsler.testcommons.TestUserUtils;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -118,7 +122,7 @@ class ELARequestBuilderTest {
 
     @Test
     @Disabled("Due to lack of idea")
-    void shouldAppendUnsubscribeFooterAtTheEnd() {
+    void shouldAppendUnsubscribeFooterAtTheEnd() throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException {
         final List<NLUser> users = userRepository.findAll();
         if (users.isEmpty()) {
             Assertions.fail("Users empty");

@@ -15,6 +15,7 @@ class UserModuleConfiguration {
     private final IUserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
     private final IELATemplateService templateService;
+
     @Bean(name = "userService")
     IUserCrudService userService() {
         return new UserCrudService(userRepository, passwordEncoder, templateService);

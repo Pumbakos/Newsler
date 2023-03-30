@@ -38,7 +38,7 @@ public class NLExecutionDate implements NLModel {
 
     @Override
     public boolean validate() {
-        if(value == null) {
+        if (value == null) {
             return false;
         }
         try {

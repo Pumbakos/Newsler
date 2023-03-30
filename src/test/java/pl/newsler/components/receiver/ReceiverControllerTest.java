@@ -48,7 +48,7 @@ class ReceiverControllerTest {
     private final ReceiverModuleConfiguration configuration = new ReceiverModuleConfiguration(receiverRepository, userRepository);
     private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final StubELAMailRepository mailRepository = new StubELAMailRepository();
-    private final  RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+    private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
     private final StubELAMailModuleConfiguration mailModuleConfiguration = new StubELAMailModuleConfiguration(
             userRepository,
             mailRepository,

@@ -13,6 +13,7 @@ import pl.newsler.commons.exception.InvalidUserDataException;
 class JWTAuthController implements IJWTAuthController {
     private final IJWTAuthService jwtService;
     private final Gson gson = new Gson();
+
     @Override
     public ResponseEntity<String> generateJWT(UserAuthModel userAuthModel) {
         try {

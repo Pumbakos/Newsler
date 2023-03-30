@@ -1,6 +1,7 @@
 package pl.newsler.security;
 
 import org.jetbrains.annotations.NotNull;
+import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import pl.newsler.commons.exception.DecryptionException;
 import pl.newsler.commons.exception.EncryptionException;
@@ -11,7 +12,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
@@ -22,9 +26,10 @@ class NLPasswordEncoder implements NLIPasswordEncoder {
     private final SecretKey secretKey;
     private final byte[] salt;
 
-    NLPasswordEncoder(final BCryptPasswordEncoder bCryptPasswordEncoder, final NLIKeyProvider keyProvider) {
+    NLPasswordEncoder(final BCryptPasswordEncoder bCryptPasswordEncoder, final NLIKeyProvider keyProvider, final Environment env) throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.salt = keyProvider.getKey("pe_salt");
+        final String property = env.getProperty("newsler.security.keystore.encode-key-salt");
+        this.salt = property != null ? property.getBytes() : keyProvider.getKey("newsler.security.keystore.encode-key-salt");
         this.secretKey = generateKey();
     }
 

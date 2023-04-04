@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,6 +16,8 @@ import java.time.format.DateTimeFormatter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode
 public class NLExecutionDate implements NLModel {
+    @Serial
+    private static final long serialVersionUID = -4044218697850127239L;
     public static final String PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     private final String value;
@@ -35,7 +38,7 @@ public class NLExecutionDate implements NLModel {
 
     @Override
     public boolean validate() {
-        if(value == null) {
+        if (value == null) {
             return false;
         }
         try {

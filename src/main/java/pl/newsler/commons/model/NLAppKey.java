@@ -20,7 +20,7 @@ public class NLAppKey implements NLModel {
     private final String value;
 
     public boolean validate() {
-            return StringUtils.isNotBlank(value) && value.matches("^[a-zA-Z\\d]{40}$");
+        return StringUtils.isNotBlank(value) && value.matches("^[a-zA-Z\\d]{40}$");
     }
 
     @Override

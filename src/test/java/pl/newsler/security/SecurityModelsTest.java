@@ -18,14 +18,14 @@ class SecurityModelsTest {
     @Test
     void shouldCreateAndCompareNLPrincipal() {
         NLUser dotted = factory.dotted();
-        dotted.setId(NLUuid.of(UUID.randomUUID()));
+        dotted.setUuid(NLUuid.of(UUID.randomUUID()));
         NLUser dashed = factory.dashed();
-        dashed.setId(NLUuid.of(UUID.randomUUID()));
-        NLPrincipal dashedPrincipal = new NLPrincipal(dotted.map().getId(), dotted.getEmail(), dotted.getFirstName());
-        NLPrincipal dottedPrincipal = new NLPrincipal(dashed.map().getId(), dashed.getEmail(), dashed.getFirstName());
+        dashed.setUuid(NLUuid.of(UUID.randomUUID()));
+        NLPrincipal dashedPrincipal = new NLPrincipal(dotted.map().getUuid(), dotted.getEmail(), dotted.getFirstName());
+        NLPrincipal dottedPrincipal = new NLPrincipal(dashed.map().getUuid(), dashed.getEmail(), dashed.getFirstName());
 
         Assertions.assertNotNull(dottedPrincipal);
-        Assertions.assertEquals(dottedPrincipal, new NLPrincipal(dashed.map().getId(), dashed.getEmail(), dashed.getFirstName()));
+        Assertions.assertEquals(dottedPrincipal, new NLPrincipal(dashed.map().getUuid(), dashed.getEmail(), dashed.getFirstName()));
         Assertions.assertEquals(dottedPrincipal.toString(), dottedPrincipal.toString());
         Assertions.assertEquals(dottedPrincipal.hashCode(), dottedPrincipal.hashCode());
         Assertions.assertNotEquals(dottedPrincipal.getId(), dashedPrincipal.getId());
@@ -43,9 +43,9 @@ class SecurityModelsTest {
     @Test
     void shouldCreateAndCompareNLCredentials() {
         NLUser dotted = factory.dotted();
-        dotted.setId(NLUuid.of(UUID.randomUUID()));
+        dotted.setUuid(NLUuid.of(UUID.randomUUID()));
         NLUser dashed = factory.dashed();
-        dashed.setId(NLUuid.of(UUID.randomUUID()));
+        dashed.setUuid(NLUuid.of(UUID.randomUUID()));
         NLCredentials dashedCredentials = new NLCredentials(dashed.getNLPassword());
         NLCredentials dottedCredentials = new NLCredentials(dotted.getNLPassword());
 

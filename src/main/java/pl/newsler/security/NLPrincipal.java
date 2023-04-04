@@ -4,8 +4,8 @@ import lombok.Getter;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import pl.newsler.commons.model.NLEmail;
-import pl.newsler.commons.model.NLUuid;
 import pl.newsler.commons.model.NLName;
+import pl.newsler.commons.model.NLUuid;
 
 import javax.security.auth.Subject;
 import java.io.Serializable;

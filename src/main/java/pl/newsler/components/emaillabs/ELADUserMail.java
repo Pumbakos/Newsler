@@ -25,7 +25,7 @@ public class ELADUserMail {
 
     public static ELADUserMail of(ELAUserMail mail) {
         return ELADUserMail.builder()
-                .id(mail.getId())
+                .id(mail.getUuid())
                 .toAddresses(mail.getToAddresses())
                 .subject(mail.getSubject())
                 .message(mail.getMessage())

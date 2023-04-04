@@ -1,7 +1,12 @@
 package pl.newsler.security;
 
-public interface NLIKeyProvider {
-    byte[] getKey(NLPublicAlias alias);
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
-    char[] getCharKey(NLPublicAlias alias);
+public interface NLIKeyProvider {
+    byte[] getKey(String alias) throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException;
+
+    char[] getCharKey(String alias) throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException;
 }

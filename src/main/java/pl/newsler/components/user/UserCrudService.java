@@ -3,7 +3,6 @@ package pl.newsler.components.user;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import pl.newsler.commons.exception.InvalidUserDataException;
-import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.commons.model.NLAppKey;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
@@ -12,9 +11,12 @@ import pl.newsler.commons.model.NLModel;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
+import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLUserType;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.commons.utillity.ObjectUtils;
+import pl.newsler.components.emaillabs.IELATemplateService;
+import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.components.user.usecase.UserDeleteRequest;
 import pl.newsler.components.user.usecase.UserGetRequest;
 import pl.newsler.components.user.usecase.UserGetResponse;
@@ -28,6 +30,7 @@ import java.util.UUID;
 class UserCrudService implements IUserCrudService {
     private final IUserRepository userRepository;
     private final NLIPasswordEncoder passwordEncoder;
+    private final IELATemplateService templateService;
 
     @Override
     public @NotNull UserGetResponse get(final UserGetRequest request) {
@@ -79,8 +82,8 @@ class UserCrudService implements IUserCrudService {
         user.setEmail(email);
         user.setPassword(NLPassword.of(passwordEncoder.bCrypt().encode(password.getValue())));
         user.setRole(NLUserType.USER);
-        user.setId(NLUuid.of(UUID.randomUUID()));
-        return userRepository.save(user).getId();
+        user.setUuid(NLUuid.of(UUID.randomUUID()));
+        return userRepository.save(user).getUuid();
     }
 
     @Override
@@ -107,11 +110,14 @@ class UserCrudService implements IUserCrudService {
             throw new InvalidUserDataException();
         }
 
-        final NLUser nlUser = optionalNLUser.get();
-        nlUser.setAppKey(NLAppKey.of(hash(appKey.getValue())));
-        nlUser.setSecretKey(NLSecretKey.of(hash(secretKey.getValue())));
-        nlUser.setSmtpAccount(NLSmtpAccount.of(hash(smtpAccount.getValue())));
-        userRepository.save(nlUser);
+        final NLUser user = optionalNLUser.get();
+        user.setAppKey(NLAppKey.of(hash(appKey.getValue())));
+        user.setSecretKey(NLSecretKey.of(hash(secretKey.getValue())));
+        user.setSmtpAccount(NLSmtpAccount.of(hash(smtpAccount.getValue())));
+
+        final String templateId = templateService.add(user, IELATemplateService.DEFAULT_HTML_TEMPLATE, IELATemplateService.DEFAULT_TEXT_TEMPLATE);
+        user.setDefaultTemplateId(NLStringValue.of(templateId));
+        userRepository.save(user);
     }
 
     @Override
@@ -135,7 +141,7 @@ class UserCrudService implements IUserCrudService {
             throw new InvalidUserDataException();
         }
 
-        userRepository.deleteById(user.getId());
+        userRepository.deleteById(user.getUuid());
     }
 
     private boolean isDataOk(final NLModel first, final NLModel second, final NLModel third) {

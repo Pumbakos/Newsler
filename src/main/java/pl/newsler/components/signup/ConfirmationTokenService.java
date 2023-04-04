@@ -29,6 +29,6 @@ class ConfirmationTokenService {
     }
 
     public boolean setTokenExpired(NLUuid userId) {
-        return confirmationTokenRepository.updateTokenExpired(userId);
+        return confirmationTokenRepository.updateTokenExpired(userId) > 0;
     }
 }

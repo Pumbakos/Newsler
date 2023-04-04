@@ -17,7 +17,7 @@ public class StubConfirmationTokenRepository extends InMemoryJpaRepository<NLCon
     }
 
     @Override
-    public <S extends NLConfirmationToken> @NotNull S save(S entity) {
+    public <S extends NLConfirmationToken> @NotNull S save(@NotNull S entity) {
         return super.save(entity);
     }
 
@@ -37,13 +37,13 @@ public class StubConfirmationTokenRepository extends InMemoryJpaRepository<NLCon
     }
 
     @Override
-    public boolean updateTokenExpired(final NLUuid userId) {
+    public int updateTokenExpired(final NLUuid userId) {
         final AtomicBoolean updated = new AtomicBoolean(false);
-        super.database.values().stream().filter(c -> c.getUserId().equals(userId)).findFirst().ifPresent(c -> {
+        super.database.values().stream().filter(c -> c.getUserUuid().equals(userId)).findFirst().ifPresent(c -> {
             c.setExpirationDate(LocalDateTime.now());
             updated.set(true);
         });
 
-        return updated.get();
+        return updated.get() ? 1 : 0;
     }
 }

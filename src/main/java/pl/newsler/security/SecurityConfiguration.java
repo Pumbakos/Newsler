@@ -10,7 +10,9 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -29,6 +31,10 @@ import java.util.List;
 class SecurityConfiguration {
     private final AuthUserDetailService userDetailService;
     private final JWTUtility jwtUtility;
+    private static final String[] AUTH_BLACKLIST = {
+            "/v1/api/auth/**",
+            "/v1/api/subscription/cancel**"
+    };
 
     @Bean(name = "securityFilterChain")
     SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
@@ -46,7 +52,11 @@ class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() // temporarily authenticated via JWT
                 )
-                .addFilterBefore(new JWTFilter("/v1/api/auth/", manager, userDetailService, jwtUtility), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(
+                        new JWTFilter(manager, userDetailService, jwtUtility),
+                        UsernamePasswordAuthenticationFilter.class
+                )
+                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
 
         return http.build();
     }
@@ -54,5 +64,10 @@ class SecurityConfiguration {
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web.ignoring().requestMatchers(AUTH_BLACKLIST);
     }
 }

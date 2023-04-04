@@ -285,7 +285,7 @@ class NLModelsTest {
 
     //* ---------- NLLastName ---------- *//
     @Test
-    void shouldCreatePackagePrivateNLLastName(){
+    void shouldCreatePackagePrivateNLLastName() {
         Assertions.assertDoesNotThrow(NLLastName::new);
     }
 
@@ -526,7 +526,9 @@ class NLModelsTest {
 
     @Test
     void shouldValidateNLToken() {
-        Assertions.assertTrue(NLToken.of(UUID.randomUUID().toString()).validate());
+        final String value = UUID.randomUUID().toString();
+        Assertions.assertTrue(NLToken.of(value).validate());
+        Assertions.assertTrue(NLToken.of(String.format("%s-%s", value, value)).validate());
     }
 
     @Test
@@ -615,7 +617,7 @@ class NLModelsTest {
 
     //* ---------- NLVersion ---------- *//
     @Test
-    void shouldCreatePackagePrivateNLVersion(){
+    void shouldCreatePackagePrivateNLVersion() {
         Assertions.assertDoesNotThrow(NLVersion::new);
     }
 

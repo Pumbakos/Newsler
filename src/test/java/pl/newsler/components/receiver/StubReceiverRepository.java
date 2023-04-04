@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public class StubReceiverRepository extends InMemoryJpaRepository<Receiver, NLUuid> implements IReceiverRepository {
     public StubReceiverRepository() {
-        super(Receiver::getId);
+        super(Receiver::getUuid);
     }
 
     @Override

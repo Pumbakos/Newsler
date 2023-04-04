@@ -10,6 +10,7 @@ import java.util.Random;
 
 class TimeResolverTest {
     private final Random random = new SecureRandom();
+
     @Test
     void shouldTestTimeResolverForNow() {
         ZonedDateTime now = ZonedDateTime.now();

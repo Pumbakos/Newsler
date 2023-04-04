@@ -1,18 +1,26 @@
 package pl.newsler.security;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
 class NLKeyProvider implements NLIKeyProvider {
+    private final NLKeyStore keyStore;
+
+    NLKeyProvider(String keyStoreType, String keyStorePath, String keyStorePassword,
+                  String protectionPasswordPhrase, String encodeKeySalt) throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException {
+        this.keyStore = new NLKeyStore(keyStoreType, keyStorePath, keyStorePassword, protectionPasswordPhrase, encodeKeySalt);
+    }
+
     @Override
-    public byte[] getKey(NLPublicAlias alias) {
-        return NLKeyStore.getKey(alias);
+    public byte[] getKey(String alias) {
+        return keyStore.getKey(alias);
     }
 
     @Override
     @SuppressWarnings("java:S2129")
-    public char[] getCharKey(NLPublicAlias alias) {
-        return new String(NLKeyStore.getKey(alias)).toCharArray();
+    public char[] getCharKey(String alias) {
+        return new String(keyStore.getKey(alias)).toCharArray();
     }
 }

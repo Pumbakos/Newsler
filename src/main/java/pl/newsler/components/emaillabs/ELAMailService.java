@@ -6,6 +6,7 @@ import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLExecutionDate;
 import pl.newsler.commons.model.NLUuid;
+import pl.newsler.commons.utillity.ObjectUtils;
 import pl.newsler.components.emaillabs.exception.InvalidDateException;
 import pl.newsler.components.emaillabs.executor.ELAInstantMailDetails;
 import pl.newsler.components.emaillabs.executor.ELAScheduleMailDetails;
@@ -17,10 +18,12 @@ import pl.newsler.components.emaillabs.usecase.ELAScheduleMailRequest;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.NLUser;
 
+import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,33 +37,42 @@ class ELAMailService implements IELAMailService {
 
     @Override
     public void queue(ELAInstantMailRequest request) throws InvalidUserDataException {
-        Optional<NLUser> optionalUser = userRepository.findByEmail(NLEmail.of(request.from()));
+        if (ObjectUtils.isBlank(request)) {
+            throw new InvalidUserDataException("Input data", "Some of data are missing.");
+        }
+
+        final Optional<NLUser> optionalUser = userRepository.findByEmail(NLEmail.of(request.from()));
         if (optionalUser.isEmpty()) {
             throw new InvalidUserDataException();
         }
 
-        instantExecutor.queue(optionalUser.get().map().getId(), ELAInstantMailDetails.of(request));
+        instantExecutor.queue(optionalUser.get().map().getUuid(), ELAInstantMailDetails.of(request));
     }
 
     @Override
     public void schedule(final ELAScheduleMailRequest request) throws InvalidUserDataException, InvalidDateException {
-        String dateTime = request.dateTime();
-        if (StringUtils.isBlank(dateTime)) {
+        if (ObjectUtils.isBlank(request)) {
+            throw new InvalidUserDataException("Input data", "Some of data are missing.");
+        }
+        final long curr = System.currentTimeMillis();
+        final String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(request.timestamp()));
+        if (StringUtils.isBlank(dateTime) || request.timestamp() < curr) {
             throw new InvalidDateException();
         }
+
         try {
             final LocalDateTime time = LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern(NLExecutionDate.PATTERN));
 
-            Optional<NLUser> optionalUser = userRepository.findByEmail(NLEmail.of(request.from()));
+            final Optional<NLUser> optionalUser = userRepository.findByEmail(NLEmail.of(request.from()));
             if (optionalUser.isEmpty()) {
                 throw new InvalidUserDataException();
             }
 
-            Set<String> availableZoneIds = ZoneId.getAvailableZoneIds();
+            final Set<String> availableZoneIds = ZoneId.getAvailableZoneIds();
             boolean contains = availableZoneIds.contains(request.zone());
 
             scheduledExecutor.schedule(
-                    optionalUser.get().map().getId(),
+                    optionalUser.get().map().getUuid(),
                     ELAScheduleMailDetails.of(request, time.atZone(ZoneId.of(contains ? request.zone() : "Europe/Warsaw")))
             );
         } catch (DateTimeException e) {
@@ -70,7 +82,7 @@ class ELAMailService implements IELAMailService {
 
     @Override
     public List<ELAGetMailResponse> fetchAllMails(NLUuid userId) throws InvalidUserDataException {
-        Optional<NLUser> optional = userRepository.findById(userId);
+        final Optional<NLUser> optional = userRepository.findById(userId);
         if (optional.isEmpty()) {
             throw new InvalidUserDataException();
         }

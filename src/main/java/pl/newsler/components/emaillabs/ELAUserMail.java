@@ -20,9 +20,9 @@ import org.hibernate.Hibernate;
 import pl.newsler.commons.model.NLEmailMessage;
 import pl.newsler.commons.model.NLEmailStatus;
 import pl.newsler.commons.model.NLExecutionDate;
-import pl.newsler.commons.model.NLUuid;
 import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLSubject;
+import pl.newsler.commons.model.NLUuid;
 import pl.newsler.commons.model.NLVersion;
 import pl.newsler.components.emaillabs.executor.ELAInstantMailDetails;
 import pl.newsler.components.emaillabs.executor.ELAScheduleMailDetails;
@@ -49,35 +49,35 @@ public class ELAUserMail implements Serializable {
 
     @Getter(AccessLevel.PACKAGE)
     @EmbeddedId
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "UUID")))
-    private NLUuid id;
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "UUID", nullable = false, unique = true, updatable = false)))
+    private NLUuid uuid;
 
     @Getter(AccessLevel.PACKAGE)
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "VERSION")))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "VERSION", nullable = false)))
     private NLVersion version;
 
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "USER_UUID")))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "USER_UUID", nullable = false, updatable = false)))
     private NLUuid userId;
 
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "TO_ADDRESSES")))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "TO_ADDRESSES", nullable = false, updatable = false)))
     private NLStringValue toAddresses;
 
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SUBJECT", length = 128)))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SUBJECT", length = 128, nullable = false, updatable = false)))
     private NLSubject subject;
 
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "MESSAGE", length = 5000)))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "MESSAGE", length = 5000, nullable = false, updatable = false)))
     private NLEmailMessage message;
 
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "EXECUTION_DATE")))
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "EXECUTION_DATE", nullable = false)))
     private NLExecutionDate executionDate;
 
-    @Column(name = "STATUS")
+    @Column(name = "STATUS", nullable = false)
     @Enumerated(EnumType.STRING)
     private NLEmailStatus status;
 
@@ -115,7 +115,7 @@ public class ELAUserMail implements Serializable {
 
     public ELADUserMail map() {
         return ELADUserMail.builder()
-                .id(this.id)
+                .id(this.uuid)
                 .toAddresses(this.toAddresses)
                 .subject(this.subject)
                 .message(this.message)
@@ -127,7 +127,7 @@ public class ELAUserMail implements Serializable {
 
     public ELAGetMailResponse toResponse(String from) {
         return new ELAGetMailResponse(
-                this.id.getValue(),
+                this.uuid.getValue(),
                 from,
                 Arrays.asList(this.toAddresses.getValue().split(",")),
                 this.subject.getValue(),
@@ -146,11 +146,11 @@ public class ELAUserMail implements Serializable {
             return false;
         }
         final ELAUserMail that = (ELAUserMail) o;
-        return id != null && Objects.equals(id, that.id);
+        return uuid != null && Objects.equals(uuid, that.uuid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(uuid);
     }
 }

@@ -17,8 +17,8 @@ class JWTResolver {
         final String keyId = jwt.getId();
         final String issuer = jwt.getIssuer();
         final String email = jwt.getClaim(JWTClaim.EMAIL).asString();
-        final String role = jwt.getClaim(JWTClaim.ROLE).asString();
-        final String name = jwt.getClaim(JWTClaim.NAME).asString();
+        final String role = jwt.getClaim(JWTClaim.AUTHORITIES).asString();
+        final String name = jwt.getClaim(JWTClaim.UUID).asString();
         final Instant expiration = jwt.getExpiresAtAsInstant();
 
         return (

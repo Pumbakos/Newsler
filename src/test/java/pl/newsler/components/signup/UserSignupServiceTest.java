@@ -10,11 +10,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.web.client.RestTemplate;
 import pl.newsler.commons.exception.EmailAlreadyConfirmedException;
 import pl.newsler.commons.exception.InvalidTokenException;
 import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.commons.exception.TokenExpiredException;
-import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
 import pl.newsler.commons.model.NLId;
@@ -23,6 +23,9 @@ import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLToken;
 import pl.newsler.commons.model.NLUuid;
+import pl.newsler.components.emaillabs.StubELAMailModuleConfiguration;
+import pl.newsler.components.emaillabs.StubELAMailRepository;
+import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.components.signup.usecase.UserCreateRequest;
 import pl.newsler.components.signup.usecase.UserResendTokenRequest;
 import pl.newsler.components.user.IUserCrudService;
@@ -30,7 +33,7 @@ import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.StubUserModuleConfiguration;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.TestUserFactory;
-import pl.newsler.internal.DomainProperties;
+import pl.newsler.internal.NewslerServiceProperties;
 import pl.newsler.security.NLIPasswordEncoder;
 import pl.newsler.security.StubNLPasswordEncoder;
 
@@ -50,7 +53,19 @@ class UserSignupServiceTest {
     private final StubConfirmationTokenRepository confirmationTokenRepository = new StubConfirmationTokenRepository();
     private final NLIPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final IUserRepository userRepository = new StubUserRepository();
-    private final StubUserModuleConfiguration userModuleConfiguration = new StubUserModuleConfiguration(userRepository, passwordEncoder);
+    private final StubELAMailRepository mailRepository = new StubELAMailRepository();
+    private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+    private final StubELAMailModuleConfiguration mailModuleConfiguration = new StubELAMailModuleConfiguration(
+            userRepository,
+            mailRepository,
+            passwordEncoder,
+            null
+    );
+    private final StubUserModuleConfiguration userModuleConfiguration = new StubUserModuleConfiguration(
+            userRepository,
+            passwordEncoder,
+            mailModuleConfiguration.templateService(mailModuleConfiguration.elaParamBuilder(), restTemplate)
+    );
     private final IUserCrudService crudService = userModuleConfiguration.userService();
     private final JavaMailSender mailSender = new JavaMailSenderImpl();
     private final SignupModuleConfiguration configuration = new SignupModuleConfiguration(
@@ -67,21 +82,21 @@ class UserSignupServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        factory.standard().setId(
+        factory.standard().setUuid(
                 crudService.create(
                         NLFirstName.of(factory.standard().getFirstName().getValue()),
                         NLLastName.of(factory.standard().getLastName().getValue()),
                         NLEmail.of(factory.standard().getEmail().getValue()),
                         NLPassword.of(factory.standard().getNLPassword().getValue())
                 ));
-        factory.dashed().setId(
+        factory.dashed().setUuid(
                 crudService.create(
                         NLFirstName.of(factory.dashed().getFirstName().getValue()),
                         NLLastName.of(factory.dashed().getLastName().getValue()),
                         NLEmail.of(factory.dashed().getEmail().getValue()),
                         NLPassword.of(factory.dashed().getNLPassword().getValue())
                 ));
-        factory.dotted().setId(
+        factory.dotted().setUuid(
                 crudService.create(
                         NLFirstName.of(factory.dotted().getFirstName().getValue()),
                         NLLastName.of(factory.dotted().getLastName().getValue()),
@@ -92,9 +107,9 @@ class UserSignupServiceTest {
         final String standardToken = UUID.randomUUID().toString();
         final String dashedToken = UUID.randomUUID().toString();
         final String dottedToken = UUID.randomUUID().toString();
-        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(standardToken), factory.standard().map().getId()));
-        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dashedToken), factory.dashed().map().getId()));
-        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dottedToken), factory.dotted().map().getId()));
+        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(standardToken), factory.standard().map().getUuid()));
+        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dashedToken), factory.dashed().map().getUuid()));
+        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dottedToken), factory.dotted().map().getUuid()));
     }
 
     @AfterEach
@@ -109,7 +124,7 @@ class UserSignupServiceTest {
         final Field port = service.getClass().getDeclaredField("port");
 
         schema.setAccessible(true);
-        schema.set(service, DomainProperties.Schema.HTTP);
+        schema.set(service, NewslerServiceProperties.Schema.HTTP);
         homeDomain.setAccessible(true);
         homeDomain.set(service, "localhost");
         port.setAccessible(true);
@@ -146,8 +161,8 @@ class UserSignupServiceTest {
     }
 
     @Test
-    void shouldConfirmTokenWhenTokenValid(){
-        final NLUuid uuid = factory.dashed().map().getId();
+    void shouldConfirmTokenWhenTokenValid() {
+        final NLUuid uuid = factory.dashed().map().getUuid();
         final NLToken token = NLToken.of(UUID.randomUUID().toString());
         final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), token, uuid);
         confirmationTokenRepository.save(confirmationToken);
@@ -156,19 +171,19 @@ class UserSignupServiceTest {
     }
 
     @Test
-    void shouldNotConfirmTokenAndThrowInvalidTokenExceptionWhenTokenNotFound(){
+    void shouldNotConfirmTokenAndThrowInvalidTokenExceptionWhenTokenNotFound() {
         final NLToken invalidToken = NLToken.of(UUID.randomUUID().toString());
         Assertions.assertThrows(InvalidTokenException.class, () -> service.confirmToken(invalidToken));
     }
 
     @Test
-    void shouldNotConfirmTokenAndThrowInvalidTokenExceptionWhenTokenInvalid(){
+    void shouldNotConfirmTokenAndThrowInvalidTokenExceptionWhenTokenInvalid() {
         final NLToken invalidToken = NLToken.of("INVALID_TOKEN");
         Assertions.assertThrows(InvalidTokenException.class, () -> service.confirmToken(invalidToken));
     }
 
     @Test
-    void shouldNotConfirmTokenAndThrowEmailAlreadyConfirmedExceptionWhenTokenAlreadyConfirmed(){
+    void shouldNotConfirmTokenAndThrowEmailAlreadyConfirmedExceptionWhenTokenAlreadyConfirmed() {
         final NLConfirmationToken confirmationToken = confirmationTokenRepository.findAll().get(0);
         final NLToken token = confirmationToken.getToken();
         confirmationTokenRepository.updateConfirmationDate(token, LocalDateTime.now().minusMinutes(13));
@@ -177,14 +192,14 @@ class UserSignupServiceTest {
     }
 
     @Test
-    void shouldNotConfirmTokenAndThrowTokenExpiredExceptionWhenTokenExpired(){
-        final NLUuid uuid = factory.dashed().map().getId();
+    void shouldNotConfirmTokenAndThrowTokenExpiredExceptionWhenTokenExpired() {
+        final NLUuid uuid = factory.dashed().map().getUuid();
         final LocalDateTime now = LocalDateTime.now().minusMinutes(16L);
         final LocalDateTime then = now.plusMinutes(1L);
         final NLToken token = NLToken.of(UUID.randomUUID().toString());
 
         final NLConfirmationToken confirmationToken = new NLConfirmationToken();
-        confirmationToken.setUserId(uuid);
+        confirmationToken.setUserUuid(uuid);
         confirmationToken.setId(NLId.of(725414413L));
         confirmationToken.setCreationDate(now);
         confirmationToken.setExpirationDate(then);
@@ -206,7 +221,7 @@ class UserSignupServiceTest {
         final UserResendTokenRequest request = new UserResendTokenRequest(email, password);
 
         schema.setAccessible(true);
-        schema.set(service, DomainProperties.Schema.HTTP);
+        schema.set(service, NewslerServiceProperties.Schema.HTTP);
         homeDomain.setAccessible(true);
         homeDomain.set(service, "localhost");
         port.setAccessible(true);
@@ -217,7 +232,7 @@ class UserSignupServiceTest {
     }
 
     @Test
-    void shouldNotResendConfirmationTokenAndThrowInvalidUserDataExceptionWhenInvalidEmail(){
+    void shouldNotResendConfirmationTokenAndThrowInvalidUserDataExceptionWhenInvalidEmail() {
         final String validEmail = factory.dashed().getEmail().getValue();
         final String invalidEmail = "invalid@email";
         final String invalidPassword = "!NValidPassword";
@@ -229,7 +244,7 @@ class UserSignupServiceTest {
     }
 
     @Test
-    void shouldNotResendConfirmationTokenAndThrowInvalidUserDataExceptionWhenEmailDoesNotMatchPassword(){
+    void shouldNotResendConfirmationTokenAndThrowInvalidUserDataExceptionWhenEmailDoesNotMatchPassword() {
         final String validEmail = factory.dashed().getEmail().getValue();
         final String invalidPassword = "Ma7Tch!ngP4$$wor3";
         final UserResendTokenRequest request = new UserResendTokenRequest(validEmail, invalidPassword);
@@ -238,7 +253,7 @@ class UserSignupServiceTest {
     }
 
     @Test
-    void shouldNotResendConfirmationTokenAndThrowInvalidUserDataExceptionWhenUserNotFound(){
+    void shouldNotResendConfirmationTokenAndThrowInvalidUserDataExceptionWhenUserNotFound() {
         final UserResendTokenRequest request = new UserResendTokenRequest("valid@email.test", "Ma77ching94$$wor3");
 
         Assertions.assertThrows(InvalidUserDataException.class, () -> service.resendConfirmationToken(request));

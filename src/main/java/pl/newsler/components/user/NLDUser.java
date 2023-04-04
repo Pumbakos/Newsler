@@ -18,7 +18,7 @@ import pl.newsler.commons.model.NLUuid;
 @Builder(access = AccessLevel.PUBLIC)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class NLDUser {
-    NLUuid id;
+    NLUuid uuid;
     NLEmail email;
     NLFirstName name;
     NLLastName lastName;
@@ -32,7 +32,7 @@ public class NLDUser {
 
     public static NLDUser of(NLUser user) {
         return NLDUser.builder()
-                .id(user.getId())
+                .uuid(user.getUuid())
                 .email(user.getEmail())
                 .name(user.getFirstName())
                 .lastName(user.getLastName())
@@ -48,7 +48,7 @@ public class NLDUser {
 
     public NLUser toUser() {
         final NLUser user = new NLUser();
-        user.setId(id);
+        user.setUuid(uuid);
         user.setEmail(email);
         user.setFirstName(name);
         user.setLastName(lastName);

@@ -19,14 +19,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
-import pl.newsler.commons.exception.InvalidTokenException;
-import pl.newsler.commons.exception.UnauthorizedException;
 import pl.newsler.auth.AuthUserDetailService;
 import pl.newsler.auth.JWTClaim;
 import pl.newsler.auth.JWTUtility;
+import pl.newsler.commons.exception.InvalidTokenException;
+import pl.newsler.commons.exception.InvalidUserDataException;
+import pl.newsler.commons.exception.UnauthorizedException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.components.user.NLUser;
-import pl.newsler.commons.exception.InvalidUserDataException;
 import pl.newsler.security.NLAuthenticationToken;
 import pl.newsler.security.NLCredentials;
 import pl.newsler.security.NLPrincipal;
@@ -40,20 +40,25 @@ public class JWTFilter extends OncePerRequestFilter {
     private final AuthenticationManager authenticationManager;
     private final AuthUserDetailService authUserDetailService;
     private final JWTUtility utility;
-    private final String filterNotProcessingUrl;
+    private final String[] notProcessingUrls;
 
     /**
      * Creates a new instance with a default filterProcessesUrl and an
      * {@link AuthenticationManager}
      *
-     * @param filterNotProcessingUrl the default value for <tt>filterProcessesUrl</tt>.
-     * @param authenticationManager  the {@link AuthenticationManager} used to authenticate an {@link Authentication} object. Cannot be null.
-     * @param authUserDetailService  {@link org.springframework.security.core.userdetails.UserDetailsService}
+     * @param notProcessingUrls     urls to be omitted by <tt>JWTFilter</tt>
+     * @param authenticationManager the {@link AuthenticationManager} used to authenticate an {@link Authentication} object. Cannot be null.
+     * @param authUserDetailService {@link org.springframework.security.core.userdetails.UserDetailsService}
      */
-    public JWTFilter(@NotNull String filterNotProcessingUrl, @NotNull AuthenticationManager authenticationManager,
-                     @NotNull AuthUserDetailService authUserDetailService, @NotNull JWTUtility utility) {
+    public JWTFilter(@NotNull AuthenticationManager authenticationManager,
+                     @NotNull AuthUserDetailService authUserDetailService, @NotNull JWTUtility utility,
+                     String... notProcessingUrls) {
         super();
-        this.filterNotProcessingUrl = filterNotProcessingUrl;
+        if (StringUtils.isAllBlank(notProcessingUrls)) {
+            this.notProcessingUrls = new String[]{};
+        } else {
+            this.notProcessingUrls = notProcessingUrls;
+        }
         this.authenticationManager = authenticationManager;
         this.authUserDetailService = authUserDetailService;
         this.utility = utility;
@@ -61,7 +66,8 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain chain) throws ServletException, IOException {
-        if (request.getRequestURI().contains(filterNotProcessingUrl)) {
+        boolean isUrlOnBlacklist = isUrlOnBlacklist(request);
+        if (isUrlOnBlacklist) {
             chain.doFilter(request, response);
             return;
         }
@@ -77,6 +83,15 @@ public class JWTFilter extends OncePerRequestFilter {
         performAuthentication(authentication);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         chain.doFilter(request, response);
+    }
+
+    private boolean isUrlOnBlacklist(final @NotNull HttpServletRequest request) {
+        for (final String url : notProcessingUrls) {
+            if (request.getRequestURI().contains(url)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void performAuthentication(@NotNull NLAuthenticationToken authentication) {
@@ -105,7 +120,7 @@ public class JWTFilter extends OncePerRequestFilter {
         if (JWTResolver.resolveJWT(jwt, user)) {
             final NLPrincipal principal = createPrincipal(user);
             final NLCredentials credentials = createCredentials(user);
-            final Set<SimpleGrantedAuthority> roles = Collections.singleton(new SimpleGrantedAuthority(jwt.getClaim(JWTClaim.ROLE).asString()));
+            final Set<SimpleGrantedAuthority> roles = Collections.singleton(new SimpleGrantedAuthority(jwt.getClaim(JWTClaim.AUTHORITIES).asString()));
 
             return new NLAuthenticationToken(principal, credentials, roles);
         }
@@ -113,7 +128,7 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     private @NotNull DecodedJWT verifyToken(@NotNull String authToken) {
-        final JWTVerifier verifier = JWT.require(utility.hmac384()).build();
+        final JWTVerifier verifier = JWT.require(utility.rsa384()).build();
         try {
             return verifier.verify(authToken);
         } catch (JWTVerificationException e) {
@@ -122,7 +137,7 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     private @NotNull NLPrincipal createPrincipal(@NotNull NLUser user) {
-        return new NLPrincipal(user.map().getId(), user.getEmail(), user.getFirstName());
+        return new NLPrincipal(user.map().getUuid(), user.getEmail(), user.getFirstName());
     }
 
     private @NotNull NLCredentials createCredentials(@NotNull NLUser user) {

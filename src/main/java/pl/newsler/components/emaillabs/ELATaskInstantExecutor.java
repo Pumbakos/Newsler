@@ -1,22 +1,23 @@
 package pl.newsler.components.emaillabs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.web.client.RestTemplate;
+import pl.newsler.commons.model.NLEmailStatus;
+import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.executor.ELAConcurrentTaskExecutor;
 import pl.newsler.components.emaillabs.executor.ELAInstantMailDetails;
+import pl.newsler.components.emaillabs.executor.ELARequestBuilder;
 import pl.newsler.components.emaillabs.executor.IELATaskInstantExecutor;
 import pl.newsler.components.receiver.IReceiverService;
 import pl.newsler.components.user.IUserRepository;
 import pl.newsler.security.NLIPasswordEncoder;
 
-import java.util.Iterator;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,7 +28,7 @@ class ELATaskInstantExecutor extends ELAConcurrentTaskExecutor<ELAInstantMailDet
     ELATaskInstantExecutor(final Queue<Pair<NLUuid, ELAInstantMailDetails>> queue, final ConcurrentTaskExecutor taskExecutor,
                            final NLIPasswordEncoder passwordEncoder, final IELAMailRepository mailRepository,
                            final IReceiverService receiverService, final IUserRepository userRepository,
-                           final RestTemplate restTemplate, final ObjectMapper objectMapper) {
+                           final RestTemplate restTemplate, final ELARequestBuilder paramBuilder) {
         super(
                 queue,
                 taskExecutor,
@@ -36,7 +37,7 @@ class ELATaskInstantExecutor extends ELAConcurrentTaskExecutor<ELAInstantMailDet
                 receiverService,
                 userRepository,
                 restTemplate,
-                objectMapper
+                paramBuilder
         );
     }
 
@@ -52,7 +53,6 @@ class ELATaskInstantExecutor extends ELAConcurrentTaskExecutor<ELAInstantMailDet
         }
     }
 
-    @Async
     void executeQueue() {
         try {
             super.execute(this::execute);
@@ -69,7 +69,20 @@ class ELATaskInstantExecutor extends ELAConcurrentTaskExecutor<ELAInstantMailDet
             return;
         }
 
-        getUserAndExecute(pair);
+        try {
+            getUserAndExecute(pair);
+        } catch (Exception e) {
+            final Optional<ELAUserMail> optionalELAUserMail = mailRepository
+                    .findAllByUserId(pair.getKey())
+                    .stream().filter(mail -> mail.getUuid().equals(pair.getValue().id()))
+                    .findFirst();
+
+            final ELAUserMail userMail;
+            userMail = optionalELAUserMail.orElseGet(() -> ELAUserMail.of(pair.getKey(), pair.getValue()));
+            userMail.setErrorMessage(NLStringValue.of("Something went wrong during preparing you mail :("));
+            userMail.setStatus(NLEmailStatus.ERROR);
+            mailRepository.save(userMail);
+        }
         execute();
     }
 }

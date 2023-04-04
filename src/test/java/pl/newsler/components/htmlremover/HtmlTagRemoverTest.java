@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -19,6 +18,7 @@ class HtmlTagRemoverTest {
         Assertions.assertFalse(removed.contains("<h2>"));
         Assertions.assertFalse(removed.contains("<p>"));
     }
+
     @Test
     @DisplayName("should remove <p>, <em>, <strong>, <span>, <s>, <sup>, <sub> and <code> html tags & styling")
     void shouldRemoveCodeHTMLTags() {

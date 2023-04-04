@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.FluentQuery;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,22 +23,22 @@ public class InMemoryJpaRepository<T, ID> implements JpaRepository<T, ID> {
     protected final Map<ID, T> database = new HashMap<>();
 
     @Override
-    public List<T> findAll() {
+    public @NotNull List<T> findAll() {
         return database.values().stream().toList();
     }
 
     @Override
-    public List<T> findAll(Sort sort) {
+    public @NotNull List<T> findAll(@NotNull Sort sort) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public Page<T> findAll(Pageable pageable) {
+    public @NotNull Page<T> findAll(@NotNull Pageable pageable) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public List<T> findAllById(Iterable<ID> ids) {
+    public @NotNull List<T> findAllById(@NotNull Iterable<ID> ids) {
         throw new PleaseImplementMeException();
     }
 
@@ -49,26 +48,22 @@ public class InMemoryJpaRepository<T, ID> implements JpaRepository<T, ID> {
     }
 
     @Override
-    public void deleteById(ID id) {
-        if (id == null) {
-            throw new IllegalArgumentException();
-        }
-
+    public void deleteById(@NotNull ID id) {
         database.remove(id);
     }
 
     @Override
-    public void delete(T entity) {
+    public void delete(@NotNull T entity) {
+        database.remove(idFunction.apply(entity), entity);
+    }
+
+    @Override
+    public void deleteAllById(@NotNull Iterable<? extends ID> ids) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public void deleteAllById(Iterable<? extends ID> ids) {
-        throw new PleaseImplementMeException();
-    }
-
-    @Override
-    public void deleteAll(Iterable<? extends T> entities) {
+    public void deleteAll(@NotNull Iterable<? extends T> entities) {
         throw new PleaseImplementMeException();
     }
 
@@ -78,7 +73,7 @@ public class InMemoryJpaRepository<T, ID> implements JpaRepository<T, ID> {
     }
 
     @Override
-    public <S extends T> S save(S entity) {
+    public <S extends T> @NotNull S save(@NotNull S entity) {
         ID id = idFunction.apply(entity);
         database.put(id, entity);
         return entity;
@@ -95,12 +90,12 @@ public class InMemoryJpaRepository<T, ID> implements JpaRepository<T, ID> {
     }
 
     @Override
-    public Optional<T> findById(ID id) {
+    public @NotNull Optional<T> findById(@NotNull ID id) {
         return Optional.ofNullable(database.get(id));
     }
 
     @Override
-    public boolean existsById(ID id) {
+    public boolean existsById(@NotNull ID id) {
         throw new PleaseImplementMeException();
     }
 
@@ -110,22 +105,22 @@ public class InMemoryJpaRepository<T, ID> implements JpaRepository<T, ID> {
     }
 
     @Override
-    public <S extends T> S saveAndFlush(S entity) {
+    public <S extends T> @NotNull S saveAndFlush(@NotNull S entity) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public <S extends T> List<S> saveAllAndFlush(Iterable<S> entities) {
+    public <S extends T> @NotNull List<S> saveAllAndFlush(@NotNull Iterable<S> entities) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public void deleteAllInBatch(Iterable<T> entities) {
+    public void deleteAllInBatch(@NotNull Iterable<T> entities) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public void deleteAllByIdInBatch(Iterable<ID> ids) {
+    public void deleteAllByIdInBatch(@NotNull Iterable<ID> ids) {
         throw new PleaseImplementMeException();
     }
 
@@ -135,52 +130,52 @@ public class InMemoryJpaRepository<T, ID> implements JpaRepository<T, ID> {
     }
 
     @Override
-    public T getOne(ID id) {
+    public @NotNull T getOne(@NotNull ID id) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public T getById(ID id) {
+    public @NotNull T getById(@NotNull ID id) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public T getReferenceById(ID id) {
+    public @NotNull T getReferenceById(@NotNull ID id) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public <S extends T> Optional<S> findOne(Example<S> example) {
+    public <S extends T> @NotNull Optional<S> findOne(@NotNull Example<S> example) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public <S extends T> List<S> findAll(Example<S> example) {
+    public <S extends T> @NotNull List<S> findAll(@NotNull Example<S> example) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public <S extends T> List<S> findAll(Example<S> example, Sort sort) {
+    public <S extends T> @NotNull List<S> findAll(@NotNull Example<S> example, @NotNull Sort sort) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public <S extends T> Page<S> findAll(Example<S> example, Pageable pageable) {
+    public <S extends T> @NotNull Page<S> findAll(@NotNull Example<S> example, @NotNull Pageable pageable) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public <S extends T> long count(Example<S> example) {
+    public <S extends T> long count(@NotNull Example<S> example) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public <S extends T> boolean exists(Example<S> example) {
+    public <S extends T> boolean exists(@NotNull Example<S> example) {
         throw new PleaseImplementMeException();
     }
 
     @Override
-    public <S extends T, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+    public <S extends T, R> @NotNull R findBy(@NotNull Example<S> example, @NotNull Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
         throw new PleaseImplementMeException();
     }
 }

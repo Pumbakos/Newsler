@@ -11,7 +11,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -26,6 +25,8 @@ import pl.newsler.commons.model.NLLastName;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLSecretKey;
 import pl.newsler.commons.model.NLSmtpAccount;
+import pl.newsler.commons.model.NLStringValue;
+import pl.newsler.commons.model.NLToken;
 import pl.newsler.commons.model.NLUserType;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.commons.model.NLVersion;
@@ -34,48 +35,47 @@ import pl.newsler.components.user.usecase.UserGetResponse;
 import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 
 @Entity
 @Table(name = "USERS", catalog = "NEWSLER", schema = "PUBLIC")
 @ToString
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class NLUser implements UserDetails {
     @Serial
     private static final long serialVersionUID = -1087455812902755879L;
 
     @Getter(AccessLevel.PACKAGE)
     @EmbeddedId
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "ID")))
-    private NLUuid id;
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "UUID")))
+    private NLUuid uuid;
 
     @Getter(AccessLevel.PACKAGE)
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "VERSION")))
-    private NLVersion version = UserRepository.version;
+    private NLVersion version;
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "EMAIL")))
-    private NLEmail email = NLEmail.of("");
+    private NLEmail email;
 
     /**
      * If user is an organization it is preferred to use name as one String omitting lastName <br/>
      * i.e "name = Microsoft Corporation", "name = EmailLabs" <br/>
      * <strong>not</strong> "name = Microsoft", lastName = "Corporation"
      */
-
     @Embedded
-    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "FIRST_NAME")))
-    private NLFirstName firstName = NLFirstName.of("");
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "FIRST_NAME", nullable = false)))
+    private NLFirstName firstName;
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "LAST_NAME")))
-    private NLLastName lastName = NLLastName.of("");
+    private NLLastName lastName;
 
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "PASSWORD")))
-    private NLPassword password = NLPassword.of("");
+    private NLPassword password;
 
     /**
      * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find APP KEY here</a><br/>
@@ -83,7 +83,7 @@ public class NLUser implements UserDetails {
      */
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "APP_KEY")))
-    private NLAppKey appKey = NLAppKey.of("");
+    private NLAppKey appKey;
 
     /**
      * <a href="https://panel.emaillabs.net.pl/en/site/api">You can find SECRET KEY here</a><br/>
@@ -91,7 +91,7 @@ public class NLUser implements UserDetails {
      */
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SECRET_KEY")))
-    private NLSecretKey secretKey = NLSecretKey.of("");
+    private NLSecretKey secretKey;
 
     /**
      * <a href="https://panel.emaillabs.net.pl/pl/smtp">You can find SMTP ACCOUNT here</a><br/>
@@ -99,7 +99,15 @@ public class NLUser implements UserDetails {
      */
     @Embedded
     @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SMTP_ACCOUNT")))
-    private NLSmtpAccount smtpAccount = NLSmtpAccount.of("");
+    private NLSmtpAccount smtpAccount;
+
+    @Embedded
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "SUBSCRIPTION_TOKEN")))
+    private NLToken subscriptionToken;
+
+    @Embedded
+    @AttributeOverrides(value = @AttributeOverride(name = "value", column = @Column(name = "DEFAULT_TEMPLATE_ID")))
+    private NLStringValue defaultTemplateId = NLStringValue.of("");
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ROLE")
@@ -123,6 +131,18 @@ public class NLUser implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority(this.role.name()));
+    }
+
+    protected NLUser() {
+        version = UserRepository.version;
+        email = NLEmail.of("");
+        firstName = NLFirstName.of("");
+        lastName = NLLastName.of("");
+        password = NLPassword.of("");
+        appKey = NLAppKey.of("");
+        secretKey = NLSecretKey.of("");
+        smtpAccount = NLSmtpAccount.of("");
+        subscriptionToken = NLToken.of(UUID.randomUUID().toString().concat("-").concat(UUID.randomUUID().toString()));
     }
 
     @Override
@@ -152,7 +172,7 @@ public class NLUser implements UserDetails {
 
     public NLDUser map() {
         return NLDUser.builder()
-                .id(id)
+                .uuid(uuid)
                 .email(email)
                 .name(firstName)
                 .lastName(lastName)
@@ -166,8 +186,12 @@ public class NLUser implements UserDetails {
                 .build();
     }
 
+    public boolean isUserActive() {
+        return this.isEnabled() && this.isCredentialsNonExpired() && this.isAccountNonExpired();
+    }
+
     public UserGetResponse truncate() {
-        return new UserGetResponse(id.getValue(), email.getValue(), firstName.getValue(), lastName.getValue(), smtpAccount.getValue(), secretKey.getValue(), appKey.getValue());
+        return new UserGetResponse(uuid.getValue(), email.getValue(), firstName.getValue(), lastName.getValue(), smtpAccount.getValue(), secretKey.getValue(), appKey.getValue());
     }
 
     @Override
@@ -183,7 +207,7 @@ public class NLUser implements UserDetails {
         final NLUser nlUser = (NLUser) o;
 
         return new EqualsBuilder()
-                .append(id, nlUser.id)
+                .append(uuid, nlUser.uuid)
                 .append(version, nlUser.version)
                 .append(email, nlUser.email)
                 .append(firstName, nlUser.firstName)
@@ -201,7 +225,7 @@ public class NLUser implements UserDetails {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(id).append(version)
+                .append(uuid).append(version)
                 .append(email)
                 .append(firstName)
                 .append(password)

@@ -8,19 +8,18 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.web.client.RestTemplate;
 import pl.newsler.api.IUserSignupController;
-import pl.newsler.commons.exception.EmailAlreadyConfirmedException;
 import pl.newsler.commons.exception.GlobalRestExceptionHandler;
-import pl.newsler.commons.exception.InvalidTokenException;
 import pl.newsler.commons.exception.InvalidUserDataException;
-import pl.newsler.commons.exception.NLError;
 import pl.newsler.commons.exception.NLException;
-import pl.newsler.commons.exception.TokenExpiredException;
-import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
 import pl.newsler.commons.model.NLId;
@@ -28,6 +27,9 @@ import pl.newsler.commons.model.NLLastName;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLStringValue;
 import pl.newsler.commons.model.NLToken;
+import pl.newsler.components.emaillabs.StubELAMailModuleConfiguration;
+import pl.newsler.components.emaillabs.StubELAMailRepository;
+import pl.newsler.components.signup.exception.UserAlreadyExistsException;
 import pl.newsler.components.signup.usecase.UserCreateRequest;
 import pl.newsler.components.signup.usecase.UserResendTokenRequest;
 import pl.newsler.components.user.IUserCrudService;
@@ -35,7 +37,8 @@ import pl.newsler.components.user.IUserRepository;
 import pl.newsler.components.user.StubUserModuleConfiguration;
 import pl.newsler.components.user.StubUserRepository;
 import pl.newsler.components.user.TestUserFactory;
-import pl.newsler.internal.DomainProperties;
+import pl.newsler.internal.NewslerDesignerServiceProperties;
+import pl.newsler.internal.NewslerServiceProperties;
 import pl.newsler.security.NLIPasswordEncoder;
 import pl.newsler.security.StubNLPasswordEncoder;
 
@@ -54,9 +57,21 @@ public class UserSignupControllerTest {
     private final StubConfirmationTokenRepository confirmationTokenRepository = new StubConfirmationTokenRepository();
     private final NLIPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
     private final IUserRepository userRepository = new StubUserRepository();
-    private final StubUserModuleConfiguration userModuleConfiguration = new StubUserModuleConfiguration(userRepository, passwordEncoder);
+    private final StubELAMailRepository mailRepository = new StubELAMailRepository();
+    private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+    private final StubELAMailModuleConfiguration mailModuleConfiguration = new StubELAMailModuleConfiguration(
+            userRepository,
+            mailRepository,
+            passwordEncoder,
+            null
+    );
+    private final StubUserModuleConfiguration userModuleConfiguration = new StubUserModuleConfiguration(
+            userRepository,
+            passwordEncoder,
+            mailModuleConfiguration.templateService(mailModuleConfiguration.elaParamBuilder(), restTemplate)
+    );
     private final IUserCrudService crudService = userModuleConfiguration.userService();
-    private final JavaMailSender mailSender = new JavaMailSenderImpl();
+    private final JavaMailSender mailSender = Mockito.mock(JavaMailSenderImpl.class);
     private final SignupModuleConfiguration configuration = new SignupModuleConfiguration(
             confirmationTokenRepository,
             passwordEncoder,
@@ -73,21 +88,21 @@ public class UserSignupControllerTest {
 
     @BeforeEach
     void beforeEach() {
-        factory.standard().setId(
+        factory.standard().setUuid(
                 crudService.create(
                         NLFirstName.of(factory.standard().getFirstName().getValue()),
                         NLLastName.of(factory.standard().getLastName().getValue()),
                         NLEmail.of(factory.standard().getEmail().getValue()),
                         NLPassword.of(factory.standard().getNLPassword().getValue())
                 ));
-        factory.dashed().setId(
+        factory.dashed().setUuid(
                 crudService.create(
                         NLFirstName.of(factory.dashed().getFirstName().getValue()),
                         NLLastName.of(factory.dashed().getLastName().getValue()),
                         NLEmail.of(factory.dashed().getEmail().getValue()),
                         NLPassword.of(factory.dashed().getNLPassword().getValue())
                 ));
-        factory.dotted().setId(
+        factory.dotted().setUuid(
                 crudService.create(
                         NLFirstName.of(factory.dotted().getFirstName().getValue()),
                         NLLastName.of(factory.dotted().getLastName().getValue()),
@@ -98,9 +113,9 @@ public class UserSignupControllerTest {
         final String standardToken = UUID.randomUUID().toString();
         final String dashedToken = UUID.randomUUID().toString();
         final String dottedToken = UUID.randomUUID().toString();
-        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(standardToken), factory.standard().map().getId()));
-        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dashedToken), factory.dashed().map().getId()));
-        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dottedToken), factory.dotted().map().getId()));
+        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(standardToken), factory.standard().map().getUuid()));
+        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dashedToken), factory.dashed().map().getUuid()));
+        confirmationTokenRepository.save(new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(dottedToken), factory.dotted().map().getUuid()));
     }
 
     @AfterEach
@@ -113,20 +128,18 @@ public class UserSignupControllerTest {
         final Field schema = service.getClass().getDeclaredField("schema");
         final Field homeDomain = service.getClass().getDeclaredField("homeDomain");
         final Field port = service.getClass().getDeclaredField("port");
-
-        schema.setAccessible(true);
-        schema.set(service, DomainProperties.Schema.HTTP);
-        homeDomain.setAccessible(true);
+        schema.trySetAccessible();
+        homeDomain.trySetAccessible();
+        port.trySetAccessible();
+        schema.set(service, NewslerServiceProperties.Schema.HTTP);
         homeDomain.set(service, "localhost");
-        port.setAccessible(true);
         port.set(service, 8080);
 
         Mockito.doNothing().when(emailConfirmationService).send(ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
 
         final String email = email();
         final UserCreateRequest request = new UserCreateRequest(firstName(), lastName(), email, "Ma47c!n9Pa$$#0rd");
-
-        ResponseEntity<NLStringValue> response = controller.signup(request);
+        final ResponseEntity<NLStringValue> response = controller.signup(request);
 
         Assertions.assertNotNull(response);
         Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
@@ -140,10 +153,9 @@ public class UserSignupControllerTest {
             controller.signup(null);
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail("Not a desired exception type! Expected: <InvalidUserDataException> but was" + e.getClass().getName());
             }
@@ -159,10 +171,9 @@ public class UserSignupControllerTest {
             controller.signup(request);
         } catch (NLException e) {
             if (e instanceof UserAlreadyExistsException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail("Not a desired exception type! Expected: <UserAlreadyExistsException> but was" + e.getClass().getName());
             }
@@ -177,10 +188,9 @@ public class UserSignupControllerTest {
             controller.signup(request);
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail("Not a desired exception type! Expected: <InvalidUserDataException> but was" + e.getClass().getName());
             }
@@ -195,10 +205,9 @@ public class UserSignupControllerTest {
             controller.signup(request);
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail("Not a desired exception type! Expected: <InvalidUserDataException> but was" + e.getClass().getName());
             }
@@ -213,10 +222,9 @@ public class UserSignupControllerTest {
             controller.signup(request);
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail("Not a desired exception type! Expected: <InvalidUserDataException> but was" + e.getClass().getName());
             }
@@ -231,10 +239,9 @@ public class UserSignupControllerTest {
             controller.signup(request);
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail("Not a desired exception type! Expected: <InvalidUserDataException> but was" + e.getClass().getName());
             }
@@ -242,117 +249,127 @@ public class UserSignupControllerTest {
     }
 
     @Test
-    void shouldReturn200OkAndConfirmTokenWhenTokenConfirmed() {
+    void shouldReturn200OkAndConfirmTokenWhenTokenConfirmed() throws NoSuchFieldException, IllegalAccessException {
+        reflectControllerFields();
         final String token = UUID.randomUUID().toString();
-        final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(token), factory.dotted().map().getId());
+        final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(token), factory.dotted().map().getUuid());
         confirmationTokenRepository.save(confirmationToken);
 
-        try {
-            controller.confirm(token);
-        } catch (NLException e) {
-            if (e instanceof InvalidUserDataException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
-            } else {
-                Assertions.fail("Not a desired exception type! Expected: <InvalidUserDataException> but was" + e.getClass().getName());
-            }
-        }
+        final ResponseEntity<NLStringValue> response = controller.confirm(token);
+        Assertions.assertNotNull(response.getHeaders().get(HttpHeaders.LOCATION));
+        Assertions.assertEquals(
+                "http://localhost:4200/sign-up/confirmation?token=ok",
+                Objects.requireNonNull(response.getHeaders().get(HttpHeaders.LOCATION)).get(0)
+        );
+        Assertions.assertTrue(response.getStatusCode().is3xxRedirection());
+        Assertions.assertEquals(HttpStatusCode.valueOf(308), response.getStatusCode());
     }
 
     @Test
-    void shouldReturn401UnauthorizedAndNotConfirmTokenWhenTokenBlank() {
-        try {
-            controller.confirm("   ");
-        } catch (NLException e) {
-            if (e instanceof InvalidTokenException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(401), response.getStatusCode());
-            } else {
-                Assertions.fail("Not a desired exception type! Expected: <InvalidTokenException> but was" + e.getClass().getName());
-            }
-        }
+    void shouldReturn401UnauthorizedAndNotConfirmTokenWhenTokenBlank() throws NoSuchFieldException, IllegalAccessException {
+        reflectControllerFields();
+
+        final ResponseEntity<NLStringValue> response = controller.confirm("   ");
+        Assertions.assertNotNull(response.getHeaders().get(HttpHeaders.LOCATION));
+        Assertions.assertEquals(
+                "http://localhost:4200/sign-up/confirmation?token=invalid",
+                Objects.requireNonNull(response.getHeaders().get(HttpHeaders.LOCATION)).get(0)
+        );
+        Assertions.assertNotNull(response);
+        Assertions.assertTrue(response.getStatusCode().is3xxRedirection());
+        Assertions.assertEquals(HttpStatusCode.valueOf(308), response.getStatusCode());
+    }
+
+    @Test
+    void shouldReturn401UnauthorizedAndNotConfirmTokenWhenCouldNotConfirmToken() throws NoSuchFieldException, IllegalAccessException {
+        reflectControllerFields();
+
+        final IUserSignupController spy = Mockito.spy(controller);
+        final String redirectUrl = "http://localhost:4200/sign-up/confirmation?token=invalid";
+        Mockito.when(spy.confirm("   "))
+                .thenReturn(ResponseEntity.status(HttpStatus.PERMANENT_REDIRECT).header(HttpHeaders.LOCATION, redirectUrl).build());
+
+        final ResponseEntity<NLStringValue> response = spy.confirm("   ");
+        Assertions.assertNotNull(response.getHeaders().get(HttpHeaders.LOCATION));
+        Assertions.assertEquals(
+                "http://localhost:4200/sign-up/confirmation?token=invalid",
+                Objects.requireNonNull(response.getHeaders().get(HttpHeaders.LOCATION)).get(0)
+        );
+        Assertions.assertNotNull(response);
+        Assertions.assertTrue(response.getStatusCode().is3xxRedirection());
+        Assertions.assertEquals(HttpStatusCode.valueOf(308), response.getStatusCode());
     }
 
     @ParameterizedTest
     @NullAndEmptySource
-    void shouldReturn401UnauthorizedAndNotConfirmTokenWhenTokenEmpty(String token) {
-        try {
-            controller.confirm(token);
-        } catch (NLException e) {
-            if (e instanceof InvalidTokenException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(401), response.getStatusCode());
-            } else {
-                Assertions.fail("Not a desired exception type! Expected: <InvalidTokenException> but was" + e.getClass().getName());
-            }
-        }
+    void shouldReturn401UnauthorizedAndNotConfirmTokenWhenTokenEmpty(String token) throws NoSuchFieldException, IllegalAccessException {
+        reflectControllerFields();
+        final ResponseEntity<NLStringValue> response = controller.confirm(token);
+
+        Assertions.assertNotNull(response.getHeaders().get(HttpHeaders.LOCATION));
+        Assertions.assertEquals(
+                "http://localhost:4200/sign-up/confirmation?token=invalid",
+                Objects.requireNonNull(response.getHeaders().get(HttpHeaders.LOCATION)).get(0)
+        );
+        Assertions.assertNotNull(response);
+        Assertions.assertTrue(response.getStatusCode().is3xxRedirection());
+        Assertions.assertEquals(HttpStatusCode.valueOf(308), response.getStatusCode());
     }
 
     @Test
-    void shouldReturn401UnauthorizedAndNotConfirmTokenWhenTokenInvalid() {
-        try {
-            controller.confirm("invalid token");
-        } catch (NLException e) {
-            if (e instanceof InvalidTokenException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(401), response.getStatusCode());
-            } else {
-                Assertions.fail("Not a desired exception type! Expected: <InvalidTokenException> but was" + e.getClass().getName());
-            }
-        }
+    void shouldReturn401UnauthorizedAndNotConfirmTokenWhenTokenInvalid() throws NoSuchFieldException, IllegalAccessException {
+        reflectControllerFields();
+
+        final ResponseEntity<NLStringValue> response = controller.confirm("invalid token");
+        Assertions.assertNotNull(response.getHeaders().get(HttpHeaders.LOCATION));
+        Assertions.assertEquals(
+                "http://localhost:4200/sign-up/confirmation?token=invalid",
+                Objects.requireNonNull(response.getHeaders().get(HttpHeaders.LOCATION)).get(0)
+        );
+        Assertions.assertNotNull(response);
+        Assertions.assertTrue(response.getStatusCode().is3xxRedirection());
+        Assertions.assertEquals(HttpStatusCode.valueOf(308), response.getStatusCode());
     }
 
     @Test
-    void shouldReturn401UnauthorizedAndNotConfirmTokenWhenTokenAlreadyConfirmed() {
+    void shouldReturn401UnauthorizedAndNotConfirmTokenWhenTokenAlreadyConfirmed() throws NoSuchFieldException, IllegalAccessException {
+        reflectControllerFields();
         final String token = UUID.randomUUID().toString();
-        final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(token), factory.dotted().map().getId());
+        final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(token), factory.dotted().map().getUuid());
         confirmationTokenRepository.save(confirmationToken);
         confirmationTokenRepository.updateConfirmationDate(confirmationToken.getToken(), LocalDateTime.now());
 
-        try {
-            controller.confirm(token);
-        } catch (NLException e) {
-            if (e instanceof EmailAlreadyConfirmedException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(401), response.getStatusCode());
-            } else {
-                Assertions.fail("Not a desired exception type! Expected: <EmailAlreadyConfirmedException> but was" + e.getClass().getName());
-            }
-        }
+        final ResponseEntity<NLStringValue> response = controller.confirm(token);
+        Assertions.assertNotNull(response.getHeaders().get(HttpHeaders.LOCATION));
+        Assertions.assertEquals(
+                "http://localhost:4200/sign-up/confirmation?token=confirmed",
+                Objects.requireNonNull(response.getHeaders().get(HttpHeaders.LOCATION)).get(0)
+        );
+        Assertions.assertNotNull(response);
+        Assertions.assertTrue(response.getStatusCode().is3xxRedirection());
+        Assertions.assertEquals(HttpStatusCode.valueOf(308), response.getStatusCode());
     }
 
     @Test
-    void shouldReturn401UnauthorizedAndNotConfirmTokenWhenTokenExpired() {
+    void shouldReturn401UnauthorizedAndNotConfirmTokenWhenTokenExpired() throws NoSuchFieldException, IllegalAccessException {
+        reflectControllerFields();
         final String token = UUID.randomUUID().toString();
-        final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(token), factory.dotted().map().getId());
-        LocalDateTime now = LocalDateTime.now().minusMinutes(16L);
-        LocalDateTime then = now.plusMinutes(1L);
+        final NLConfirmationToken confirmationToken = new NLConfirmationToken(NLId.of(random.nextLong()), NLToken.of(token), factory.dotted().map().getUuid());
+        final LocalDateTime now = LocalDateTime.now().minusMinutes(16L);
+        final LocalDateTime then = now.plusMinutes(1L);
         confirmationToken.setCreationDate(now);
         confirmationToken.setExpirationDate(then);
         confirmationTokenRepository.save(confirmationToken);
 
-        try {
-            controller.confirm(token);
-        } catch (NLException e) {
-            if (e instanceof TokenExpiredException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(401), response.getStatusCode());
-            } else {
-                Assertions.fail(String.format("Not a desired exception type! Expected: <TokenExpiredException> but was <%s>", e.getClass().getSimpleName()));
-            }
-        }
+        final ResponseEntity<NLStringValue> response = controller.confirm(token);
+        Assertions.assertNotNull(response.getHeaders().get(HttpHeaders.LOCATION));
+        Assertions.assertEquals(
+                "http://localhost:4200/sign-up/confirmation?token=expired",
+                Objects.requireNonNull(response.getHeaders().get(HttpHeaders.LOCATION)).get(0)
+        );
+        Assertions.assertNotNull(response);
+        Assertions.assertTrue(response.getStatusCode().is3xxRedirection());
+        Assertions.assertEquals(HttpStatusCode.valueOf(308), response.getStatusCode());
     }
 
     @Test
@@ -360,20 +377,19 @@ public class UserSignupControllerTest {
         final Field schema = service.getClass().getDeclaredField("schema");
         final Field homeDomain = service.getClass().getDeclaredField("homeDomain");
         final Field port = service.getClass().getDeclaredField("port");
-
-        schema.setAccessible(true);
-        schema.set(service, DomainProperties.Schema.HTTP);
-        homeDomain.setAccessible(true);
+        schema.trySetAccessible();
+        homeDomain.trySetAccessible();
+        port.trySetAccessible();
+        schema.set(service, NewslerServiceProperties.Schema.HTTP);
         homeDomain.set(service, "localhost");
-        port.setAccessible(true);
-        port.set(service, 8080);
+        port.setInt(service, 8080);
 
         Mockito.doNothing().when(emailConfirmationService).send(ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
 
         final String email = factory.dotted().getEmail().getValue();
         final UserResendTokenRequest request = new UserResendTokenRequest(email, factory.dotted_plainPassword());
 
-        ResponseEntity<NLStringValue> response = controller.resendToken(request);
+        final ResponseEntity<NLStringValue> response = controller.resendToken(request);
 
         Assertions.assertNotNull(response);
         Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
@@ -387,10 +403,9 @@ public class UserSignupControllerTest {
             controller.resendToken(null);
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail(String.format("Not a desired exception type! Expected: <InvalidUserDataException> but was <%s>", e.getClass().getSimpleName()));
             }
@@ -403,10 +418,9 @@ public class UserSignupControllerTest {
             controller.resendToken(new UserResendTokenRequest("", ""));
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail(String.format("Not a desired exception type! Expected: <InvalidUserDataException> but was <%s>", e.getClass().getSimpleName()));
             }
@@ -419,10 +433,9 @@ public class UserSignupControllerTest {
             controller.resendToken(new UserResendTokenRequest("  ", "  "));
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail(String.format("Not a desired exception type! Expected: <InvalidUserDataException> but was <%s>", e.getClass().getSimpleName()));
             }
@@ -435,10 +448,9 @@ public class UserSignupControllerTest {
             controller.resendToken(new UserResendTokenRequest("invalid@email", factory.dashed_plainPassword()));
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail(String.format("Not a desired exception type! Expected: <InvalidUserDataException> but was <%s>", e.getClass().getSimpleName()));
             }
@@ -451,10 +463,9 @@ public class UserSignupControllerTest {
             controller.resendToken(new UserResendTokenRequest(email(), "invalidPA$$word"));
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail(String.format("Not a desired exception type! Expected: <InvalidUserDataException> but was <%s>", e.getClass().getSimpleName()));
             }
@@ -467,10 +478,9 @@ public class UserSignupControllerTest {
             controller.resendToken(new UserResendTokenRequest(factory.dotted().getEmail().getValue(), factory.standard_plainPassword()));
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail(String.format("Not a desired exception type! Expected: <InvalidUserDataException> but was <%s>", e.getClass().getSimpleName()));
             }
@@ -483,13 +493,24 @@ public class UserSignupControllerTest {
             controller.resendToken(new UserResendTokenRequest("valid@email.test", factory.standard_plainPassword()));
         } catch (NLException e) {
             if (e instanceof InvalidUserDataException ex) {
-                ResponseEntity<NLError> response = handler.handleException(ex);
-                Assertions.assertNotNull(response);
-                Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-                Assertions.assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode());
+                ProblemDetail detail = handler.handleException(ex);
+                Assertions.assertNotNull(detail);
+                Assertions.assertEquals(400, detail.getStatus());
             } else {
                 Assertions.fail(String.format("Not a desired exception type! Expected: <InvalidUserDataException> but was <%s>", e.getClass().getSimpleName()));
             }
         }
+    }
+
+    private void reflectControllerFields() throws NoSuchFieldException, IllegalAccessException {
+        final Field schema = controller.getClass().getDeclaredField("schema");
+        final Field homeDomain = controller.getClass().getDeclaredField("domainName");
+        final Field port = controller.getClass().getDeclaredField("port");
+        schema.trySetAccessible();
+        homeDomain.trySetAccessible();
+        port.trySetAccessible();
+        schema.set(controller, NewslerDesignerServiceProperties.Schema.HTTP);
+        homeDomain.set(controller, "localhost");
+        port.setInt(controller, 4200);
     }
 }

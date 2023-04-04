@@ -6,8 +6,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.mockito.Mockito;
+import org.springframework.web.client.RestTemplate;
 import pl.newsler.commons.exception.InvalidReceiverDataException;
-import pl.newsler.components.receiver.exception.ReceiverAlreadyAssociatedWithUser;
 import pl.newsler.commons.exception.ValidationException;
 import pl.newsler.commons.model.NLEmail;
 import pl.newsler.commons.model.NLFirstName;
@@ -16,6 +17,9 @@ import pl.newsler.commons.model.NLNickname;
 import pl.newsler.commons.model.NLPassword;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.commons.model.NLVersion;
+import pl.newsler.components.emaillabs.StubELAMailModuleConfiguration;
+import pl.newsler.components.emaillabs.StubELAMailRepository;
+import pl.newsler.components.receiver.exception.ReceiverAlreadySubscribedException;
 import pl.newsler.components.receiver.usecase.ReceiverCreateRequest;
 import pl.newsler.components.receiver.usecase.ReceiverGetResponse;
 import pl.newsler.components.user.IUserCrudService;
@@ -38,13 +42,22 @@ class ReceiverServiceTest {
     private final TestUserFactory factory = new TestUserFactory();
     private final IUserRepository userRepository = new StubUserRepository();
     private final IReceiverRepository receiverRepository = new StubReceiverRepository();
-    private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
-    private final StubUserModuleConfiguration userConfiguration = new StubUserModuleConfiguration(
-            userRepository,
-            passwordEncoder
-    );
     private final ReceiverModuleConfiguration configuration = new ReceiverModuleConfiguration(receiverRepository, userRepository);
-    private final IUserCrudService crudService = userConfiguration.userService();
+    private final StubNLPasswordEncoder passwordEncoder = new StubNLPasswordEncoder();
+    private final StubELAMailRepository mailRepository = new StubELAMailRepository();
+    private final RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
+    private final StubELAMailModuleConfiguration mailModuleConfiguration = new StubELAMailModuleConfiguration(
+            userRepository,
+            mailRepository,
+            passwordEncoder,
+            configuration.receiverService()
+    );
+    private final StubUserModuleConfiguration userModuleConfiguration = new StubUserModuleConfiguration(
+            userRepository,
+            passwordEncoder,
+            mailModuleConfiguration.templateService(mailModuleConfiguration.elaParamBuilder(), restTemplate)
+    );
+    private final IUserCrudService crudService = userModuleConfiguration.userService();
     private final IReceiverService service = configuration.receiverService();
 
     @BeforeEach
@@ -55,7 +68,7 @@ class ReceiverServiceTest {
                 NLEmail.of(factory.standard().getEmail().getValue()),
                 NLPassword.of(factory.standard().getNLPassword().getValue())
         );
-        factory.standard().setId(uuid);
+        factory.standard().setUuid(uuid);
 
         receiverRepository.save(new Receiver(
                 NLUuid.of(UUID.randomUUID()), NLVersion.of("0.0.0TEST"), uuid, NLEmail.of(email()),
@@ -83,24 +96,24 @@ class ReceiverServiceTest {
     void shouldAddReceiverWhenDataValid() {
         final int size = receiverRepository.findAll().size();
         final ReceiverCreateRequest validCreateRequest = new ReceiverCreateRequest(
-                factory.standard().map().getId().getValue(), email(), firstName(), firstName(), lastName()
+                factory.standard().map().getUuid().getValue(), email(), firstName(), firstName(), lastName()
         );
         Assertions.assertDoesNotThrow(() -> service.addReceiver(validCreateRequest, false));
-        Assertions.assertEquals(size +1, receiverRepository.findAll().size());
+        Assertions.assertEquals(size + 1, receiverRepository.findAll().size());
     }
 
     @Test
     void shouldNotAddReceiverWhenDataInvalid() {
         final int size = receiverRepository.findAll().size();
         final ReceiverCreateRequest invalidCreateRequest = new ReceiverCreateRequest(
-                factory.standard().map().getId().getValue(),
+                factory.standard().map().getUuid().getValue(),
                 username(),
                 username(),
                 username(),
                 username()
         );
         final ReceiverCreateRequest invalidCreateRequestModelsNull = new ReceiverCreateRequest(
-                factory.standard().map().getId().getValue(), null, null, null, null
+                factory.standard().map().getUuid().getValue(), null, null, null, null
         );
 
         Assertions.assertThrows(InvalidReceiverDataException.class, () -> service.addReceiver(invalidCreateRequest, false));
@@ -146,24 +159,24 @@ class ReceiverServiceTest {
     @Test
     void shouldNotAddReceiverWhenReceiverAlreadyAssociatedWithUserAndWasNotAutoSaved() {
         final ReceiverCreateRequest validCreateRequest = new ReceiverCreateRequest(
-                factory.standard().map().getId().getValue(), email(), firstName(), firstName(), lastName()
+                factory.standard().map().getUuid().getValue(), email(), firstName(), firstName(), lastName()
         );
         service.addReceiver(validCreateRequest, false);
         final int size = receiverRepository.findAll().size();
 
-        Assertions.assertThrows(ReceiverAlreadyAssociatedWithUser.class, () -> service.addReceiver(validCreateRequest, false));
+        Assertions.assertThrows(ReceiverAlreadySubscribedException.class, () -> service.addReceiver(validCreateRequest, false));
         Assertions.assertEquals(size, receiverRepository.findAll().size());
     }
 
     @Test
     void shouldNotAddReceiverWhenReceiverAlreadyAssociatedWithUserAndWasAutoSaved() {
         final ReceiverCreateRequest validCreateRequest = new ReceiverCreateRequest(
-                factory.standard().map().getId().getValue(), email(), firstName(), firstName(), lastName()
+                factory.standard().map().getUuid().getValue(), email(), firstName(), firstName(), lastName()
         );
         service.addReceiver(validCreateRequest, false);
         final int size = receiverRepository.findAll().size();
 
-        Assertions.assertThrows(ReceiverAlreadyAssociatedWithUser.class, () -> service.addReceiver(validCreateRequest, true));
+        Assertions.assertThrows(ReceiverAlreadySubscribedException.class, () -> service.addReceiver(validCreateRequest, true));
         Assertions.assertEquals(size, receiverRepository.findAll().size());
     }
 
@@ -172,7 +185,7 @@ class ReceiverServiceTest {
         final int size = receiverRepository.findAll().size();
         final AtomicReference<List<ReceiverGetResponse>> fetchedReceivers = new AtomicReference<>(null);
 
-        Assertions.assertDoesNotThrow(() -> fetchedReceivers.set(service.fetchAllUserReceivers(factory.standard().map().getId().getValue())));
+        Assertions.assertDoesNotThrow(() -> fetchedReceivers.set(service.fetchAllUserReceivers(factory.standard().map().getUuid().getValue())));
         Assertions.assertEquals(size, fetchedReceivers.get().size());
     }
 

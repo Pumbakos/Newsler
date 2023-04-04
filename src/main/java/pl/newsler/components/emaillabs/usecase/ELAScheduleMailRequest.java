@@ -6,5 +6,5 @@ import java.util.List;
 
 public record ELAScheduleMailRequest(@NotNull String from, @NotNull List<String> to,
                                      @NotNull String subject, @NotNull String message,
-                                     @NotNull String dateTime, @NotNull String zone) {
+                                     @NotNull long timestamp, @NotNull String zone) {
 }

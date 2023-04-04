@@ -1,6 +1,5 @@
 package pl.newsler.components.emaillabs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -10,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 import pl.newsler.commons.model.NLExecutionDate;
 import pl.newsler.commons.model.NLUuid;
 import pl.newsler.components.emaillabs.executor.ELAConcurrentTaskExecutor;
+import pl.newsler.components.emaillabs.executor.ELARequestBuilder;
 import pl.newsler.components.emaillabs.executor.ELAScheduleMailDetails;
 import pl.newsler.components.emaillabs.executor.IELATaskScheduledExecutor;
 import pl.newsler.components.receiver.IReceiverService;
@@ -32,7 +32,7 @@ public class ELATaskScheduledExecutor extends ELAConcurrentTaskExecutor<ELASched
     ELATaskScheduledExecutor(final Queue<Pair<NLUuid, ELAScheduleMailDetails>> queue, final ConcurrentTaskScheduler taskScheduler,
                              final NLIPasswordEncoder passwordEncoder, final IELAMailRepository mailRepository,
                              final IReceiverService receiverService, final IUserRepository userRepository,
-                             final RestTemplate restTemplate, final ObjectMapper objectMapper) {
+                             final RestTemplate restTemplate, final ELARequestBuilder paramBuilder) {
         super(
                 queue,
                 taskScheduler,
@@ -41,7 +41,7 @@ public class ELATaskScheduledExecutor extends ELAConcurrentTaskExecutor<ELASched
                 receiverService,
                 userRepository,
                 restTemplate,
-                objectMapper
+                paramBuilder
         );
 
         super.scheduleAtFixedRate(this::scanQueue, Duration.ofMinutes(5L));

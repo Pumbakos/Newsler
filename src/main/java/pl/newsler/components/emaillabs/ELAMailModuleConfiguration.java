@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.web.client.RestTemplate;
+import pl.newsler.components.emaillabs.executor.ELARequestBuilder;
 import pl.newsler.components.emaillabs.executor.IELATaskInstantExecutor;
 import pl.newsler.components.emaillabs.executor.IELATaskScheduledExecutor;
 import pl.newsler.components.receiver.IReceiverService;
@@ -35,8 +36,13 @@ class ELAMailModuleConfiguration {
         return new ObjectMapper();
     }
 
+    @Bean(name = "elaRequestBuilder")
+    ELARequestBuilder elaRequestBuilder() {
+        return new ELARequestBuilder(passwordEncoder);
+    }
+
     @Bean(name = "elaTaskInstantExecutor")
-    IELATaskInstantExecutor taskInstantExecutor(RestTemplate restTemplate, ObjectMapper objectMapper) {
+    IELATaskInstantExecutor taskInstantExecutor(RestTemplate restTemplate, ELARequestBuilder requestBuilder) {
         return new ELATaskInstantExecutor(
                 new ConcurrentLinkedQueue<>(),
                 new ConcurrentTaskExecutor(),
@@ -45,12 +51,12 @@ class ELAMailModuleConfiguration {
                 receiverService,
                 userRepository,
                 restTemplate,
-                objectMapper
+                requestBuilder
         );
     }
 
     @Bean(name = "elaTaskScheduledExecutor")
-    IELATaskScheduledExecutor taskScheduledExecutor(RestTemplate restTemplate, ObjectMapper objectMapper) {
+    IELATaskScheduledExecutor taskScheduledExecutor(RestTemplate restTemplate, ELARequestBuilder requestBuilder) {
         return new ELATaskScheduledExecutor(
                 new ConcurrentLinkedQueue<>(),
                 new ConcurrentTaskScheduler(),
@@ -59,12 +65,17 @@ class ELAMailModuleConfiguration {
                 receiverService,
                 userRepository,
                 restTemplate,
-                objectMapper
+                requestBuilder
         );
     }
 
     @Bean(name = "mailService")
     IELAMailService mailService(IELATaskInstantExecutor taskInstantExecutor, IELATaskScheduledExecutor taskScheduledExecutor) {
         return new ELAMailService(taskInstantExecutor, taskScheduledExecutor, userRepository, mailRepository);
+    }
+
+    @Bean
+    IELATemplateService templateService(ELARequestBuilder requestBuilder, RestTemplate restTemplate) {
+        return new ELATemplateService(requestBuilder, restTemplate);
     }
 }

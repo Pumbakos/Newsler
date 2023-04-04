@@ -35,13 +35,13 @@ class NLUserTest {
     @Test
     void shouldGetNLUserProperties() {
         final NLUser standardUser = factory.standard();
-        standardUser.setId(NLUuid.of(UUID.randomUUID()));
+        standardUser.setUuid(NLUuid.of(UUID.randomUUID()));
         standardUser.setAppKey(NLAppKey.of(secretOrAppKey()));
         standardUser.setSecretKey(NLSecretKey.of(secretOrAppKey()));
         standardUser.setSmtpAccount(NLSmtpAccount.of("1.test.smp"));
 
         Assertions.assertNotNull(standardUser);
-        Assertions.assertNotNull(standardUser.getId());
+        Assertions.assertNotNull(standardUser.getUuid());
         Assertions.assertNotNull(standardUser.getEmail());
         Assertions.assertNotNull(standardUser.getFirstName());
         Assertions.assertNotNull(standardUser.getLastName());
@@ -81,7 +81,7 @@ class NLUserTest {
         NLDUser nldUser = NLDUser.of(standardUser);
         Assertions.assertNotNull(nldUser);
         Assertions.assertNotNull(nldUser.toString());
-        Assertions.assertEquals(standardUser.getId(), nldUser.getId());
+        Assertions.assertEquals(standardUser.getUuid(), nldUser.getUuid());
         Assertions.assertEquals(standardUser.getEmail(), nldUser.getEmail());
         Assertions.assertEquals(standardUser.getFirstName(), nldUser.getName());
         Assertions.assertEquals(standardUser.getLastName(), nldUser.getLastName());

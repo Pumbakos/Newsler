@@ -12,13 +12,15 @@ import java.io.Serial;
 @NoArgsConstructor(access = AccessLevel.PACKAGE, force = true)
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC, staticName = "of")
 @EqualsAndHashCode
-public class NLToken implements NLModel{
+public class NLToken implements NLModel {
     @Serial
     private static final long serialVersionUID = -3696038848599464037L;
+    private static final String REGEX = "[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}";
     private final String value;
 
     @Override
     public boolean validate() {
-        return value != null && value.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}");
+        return value != null
+                && (value.matches(REGEX) || value.matches(String.format("%s-%s", REGEX, REGEX)));
     }
 }
